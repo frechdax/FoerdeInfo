@@ -7,7 +7,9 @@ export default function AdSenseLoader() {
     process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT ||
     "ca-pub-8846945812828956";
 
-  if (!client || !/^ca-pub-\d+$/.test(client)) return null;
+  const enabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === "true";
+
+  if (!enabled || !client || !/^ca-pub-\d+$/.test(client)) return null;
 
   return (
     <Script
