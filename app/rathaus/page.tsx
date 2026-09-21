@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SeoLanding from "../seo-landing";
+import { createPublicServerSupabase } from "@/lib/supabase-public-server";
 
 export const metadata: Metadata = {
   title: "Rathaus Glücksburg – News & amtliche Bekanntmachungen",
@@ -13,7 +14,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RathausPage() {
+export const revalidate = 1800;
+
+function newsDate(value: string | null) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value + "T12:00:00"));
+}
+
+export default async function RathausPage() {
+  const supabase = createPublicServerSupabase();
+  const { data } = await supabase
+    .from("rathaus_news")
+    .select("id,title,published_at,source_url")
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .limit(6);
+
+  const latestNews = data ?? [];
+
   return (
     <SeoLanding
       eyebrow="Rathaus Glücksburg"
@@ -29,6 +50,25 @@ export default function RathausPage() {
       ctaHref="/#rathaus"
       canonicalPath="/rathaus"
     >
+      <section className="seo-card">
+        <h2>Aktuelles aus dem Rathaus Glücksburg</h2>
+        {latestNews.length ? (
+          <div className="seo-live-list">
+            {latestNews.map((item) => (
+              <article key={item.id} className="seo-live-row">
+                <div>
+                  <strong>{item.title}</strong>
+                  {item.published_at ? <span>{newsDate(item.published_at)}</span> : null}
+                </div>
+                <a href={item.source_url} target="_blank" rel="noreferrer">Quelle ↗</a>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>Aktuell konnten keine Rathausmeldungen geladen werden.</p>
+        )}
+      </section>
+
       <section className="seo-card">
         <h2>Privater Überblick mit offiziellen Quellen</h2>
         <p>
