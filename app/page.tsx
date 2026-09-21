@@ -22,6 +22,16 @@ type Street = {
 
 type HouseNumber = { id: string; label: string };
 type WasteEvent = { type: string; date: string };
+
+type WeatherNow = {
+  temperature: number;
+  windSpeed: number;
+  windDirection: number;
+  weatherCode: number;
+  isDay: boolean;
+  min: number;
+  max: number;
+};
 type EventDateFilter =
   | "all"
   | "today"
@@ -147,6 +157,23 @@ function icon(label: string) {
   return <span className="nav-icon" aria-hidden="true">{label}</span>;
 }
 
+function weatherMeta(code: number, isDay: boolean) {
+  if (code === 0) return { icon: isDay ? "☀️" : "🌙", label: "Klar" };
+  if ([1, 2].includes(code)) return { icon: isDay ? "🌤️" : "☁️", label: "Leicht bewölkt" };
+  if (code === 3) return { icon: "☁️", label: "Bewölkt" };
+  if ([45, 48].includes(code)) return { icon: "🌫️", label: "Nebel" };
+  if ([51, 53, 55, 56, 57].includes(code)) return { icon: "🌦️", label: "Nieselregen" };
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { icon: "🌧️", label: "Regen" };
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return { icon: "❄️", label: "Schnee" };
+  if ([95, 96, 99].includes(code)) return { icon: "⛈️", label: "Gewitter" };
+  return { icon: "🌥️", label: "Wechselhaft" };
+}
+
+function windDirectionLabel(degrees: number) {
+  const directions = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"];
+  return directions[Math.round(degrees / 45) % 8];
+}
+
 export default function HomePage() {
   const supabase = useMemo(() => getSupabase(), []);
   const [view, setView] = useState<View>("home");
@@ -167,6 +194,7 @@ export default function HomePage() {
   const [globalSearch, setGlobalSearch] = useState("");
   const [eventDateFilter, setEventDateFilter] = useState<EventDateFilter>("all");
   const [eventMonthFilter, setEventMonthFilter] = useState("all");
+  const [weather, setWeather] = useState<WeatherNow | null>(null);
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
@@ -176,6 +204,46 @@ export default function HomePage() {
       if (saved.streetId) setSelectedStreet(saved.streetId);
       if (saved.houseNumberId) setRestoreHouseNumber(saved.houseNumberId);
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadWeather() {
+      try {
+        const params = new URLSearchParams({
+          latitude: "54.8357",
+          longitude: "9.5487",
+          current: "temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,is_day",
+          daily: "temperature_2m_max,temperature_2m_min",
+          timezone: "Europe/Berlin",
+          forecast_days: "1",
+        });
+
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!data?.current || !data?.daily) return;
+
+        setWeather({
+          temperature: Number(data.current.temperature_2m),
+          windSpeed: Number(data.current.wind_speed_10m),
+          windDirection: Number(data.current.wind_direction_10m),
+          weatherCode: Number(data.current.weather_code),
+          isDay: Boolean(data.current.is_day),
+          min: Number(data.daily.temperature_2m_min?.[0]),
+          max: Number(data.daily.temperature_2m_max?.[0]),
+        });
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") setWeather(null);
+      }
+    }
+
+    loadWeather();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -349,7 +417,9 @@ export default function HomePage() {
   const currentLabel =
     rathausSubItems.find((item) => item.id === view)?.label ||
     navItems.find((item) => item.id === view)?.label ||
-    view === "impressum" ? "Impressum" : "Start";
+    (view === "impressum" ? "Impressum" : "Start");
+
+  const currentWeather = weather ? weatherMeta(weather.weatherCode, weather.isDay) : null;
 
   return (
     <>
@@ -465,6 +535,36 @@ export default function HomePage() {
                   </button>
                 </section>
               )}
+
+              <section className="today-weather-card" aria-label="Wetter heute in Glücksburg">
+                <div className="today-weather-main">
+                  <span className="today-weather-icon" aria-hidden="true">
+                    {currentWeather?.icon || "🌤️"}
+                  </span>
+                  <div>
+                    <span className="dashboard-kicker">Heute in Glücksburg</span>
+                    <h2>{currentWeather?.label || "Wetter wird geladen"}</h2>
+                    <p>Aktuelle Wetterlage an der Flensburger Förde</p>
+                  </div>
+                </div>
+
+                {weather ? (
+                  <div className="today-weather-values">
+                    <div>
+                      <small>Temperatur</small>
+                      <strong>{Math.round(weather.temperature)}°C</strong>
+                      <span>{Math.round(weather.min)}° / {Math.round(weather.max)}°</span>
+                    </div>
+                    <div>
+                      <small>Wind</small>
+                      <strong>{Math.round(weather.windSpeed)} km/h</strong>
+                      <span>aus {windDirectionLabel(weather.windDirection)}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="today-weather-loading">Wetterdaten werden geladen …</div>
+                )}
+              </section>
 
               <section className="home-dashboard-grid">
                 <article className="dashboard-panel rathaus-dashboard-card">
