@@ -8,6 +8,7 @@ type View =
   | "street"
   | "waste"
   | "events"
+  | "family"
   | "rathaus"
   | "rathaus-news"
   | "official-notices"
@@ -216,7 +217,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
+    if (["home", "street", "waste", "events", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -562,6 +563,7 @@ export default function HomePage() {
     { id: "home", label: "Start", symbol: "⌂" },
     { id: "waste", label: "Müllabfuhr", symbol: "♻" },
     { id: "events", label: "Veranstaltungen", symbol: "□" },
+    { id: "family", label: "Familie", symbol: "♡" },
     { id: "rathaus", label: "Rathaus", symbol: "▦" },
     { id: "impressum", label: "Impressum", symbol: "§" },
   ];
@@ -1110,6 +1112,181 @@ export default function HomePage() {
               <div className="source-note">
                 <a href="https://gluecksburg.kulturbytes.de" target="_blank" rel="noreferrer">
                   Zum offiziellen Veranstaltungskalender ↗
+                </a>
+              </div>
+            </>
+          )}
+
+          {view === "family" && (
+            <>
+              <section className="page-heading">
+                <div className="eyebrow">Familie in Glücksburg</div>
+                <h1>Familie</h1>
+                <p>Wichtige Angebote, Hilfen und Anlaufstellen in Glücksburg kompakt zusammengefasst.</p>
+              </section>
+
+              <div className="family-info-grid">
+                <article className="family-info-card">
+                  <div className="family-card-head">
+                    <span className="family-card-icon" aria-hidden="true">⚽</span>
+                    <div>
+                      <span className="dashboard-kicker">Kinder & Jugendliche</span>
+                      <h2>Jugendtreff Glücksburg</h2>
+                    </div>
+                  </div>
+                  <p>
+                    Jeden Mittwoch ist der Jugendtreff geöffnet. Von <strong>14:00–17:00 Uhr</strong>
+                    für Kinder und Jugendliche ab 10 Jahren, ab <strong>17:00 Uhr</strong> für
+                    Jugendliche ab 14 Jahren. Vor Ort gibt es unter anderem Billard, Dart,
+                    Aktionen und Platz zum Treffen mit Freunden.
+                  </p>
+                  <div className="family-facts">
+                    <span><strong>Kontakt:</strong> Lars Bothmann, Jugendpfleger</span>
+                    <span><strong>Telefon:</strong> 04631 45-1330</span>
+                    <span><strong>E-Mail:</strong> lars.bothmann@gluecksburg.de</span>
+                  </div>
+                  <a
+                    className="family-source-link"
+                    href="https://stadt.gluecksburg.de/rathaus/neuigkeiten/detail/jugendtreff-gluecksburg"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Infos der Stadt öffnen ↗
+                  </a>
+                </article>
+
+                <article className="family-info-card">
+                  <div className="family-card-head">
+                    <span className="family-card-icon" aria-hidden="true">♿</span>
+                    <div>
+                      <span className="dashboard-kicker">Unterstützung</span>
+                      <h2>Menschen mit Behinderung</h2>
+                    </div>
+                  </div>
+                  <p>
+                    Das Freiwilligen Forum Glücksburg vermittelt kostenlose ehrenamtliche Hilfe,
+                    zum Beispiel Begleitungen zu Arzt oder Behörde, Unterstützung beim Einkaufen,
+                    Entlastung pflegender Angehöriger, Rollstuhlbegleitung, Besuche und allgemeine
+                    Lebenshilfe.
+                  </p>
+                  <div className="family-facts">
+                    <span><strong>Kontakt:</strong> Barbara Wedegärtner, Freiwilligen Forum Glücksburg</span>
+                    <span><strong>Adresse:</strong> Am Noor 2, 24960 Glücksburg</span>
+                    <span><strong>Telefon:</strong> 04631 8196</span>
+                    <span>Die Stadtseite nennt außerdem Angebote für Behindertensport und verweist auf KiBIS.</span>
+                  </div>
+                  <a
+                    className="family-source-link"
+                    href="https://stadt.gluecksburg.de/familie/menschen-mit-behinderung"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Alle Hilfsangebote ansehen ↗
+                  </a>
+                </article>
+
+                <article className="family-info-card">
+                  <div className="family-card-head">
+                    <span className="family-card-icon" aria-hidden="true">✚</span>
+                    <div>
+                      <span className="dashboard-kicker">Versorgung vor Ort</span>
+                      <h2>Gesundheit</h2>
+                    </div>
+                  </div>
+                  <p>
+                    Die städtische Übersicht bündelt Apotheken, Gesundheitszentren,
+                    Physiotherapie, Tierärzte und Zahnärzte in Glücksburg und Umgebung.
+                  </p>
+                  <div className="family-facts">
+                    <span><strong>Elisabeth Apotheke:</strong> Schinderdam 5 · 04631 4448000</span>
+                    <span><strong>Schloss-Apotheke:</strong> Bahnhofstraße 3 · 04631 3462</span>
+                    <span>Weitere Einträge: Reha- und Gesundheitsangebote, Physiotherapiepraxen, Zahn- und Tierärzte.</span>
+                  </div>
+                  <a
+                    className="family-source-link"
+                    href="https://stadt.gluecksburg.de/familie/gesundheit"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Gesundheitsübersicht öffnen ↗
+                  </a>
+                </article>
+
+                <article className="family-info-card">
+                  <div className="family-card-head">
+                    <span className="family-card-icon" aria-hidden="true">🚕</span>
+                    <div>
+                      <span className="dashboard-kicker">Sicher nach Hause</span>
+                      <h2>Disco-Taxi</h2>
+                    </div>
+                  </div>
+                  <p>
+                    Das Disco-Taxi bringt Jugendliche und junge Erwachsene bis 27 Jahre nachts
+                    günstig von Flensburg zurück. Die Fahrten starten am Flensburger ZOB.
+                  </p>
+                  <div className="family-facts">
+                    <span><strong>Wann:</strong> Freitag auf Samstag und Samstag auf Sonntag</span>
+                    <span><strong>Abfahrt:</strong> 00:30 Uhr und 03:00 Uhr</span>
+                    <span><strong>Preis:</strong> 7 € pro Person</span>
+                    <span><strong>Anmeldung:</strong> spätestens 1 Stunde vorher unter 0461 55555</span>
+                  </div>
+                  <a
+                    className="family-source-link"
+                    href="https://stadt.gluecksburg.de/rathaus/discotaxi"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Disco-Taxi bei der Stadt ↗
+                  </a>
+                </article>
+
+                <article className="family-info-card family-info-card-wide">
+                  <div className="family-card-head">
+                    <span className="family-card-icon" aria-hidden="true">%</span>
+                    <div>
+                      <span className="dashboard-kicker">Vergünstigungen</span>
+                      <h2>Sozialpass</h2>
+                    </div>
+                  </div>
+                  <p>
+                    Der Sozialpass richtet sich unter anderem an Menschen mit Bürgergeld,
+                    Arbeitslosengeld, Grundsicherung, Leistungen nach dem Asylbewerberleistungsgesetz
+                    sowie an Personen und Familien mit geringem Einkommen. Beantragt wird er bei
+                    der bequa Flensburg.
+                  </p>
+                  <div className="socialpass-layout">
+                    <div className="family-facts">
+                      <span><strong>Mitbringen:</strong> aktuellen Leistungs- oder Einkommensnachweis und gültigen Personalausweis</span>
+                      <span><strong>Gültigkeit:</strong> Januar bis Dezember des jeweiligen Kalenderjahres</span>
+                      <span><strong>bequa:</strong> Nikolaistraße 3, 2. Etage, 24937 Flensburg</span>
+                      <span><strong>Öffnung:</strong> Mo–Fr 08:30–13:30 Uhr · 0461 1503138</span>
+                    </div>
+                    <div className="family-benefits">
+                      <strong>Vergünstigungen in Glücksburg</strong>
+                      <span>Stadtbücherei: 100 % Ermäßigung</span>
+                      <span>Fördeland Therme: 50 % Ermäßigung ohne Sauna</span>
+                      <span>Glücksburg Konzerte e. V.: Eintritt 1 €</span>
+                      <span>Menke-Planetarium: ermäßigter Eintritt</span>
+                    </div>
+                  </div>
+                  <a
+                    className="family-source-link"
+                    href="https://stadt.gluecksburg.de/familie/sozialpass"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Voraussetzungen vollständig ansehen ↗
+                  </a>
+                </article>
+              </div>
+
+              <div className="source-note">
+                <a
+                  href="https://stadt.gluecksburg.de/familie/familienzentrum-gluecksburg"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Quelle und weitere Familienangebote: Stadt Glücksburg ↗
                 </a>
               </div>
             </>
