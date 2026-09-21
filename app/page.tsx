@@ -9,6 +9,7 @@ type View =
   | "street"
   | "waste"
   | "events"
+  | "urlaub"
   | "family"
   | "rathaus"
   | "rathaus-news"
@@ -228,7 +229,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
+    if (["home", "street", "waste", "events", "urlaub", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -539,6 +540,7 @@ export default function HomePage() {
     { id: "home", label: "Start", symbol: "🏠" },
     { id: "waste", label: "Müllabfuhr", symbol: "🗑️" },
     { id: "events", label: "Veranstaltungen", symbol: "📅" },
+    { id: "urlaub", label: "Urlaub", symbol: "🌊" },
     { id: "family", label: "Familie", symbol: "👪" },
     { id: "rathaus", label: "Rathaus", symbol: "🏛️" },
     { id: "impressum", label: "Impressum", symbol: "📄" },
@@ -848,6 +850,21 @@ export default function HomePage() {
                 </section>
               </section>
 
+              <section className="visitor-teaser" aria-label="Urlaub in Glücksburg">
+                <div className="visitor-teaser-icon" aria-hidden="true">🌊</div>
+                <div className="visitor-teaser-copy">
+                  <span className="dashboard-kicker">Zu Besuch in Glücksburg?</span>
+                  <h2>Unterkünfte, Ausflüge & Urlaubstipps</h2>
+                  <p>
+                    Finde Ferienwohnungen und Hotels und entdecke passende Veranstaltungen
+                    für deinen Aufenthalt an der Flensburger Förde.
+                  </p>
+                </div>
+                <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
+                  Urlaub planen →
+                </button>
+              </section>
+
             </>
           )}
 
@@ -1101,6 +1118,90 @@ export default function HomePage() {
                   Zum offiziellen Veranstaltungskalender ↗
                 </a>
               </div>
+            </>
+          )}
+
+          {view === "urlaub" && (
+            <>
+              <section className="page-heading">
+                <div className="eyebrow">Urlaub in Glücksburg</div>
+                <h1>Glücksburg entdecken</h1>
+                <p>
+                  Unterkünfte, Veranstaltungen und Ideen für deinen Aufenthalt an der
+                  Flensburger Förde – kompakt an einem Ort.
+                </p>
+              </section>
+
+              <section className="travel-feature-card">
+                <div className="travel-feature-icon" aria-hidden="true">🏡</div>
+                <div className="travel-feature-copy">
+                  <span className="dashboard-kicker">Übernachten</span>
+                  <h2>Ferienwohnungen & Hotels in Glücksburg</h2>
+                  <p>
+                    Vom Hotel an der Förde bis zur Ferienwohnung: Entdecke verfügbare
+                    Unterkünfte für deinen Aufenthalt in Glücksburg.
+                  </p>
+                  <a
+                    className="button primary travel-primary-action"
+                    href="https://www.booking.com/city/de/glucksburg.de.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Unterkünfte ansehen ↗
+                  </a>
+                  <small>Externer Link zu Booking.com. Derzeit kein Affiliate-Link.</small>
+                </div>
+              </section>
+
+              <div className="travel-grid">
+                <article className="travel-card">
+                  <span className="travel-card-icon" aria-hidden="true">📅</span>
+                  <div>
+                    <span className="dashboard-kicker">Erleben</span>
+                    <h2>Was ist los in Glücksburg?</h2>
+                    <p>
+                      Konzerte, Familienangebote, Märkte und weitere aktuelle Termine
+                      während deines Aufenthalts.
+                    </p>
+                  </div>
+                  <button className="text-button" onClick={() => navigate("events")}>
+                    Veranstaltungen ansehen →
+                  </button>
+                </article>
+
+                <article className="travel-card">
+                  <span className="travel-card-icon" aria-hidden="true">👪</span>
+                  <div>
+                    <span className="dashboard-kicker">Mit Kindern</span>
+                    <h2>Familienzeit in Glücksburg</h2>
+                    <p>
+                      Praktische Anlaufstellen und lokale Angebote für Familien mit Kindern.
+                    </p>
+                  </div>
+                  <button className="text-button" onClick={() => navigate("family")}>
+                    Familienbereich öffnen →
+                  </button>
+                </article>
+
+                <article className="travel-card">
+                  <span className="travel-card-icon" aria-hidden="true">🌤️</span>
+                  <div>
+                    <span className="dashboard-kicker">Vor Ort</span>
+                    <h2>Wetter & Tagesplanung</h2>
+                    <p>
+                      Die aktuelle Wetterlage für Glücksburg findest du direkt auf der Startseite.
+                    </p>
+                  </div>
+                  <button className="text-button" onClick={() => navigate("home")}>
+                    Zur Startseite →
+                  </button>
+                </article>
+              </div>
+
+              <p className="travel-note">
+                GlücksburgDirekt vermittelt keine Unterkünfte und ist nicht Vertragspartner
+                einer Buchung. Es gelten die Bedingungen des jeweiligen externen Anbieters.
+              </p>
             </>
           )}
 
@@ -1726,6 +1827,7 @@ export default function HomePage() {
             <div className="footer-seo-links" aria-label="Wichtige Bereiche">
               <a href="/muellabfuhr">Müllkalender Glücksburg</a>
               <a href="/veranstaltungen">Veranstaltungen Glücksburg</a>
+              <a href="/urlaub">Urlaub in Glücksburg</a>
               <a href="/familie">Familie in Glücksburg</a>
               <a href="/rathaus">Rathaus Glücksburg</a>
             </div>
