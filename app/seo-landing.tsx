@@ -68,6 +68,7 @@ export default function SeoLanding({
         <nav className="seo-links" aria-label="Weitere Bereiche">
           <a href="/muellabfuhr">Müllabfuhr</a>
           <a href="/veranstaltungen">Veranstaltungen</a>
+          <a href="/urlaub">Urlaub</a>
           <a href="/familie">Familie</a>
           <a href="/rathaus">Rathaus</a>
         </nav>
