@@ -810,3 +810,57 @@ footer span:last-child{margin-left:auto}
     height:42px;
   }
 }
+
+
+/* Kompaktes GlücksburgDirekt-Logo im Kopfbereich */
+.topbar-brand{
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  padding:4px 8px 4px 4px;
+  border-radius:12px;
+  position:relative;
+  z-index:1;
+}
+.topbar-brand:hover{background:rgba(255,255,255,.08)}
+.topbar-brand-mark{
+  background:linear-gradient(145deg,#23b3a6,#187b88);
+  box-shadow:0 5px 13px rgba(0,0,0,.17);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:40px;
+  height:40px;
+  font-size:1.15rem;
+}
+.topbar-brand-text{
+  display:grid;
+  line-height:1.02;
+  text-align:left;
+}
+.topbar-brand-text strong{
+  color:#fff;
+  font-size:.85rem;
+  font-weight:700;
+}
+.topbar-brand-text small{
+  color:#82ddd1;
+  letter-spacing:1.35px;
+  font-size:.59rem;
+  font-weight:800;
+}
+
+@media (max-width:580px){
+  .topbar-brand{
+    padding-right:5px;
+  }
+  .topbar-brand-mark{
+    width:38px;
+    height:38px;
+  }
+  .topbar-brand-text strong{font-size:.8rem}
+  .topbar-brand-text small{font-size:.56rem}
+}
