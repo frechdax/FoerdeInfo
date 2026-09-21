@@ -174,6 +174,24 @@ function windDirectionLabel(degrees: number) {
   return directions[Math.round(degrees / 45) % 8];
 }
 
+function escapeIcsText(value: string) {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\r?\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+function compactIcsDate(value: string) {
+  return value.replace(/-/g, "");
+}
+
+function compactIcsTime(value: string) {
+  const match = value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!match) return null;
+  return `${match[1].padStart(2, "0")}${match[2]}${match[3] || "00"}`;
+}
+
 export default function HomePage() {
   const supabase = useMemo(() => getSupabase(), []);
   const [view, setView] = useState<View>("home");
@@ -341,6 +359,73 @@ export default function HomePage() {
     setView(next);
     window.location.hash = next;
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function downloadEventIcs(event: EventRow) {
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//GlücksburgDirekt//Veranstaltungen//DE",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      `UID:${event.id}@gluecksburg-direkt.vercel.app`,
+      `DTSTAMP:${new Date()
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\.\d{3}Z$/, "Z")}`,
+    ];
+
+    const eventTime = event.time ? compactIcsTime(event.time) : null;
+
+    if (eventTime) {
+      lines.push(`DTSTART;TZID=Europe/Berlin:${compactIcsDate(event.date)}T${eventTime}`);
+    } else {
+      lines.push(`DTSTART;VALUE=DATE:${compactIcsDate(event.date)}`);
+      lines.push(
+        `DTEND;VALUE=DATE:${compactIcsDate(addDays(event.end_date || event.date, 1))}`
+      );
+    }
+
+    lines.push(`SUMMARY:${escapeIcsText(event.title)}`);
+
+    if (event.location) {
+      lines.push(`LOCATION:${escapeIcsText(event.location)}`);
+    }
+
+    const descriptionParts = [
+      event.description,
+      event.organizer ? `Veranstalter: ${event.organizer}` : "",
+      event.source_url ? `Weitere Informationen: ${event.source_url}` : "",
+    ].filter(Boolean);
+
+    if (descriptionParts.length) {
+      lines.push(`DESCRIPTION:${escapeIcsText(descriptionParts.join("\n\n"))}`);
+    }
+
+    if (event.source_url) {
+      lines.push(`URL:${event.source_url}`);
+    }
+
+    lines.push("END:VEVENT", "END:VCALENDAR");
+
+    const blob = new Blob([lines.join("\r\n") + "\r\n"], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const filename = event.title
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+
+    link.href = url;
+    link.download = `${filename || "veranstaltung"}-${event.date}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function loadWaste(targetView: View = "waste") {
@@ -849,7 +934,7 @@ export default function HomePage() {
               <section className="page-heading">
                 <div className="eyebrow">kulturbytes</div>
                 <h1>Veranstaltungen</h1>
-                <p>Aktuelle Termine in Glücksburg mit direktem Link zur jeweiligen Veranstaltungsseite.</p>
+                <p>Aktuelle Termine in Glücksburg – mit direktem Detail-Link und iCalendar-Download (.ics).</p>
               </section>
 
               <div className="event-filter-bar" aria-label="Veranstaltungen nach Zeitraum filtern">
@@ -904,27 +989,45 @@ export default function HomePage() {
 
               <div className="stack">
                 {filteredEvents.map((event) => (
-                  <a
-                    className="content-row"
-                    href={event.source_url || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    key={event.id}
-                  >
+                  <div className="content-row event-content-row" key={event.id}>
                     <div className="date-tile">
                       <span>{monthShort(event.date)}</span>
                       <strong>{dayNumber(event.date)}</strong>
                     </div>
-                    <div>
+
+                    <a
+                      className="event-details-link"
+                      href={event.source_url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {event.family_friendly && <span className="badge teal">Familie</span>}
                       <h3>{event.title}</h3>
                       <p>
                         {event.time ? event.time + " Uhr · " : ""}
                         {event.location || "Glücksburg"}
                       </p>
+                    </a>
+
+                    <div className="event-row-actions">
+                      <button
+                        className="button event-ical-button"
+                        onClick={() => downloadEventIcs(event)}
+                        aria-label={`${event.title} als iCalendar-Datei herunterladen`}
+                      >
+                        <span aria-hidden="true">▣</span>
+                        iCalendar
+                      </button>
+                      <a
+                        className="event-more-link"
+                        href={event.source_url || "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Details ↗
+                      </a>
                     </div>
-                    <span>›</span>
-                  </a>
+                  </div>
                 ))}
               </div>
 
