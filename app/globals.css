@@ -1648,3 +1648,44 @@ footer span:last-child{margin-left:auto}
     gap:12px;
   }
 }
+
+
+.restaurant-owner-note{
+  margin-top:14px;
+  padding:14px 16px;
+  border:1px solid #d5e6e4;
+  border-radius:14px;
+  background:#f5faf9;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+.restaurant-owner-note-icon{
+  width:36px;
+  height:36px;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(16,46,57,.06);
+}
+.restaurant-owner-note strong{
+  display:block;
+  margin-bottom:3px;
+  font-size:.88rem;
+}
+.restaurant-owner-note p{
+  margin:0 0 5px;
+  color:var(--muted);
+  font-size:.78rem;
+  line-height:1.45;
+}
+.restaurant-owner-note a{
+  color:#176c73;
+  font-size:.78rem;
+  font-weight:700;
+  text-decoration:none;
+}
+.restaurant-owner-note a:hover{text-decoration:underline}
