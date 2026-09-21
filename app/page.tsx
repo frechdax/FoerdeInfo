@@ -520,9 +520,6 @@ export default function HomePage() {
                   <h1>Alles Wichtige für deinen Alltag <span className="wave">👋</span></h1>
                   <p>Müll, Termine und Rathausinformationen auf einen Blick.</p>
                 </div>
-                <button className="location-pill" onClick={() => navigate("street")}>
-                  ⌖ {addressLabel}
-                </button>
               </section>
 
               {!selectedStreet && (
