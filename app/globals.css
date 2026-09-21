@@ -703,3 +703,110 @@ footer span:last-child{margin-left:auto}
     flex:1;
   }
 }
+
+
+/* Familie */
+.family-info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+.family-info-card{
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding:22px;
+}
+.family-info-card-wide{grid-column:1/-1}
+.family-card-head{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+.family-card-head h2{
+  margin-top:2px;
+  font-size:1.18rem;
+}
+.family-card-icon{
+  width:46px;
+  min-width:46px;
+  height:46px;
+  border-radius:12px;
+  background:#eaf5f3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.35rem;
+}
+.family-info-card>p{
+  color:var(--muted);
+  margin:0;
+  line-height:1.55;
+}
+.family-facts,
+.family-benefits{
+  display:grid;
+  gap:8px;
+}
+.family-facts span,
+.family-benefits span{
+  color:#4f6570;
+  font-size:.88rem;
+  line-height:1.45;
+}
+.family-benefits{
+  border-left:1px solid var(--line);
+  padding-left:20px;
+}
+.family-benefits strong{
+  font-size:.9rem;
+}
+.socialpass-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+}
+.family-source-link{
+  color:var(--teal);
+  border-top:1px solid var(--line);
+  margin-top:auto;
+  padding-top:14px;
+  font-size:.86rem;
+  font-weight:600;
+}
+.family-source-link:hover{text-decoration:underline}
+
+@media (max-width:850px){
+  .family-info-grid{grid-template-columns:1fr}
+  .family-info-card-wide{grid-column:auto}
+  .socialpass-layout{grid-template-columns:1fr}
+  .family-benefits{
+    border-left:0;
+    border-top:1px solid var(--line);
+    padding-left:0;
+    padding-top:16px;
+  }
+
+  /* Sechs Hauptpunkte bleiben auf kleinen Displays bedienbar. */
+  .mobile-nav{
+    justify-content:flex-start;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .mobile-nav::-webkit-scrollbar{display:none}
+  .mobile-nav button{
+    flex:0 0 78px;
+    min-width:78px;
+  }
+}
+@media (max-width:580px){
+  .family-info-card{padding:18px}
+  .family-card-icon{
+    width:42px;
+    min-width:42px;
+    height:42px;
+  }
+}
