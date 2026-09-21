@@ -10,6 +10,8 @@ type View =
   | "waste"
   | "events"
   | "urlaub"
+  | "urlaub-unterkunft"
+  | "urlaub-essen"
   | "family"
   | "rathaus"
   | "rathaus-news"
@@ -288,7 +290,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "urlaub", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
+    if (["home", "street", "waste", "events", "urlaub", "urlaub-unterkunft", "urlaub-essen", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -605,12 +607,18 @@ export default function HomePage() {
     { id: "impressum", label: "Impressum", symbol: "📄", href: "/#impressum" },
   ];
 
+  const vacationSubItems: Array<{ id: View; label: string; symbol: string }> = [
+    { id: "urlaub-unterkunft", label: "Unterkünfte", symbol: "🏡" },
+    { id: "urlaub-essen", label: "Essen & Trinken", symbol: "🍽️" },
+  ];
+
   const rathausSubItems: Array<{ id: View; label: string }> = [
     { id: "rathaus-news", label: "Aktuelles aus dem Rathaus" },
     { id: "official-notices", label: "Amtl. Bekanntmachungen" },
   ];
 
   const currentLabel =
+    vacationSubItems.find((item) => item.id === view)?.label ||
     rathausSubItems.find((item) => item.id === view)?.label ||
     navItems.find((item) => item.id === view)?.label ||
     "Start";
@@ -639,6 +647,8 @@ export default function HomePage() {
                 className={
                   "nav-item " +
                   (view === item.id ||
+                  (item.id === "urlaub" &&
+                    (view === "urlaub-unterkunft" || view === "urlaub-essen")) ||
                   (item.id === "rathaus" &&
                     (view === "rathaus-news" || view === "official-notices"))
                     ? "active"
@@ -654,6 +664,21 @@ export default function HomePage() {
                 <span>{item.label}</span>
                 {view === item.id && <span className="nav-dot" />}
               </a>
+
+              {item.id === "urlaub" && (
+                <div className="nav-submenu">
+                  {vacationSubItems.map((subitem) => (
+                    <button
+                      key={subitem.id}
+                      className={"nav-subitem " + (view === subitem.id ? "active" : "")}
+                      onClick={() => navigate(subitem.id)}
+                    >
+                      <span className="nav-subline" />
+                      <span>{subitem.symbol} {subitem.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {item.id === "rathaus" && (
                 <div className="nav-submenu">
@@ -1184,142 +1209,178 @@ export default function HomePage() {
             </>
           )}
 
-          {view === "urlaub" && (
+          {(view === "urlaub" || view === "urlaub-unterkunft" || view === "urlaub-essen") && (
             <>
               <section className="page-heading">
                 <div className="eyebrow">Urlaub in Glücksburg</div>
-                <h1>Glücksburg entdecken</h1>
+                <h1>
+                  {view === "urlaub-unterkunft"
+                    ? "Unterkünfte in Glücksburg"
+                    : view === "urlaub-essen"
+                      ? "Essen & Trinken in Glücksburg"
+                      : "Glücksburg entdecken"}
+                </h1>
                 <p>
-                  Unterkünfte, Veranstaltungen und Ideen für deinen Aufenthalt an der
-                  Flensburger Förde – kompakt an einem Ort.
+                  {view === "urlaub-unterkunft"
+                    ? "Ferienwohnungen und Hotels für deinen Aufenthalt an der Flensburger Förde."
+                    : view === "urlaub-essen"
+                      ? "Restaurants, Cafés und gastronomische Angebote in Glücksburg auf einen Blick."
+                      : "Unterkünfte, Veranstaltungen und Ideen für deinen Aufenthalt an der Flensburger Förde – kompakt an einem Ort."}
                 </p>
               </section>
 
-              <section className="travel-feature-card">
-                <div className="travel-feature-icon" aria-hidden="true">🏡</div>
-                <div className="travel-feature-copy">
-                  <span className="dashboard-kicker">Übernachten</span>
-                  <h2>Ferienwohnungen & Hotels in Glücksburg</h2>
-                  <p>
-                    Vom Hotel an der Förde bis zur Ferienwohnung: Entdecke verfügbare
-                    Unterkünfte für deinen Aufenthalt in Glücksburg.
-                  </p>
-                  <a
-                    className="button primary travel-primary-action"
-                    href="https://www.booking.com/city/de/glucksburg.de.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
+              <nav className="vacation-tabs" aria-label="Urlaub Unterbereiche">
+                <button
+                  className={view === "urlaub" ? "active" : ""}
+                  onClick={() => navigate("urlaub")}
+                >
+                  Übersicht
+                </button>
+                {vacationSubItems.map((subitem) => (
+                  <button
+                    key={subitem.id}
+                    className={view === subitem.id ? "active" : ""}
+                    onClick={() => navigate(subitem.id)}
                   >
-                    Unterkünfte ansehen ↗
-                  </a>
-                  <small>Externer Link zu Booking.com. Derzeit kein Affiliate-Link.</small>
-                </div>
-              </section>
+                    <span aria-hidden="true">{subitem.symbol}</span>
+                    {subitem.label}
+                  </button>
+                ))}
+              </nav>
 
-              <section className="restaurant-section">
-                <div className="restaurant-section-heading">
-                  <div>
-                    <span className="dashboard-kicker">Essen & genießen</span>
-                    <h2>Restaurants in Glücksburg</h2>
+              {view !== "urlaub-essen" && (
+                <section className="travel-feature-card">
+                  <div className="travel-feature-icon" aria-hidden="true">🏡</div>
+                  <div className="travel-feature-copy">
+                    <span className="dashboard-kicker">Übernachten</span>
+                    <h2>Ferienwohnungen & Hotels in Glücksburg</h2>
                     <p>
-                      Vom Strandrestaurant bis zum Essen am Schloss – eine Auswahl aktueller
-                      Restaurants für deinen Aufenthalt in Glücksburg.
+                      Vom Hotel an der Förde bis zur Ferienwohnung: Entdecke verfügbare
+                      Unterkünfte für deinen Aufenthalt in Glücksburg.
                     </p>
-                  </div>
-                  <span className="restaurant-heading-icon" aria-hidden="true">🍽️</span>
-                </div>
-
-                <div className="restaurant-list">
-                  {vacationRestaurants.map((restaurant) => (
                     <a
-                      className="restaurant-list-item"
-                      href={restaurant.href}
+                      className="button primary travel-primary-action"
+                      href="https://www.booking.com/city/de/glucksburg.de.html"
                       target="_blank"
                       rel="noopener noreferrer"
-                      key={restaurant.name}
                     >
-                      <span className="restaurant-list-icon" aria-hidden="true">
-                        {restaurant.icon}
-                      </span>
-                      <span className="restaurant-list-copy">
-                        <strong>{restaurant.name}</strong>
-                        <span>{restaurant.detail}</span>
-                        <small>{restaurant.address} · 24960 Glücksburg</small>
-                      </span>
-                      <span className="restaurant-list-arrow" aria-hidden="true">↗</span>
+                      Unterkünfte ansehen ↗
                     </a>
-                  ))}
-                </div>
-
-                <p className="restaurant-source-note">
-                  Auswahl nach der Glücksburger Gastrokarte 2026. Öffnungszeiten und
-                  Reservierung bitte direkt beim jeweiligen Restaurant prüfen.
-                </p>
-                <div className="restaurant-owner-note">
-                  <span className="restaurant-owner-note-icon" aria-hidden="true">💬</span>
-                  <div>
-                    <strong>Dein Restaurant fehlt?</strong>
-                    <p>
-                      Du betreibst ein Restaurant, Café oder einen gastronomischen Betrieb in
-                      Glücksburg und bist hier noch nicht aufgeführt? Melde dich gern bei mir,
-                      damit ich den Eintrag prüfen und ergänzen kann.
-                    </p>
-                    <a href="mailto:sebastianschwarz1@icloud.de">
-                      sebastianschwarz1@icloud.de
-                    </a>
+                    <small>Externer Link zu Booking.com. Derzeit kein Affiliate-Link.</small>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
 
-              <div className="travel-grid">
-                <article className="travel-card">
-                  <span className="travel-card-icon" aria-hidden="true">📅</span>
-                  <div>
-                    <span className="dashboard-kicker">Erleben</span>
-                    <h2>Was ist los in Glücksburg?</h2>
-                    <p>
-                      Konzerte, Familienangebote, Märkte und weitere aktuelle Termine
-                      während deines Aufenthalts.
-                    </p>
+              {view !== "urlaub-unterkunft" && (
+                <section className="restaurant-section">
+                  <div className="restaurant-section-heading">
+                    <div>
+                      <span className="dashboard-kicker">Essen & genießen</span>
+                      <h2>Restaurants in Glücksburg</h2>
+                      <p>
+                        Vom Strandrestaurant bis zum Essen am Schloss – eine Auswahl aktueller
+                        Restaurants für deinen Aufenthalt in Glücksburg.
+                      </p>
+                    </div>
+                    <span className="restaurant-heading-icon" aria-hidden="true">🍽️</span>
                   </div>
-                  <button className="text-button" onClick={() => navigate("events")}>
-                    Veranstaltungen ansehen →
-                  </button>
-                </article>
 
-                <article className="travel-card">
-                  <span className="travel-card-icon" aria-hidden="true">👪</span>
-                  <div>
-                    <span className="dashboard-kicker">Mit Kindern</span>
-                    <h2>Familienzeit in Glücksburg</h2>
-                    <p>
-                      Praktische Anlaufstellen und lokale Angebote für Familien mit Kindern.
-                    </p>
+                  <div className="restaurant-list">
+                    {vacationRestaurants.map((restaurant) => (
+                      <a
+                        className="restaurant-list-item"
+                        href={restaurant.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key={restaurant.name}
+                      >
+                        <span className="restaurant-list-icon" aria-hidden="true">
+                          {restaurant.icon}
+                        </span>
+                        <span className="restaurant-list-copy">
+                          <strong>{restaurant.name}</strong>
+                          <span>{restaurant.detail}</span>
+                          <small>{restaurant.address} · 24960 Glücksburg</small>
+                        </span>
+                        <span className="restaurant-list-arrow" aria-hidden="true">↗</span>
+                      </a>
+                    ))}
                   </div>
-                  <button className="text-button" onClick={() => navigate("family")}>
-                    Familienbereich öffnen →
-                  </button>
-                </article>
 
-                <article className="travel-card">
-                  <span className="travel-card-icon" aria-hidden="true">🌤️</span>
-                  <div>
-                    <span className="dashboard-kicker">Vor Ort</span>
-                    <h2>Wetter & Tagesplanung</h2>
-                    <p>
-                      Die aktuelle Wetterlage für Glücksburg findest du direkt auf der Startseite.
-                    </p>
+                  <p className="restaurant-source-note">
+                    Auswahl nach der Glücksburger Gastrokarte 2026. Öffnungszeiten und
+                    Reservierung bitte direkt beim jeweiligen Restaurant prüfen.
+                  </p>
+                  <div className="restaurant-owner-note">
+                    <span className="restaurant-owner-note-icon" aria-hidden="true">💬</span>
+                    <div>
+                      <strong>Dein Restaurant fehlt?</strong>
+                      <p>
+                        Du betreibst ein Restaurant, Café oder einen gastronomischen Betrieb in
+                        Glücksburg und bist hier noch nicht aufgeführt? Melde dich gern bei mir,
+                        damit ich den Eintrag prüfen und ergänzen kann.
+                      </p>
+                      <a href="mailto:sebastianschwarz1@icloud.de">
+                        sebastianschwarz1@icloud.de
+                      </a>
+                    </div>
                   </div>
-                  <button className="text-button" onClick={() => navigate("home")}>
-                    Zur Startseite →
-                  </button>
-                </article>
-              </div>
+                </section>
+              )}
 
-              <p className="travel-note">
-                GlücksburgDirekt vermittelt keine Unterkünfte und ist nicht Vertragspartner
-                einer Buchung. Es gelten die Bedingungen des jeweiligen externen Anbieters.
-              </p>
+              {view === "urlaub" && (
+                <>
+                  <div className="travel-grid">
+                    <article className="travel-card">
+                      <span className="travel-card-icon" aria-hidden="true">📅</span>
+                      <div>
+                        <span className="dashboard-kicker">Erleben</span>
+                        <h2>Was ist los in Glücksburg?</h2>
+                        <p>
+                          Konzerte, Familienangebote, Märkte und weitere aktuelle Termine
+                          während deines Aufenthalts.
+                        </p>
+                      </div>
+                      <button className="text-button" onClick={() => navigate("events")}>
+                        Veranstaltungen ansehen →
+                      </button>
+                    </article>
+
+                    <article className="travel-card">
+                      <span className="travel-card-icon" aria-hidden="true">👪</span>
+                      <div>
+                        <span className="dashboard-kicker">Mit Kindern</span>
+                        <h2>Familienzeit in Glücksburg</h2>
+                        <p>
+                          Praktische Anlaufstellen und lokale Angebote für Familien mit Kindern.
+                        </p>
+                      </div>
+                      <button className="text-button" onClick={() => navigate("family")}>
+                        Familienbereich öffnen →
+                      </button>
+                    </article>
+
+                    <article className="travel-card">
+                      <span className="travel-card-icon" aria-hidden="true">🌤️</span>
+                      <div>
+                        <span className="dashboard-kicker">Vor Ort</span>
+                        <h2>Wetter & Tagesplanung</h2>
+                        <p>
+                          Die aktuelle Wetterlage für Glücksburg findest du direkt auf der Startseite.
+                        </p>
+                      </div>
+                      <button className="text-button" onClick={() => navigate("home")}>
+                        Zur Startseite →
+                      </button>
+                    </article>
+                  </div>
+
+                  <p className="travel-note">
+                    GlücksburgDirekt vermittelt keine Unterkünfte und ist nicht Vertragspartner
+                    einer Buchung. Es gelten die Bedingungen des jeweiligen externen Anbieters.
+                  </p>
+                </>
+              )}
             </>
           )}
 
