@@ -560,12 +560,12 @@ export default function HomePage() {
   const currentEvents = events.slice(0, 4);
 
   const navItems: Array<{ id: View; label: string; symbol: string }> = [
-    { id: "home", label: "Start", symbol: "⌂" },
-    { id: "waste", label: "Müllabfuhr", symbol: "♻" },
-    { id: "events", label: "Veranstaltungen", symbol: "□" },
-    { id: "family", label: "Familie", symbol: "♡" },
-    { id: "rathaus", label: "Rathaus", symbol: "▦" },
-    { id: "impressum", label: "Impressum", symbol: "§" },
+    { id: "home", label: "Start", symbol: "🏠" },
+    { id: "waste", label: "Müllabfuhr", symbol: "🗑️" },
+    { id: "events", label: "Veranstaltungen", symbol: "📅" },
+    { id: "family", label: "Familie", symbol: "👪" },
+    { id: "rathaus", label: "Rathaus", symbol: "🏛️" },
+    { id: "impressum", label: "Impressum", symbol: "📄" },
   ];
 
   const rathausSubItems: Array<{ id: View; label: string }> = [
