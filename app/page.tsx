@@ -1031,7 +1031,6 @@ export default function HomePage() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {event.family_friendly && <span className="badge teal">Familie</span>}
                       <h3>{event.title}</h3>
                       <p>
                         {event.time ? event.time + " Uhr · " : ""}
