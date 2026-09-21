@@ -1663,9 +1663,11 @@ export default function HomePage() {
                 <p>
                   Verantwortlicher für die Datenverarbeitung auf dieser Website ist der oben
                   genannte Betreiber. Die Website ist so ausgelegt, dass nur die für Betrieb und
-                  angeforderte Funktionen erforderlichen Daten verarbeitet werden. Aktuell werden
-                  keine Werbenetzwerke oder werbebasierten Nutzerprofile eingesetzt. Für eine
-                  datensparsame Reichweiten- und Nutzungsanalyse wird Vercel Web Analytics verwendet.
+                  angeforderte Funktionen erforderlichen Daten verarbeitet werden. Für eine
+                  datensparsame Reichweiten- und Nutzungsanalyse wird Vercel Web Analytics
+                  eingesetzt. Google AdSense ist technisch vorbereitet, die Auslieferung von
+                  Werbeanzeigen ist derzeit jedoch noch deaktiviert. Vor einer Aktivierung werden
+                  die hierfür erforderlichen Einwilligungs- und Datenschutzmechanismen umgesetzt.
                 </p>
 
                 <h3>Hosting über Vercel</h3>
@@ -1689,17 +1691,96 @@ export default function HomePage() {
 
                 <h3>Reichweitenmessung mit Vercel Web Analytics</h3>
                 <p>
-                  GlücksburgDirekt nutzt Vercel Web Analytics, um aggregierte Besucher-,
-                  Seitenaufruf- und ausgewählte Interaktionszahlen auszuwerten, beispielsweise
-                  das Öffnen eines Bereichs oder das Laden des Müllkalenders. Dabei werden keine
-                  Straßennamen oder Hausnummern als Analyseereignisse übermittelt. Der Dienst
-                  arbeitet ohne klassische
-                  Tracking-Cookies und ist nicht darauf ausgelegt, Besucher über verschiedene
-                  Websites hinweg zu verfolgen. Die Auswertung dient dazu, zu erkennen, welche
-                  Bereiche der Website genutzt werden und das Angebot entsprechend zu verbessern.
-                  Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt
-                  in der Reichweitenmessung und Optimierung dieses lokalen Informationsangebots.
+                  GlücksburgDirekt nutzt Vercel Web Analytics zur Auswertung von Seitenaufrufen,
+                  Besucherzahlen, Referrern, Geräte- und Browserinformationen sowie ausgewählten
+                  Interaktionen, beispielsweise dem Öffnen eines Bereichs oder dem Laden des
+                  Müllkalenders. Straßennamen oder andere Adressangaben werden nicht als
+                  Analyseereignisse an Vercel übermittelt.
                 </p>
+                <p>
+                  Vercel beschreibt Web Analytics als datenschutzfreundliche First-Party-Analyse
+                  ohne klassische Tracking-Cookies. Zur Unterscheidung von Besuchen kann aus
+                  technischen Anfrageinformationen ein Hash gebildet werden; nach Angaben von
+                  Vercel wird dieser nach 24 Stunden verworfen und dient nicht dazu, Besucher über
+                  verschiedene Websites hinweg zu verfolgen. Die Auswertung dient der
+                  Reichweitenmessung und Verbesserung des Angebots. Rechtsgrundlage ist
+                  Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt in der
+                  bedarfsgerechten Optimierung dieses lokalen Informationsangebots.
+                </p>
+                <p>
+                  <a
+                    href="https://vercel.com/legal/privacy-notice"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Datenschutzhinweise von Vercel ↗
+                  </a>
+                </p>
+
+                <h3>Google AdSense und Werbeanzeigen</h3>
+                <p>
+                  Für die spätere Finanzierung des Angebots ist die Einbindung von Google AdSense
+                  vorgesehen. Anbieter des Dienstes ist Google. Der AdSense-Code ist auf
+                  GlücksburgDirekt technisch vorbereitet, derzeit aber deaktiviert; solange die
+                  Werbeeinbindung nicht aktiviert ist, werden über GlücksburgDirekt keine
+                  AdSense-Anzeigenanfragen ausgelöst.
+                </p>
+                <p>
+                  Nach einer Aktivierung kann Google im Zusammenhang mit der Anzeigenbereitstellung
+                  Informationen wie IP-Adresse, Browser- und Geräteinformationen, aufgerufene
+                  Seiten sowie Werbe- und Gerätekennungen verarbeiten. Google und gegebenenfalls
+                  weitere Anzeigentechnologie-Anbieter können Cookies oder vergleichbare
+                  Speichertechnologien einsetzen. Personalisierte Werbung kann insbesondere auf
+                  früheren Aktivitäten, Interessen oder anderen von Google verwendeten Signalen
+                  beruhen. Auch bei nicht personalisierten Anzeigen können Cookies oder andere
+                  Kennungen beispielsweise für Frequency Capping und aggregierte Anzeigenberichte
+                  eingesetzt werden.
+                </p>
+                <p>
+                  Für Nutzer im Europäischen Wirtschaftsraum, im Vereinigten Königreich und in der
+                  Schweiz wird vor einer entsprechenden Anzeigenbereitstellung eine von Google
+                  zertifizierte Consent-Management-Plattform (CMP) eingesetzt, soweit dies nach den
+                  anwendbaren Vorgaben erforderlich ist. Dort können Nutzer ihre Einwilligung
+                  erteilen, ablehnen oder ihre Auswahl verwalten. Einwilligungspflichtige
+                  Verarbeitungen erfolgen erst nach der entsprechenden Auswahl. Rechtsgrundlage
+                  ist in diesen Fällen Art. 6 Abs. 1 lit. a DSGVO; eine Einwilligung kann jederzeit
+                  mit Wirkung für die Zukunft widerrufen werden.
+                </p>
+                <p>
+                  Im Rahmen der Google-Publisher-Produkte handeln der Betreiber von
+                  GlücksburgDirekt und Google hinsichtlich bestimmter Verarbeitungen jeweils als
+                  eigenständig Verantwortliche. Weitere Informationen zur Datenverarbeitung durch
+                  Google und zu Werbeeinstellungen finden sich hier:
+                </p>
+                <ul className="legal-list">
+                  <li>
+                    <a
+                      href="https://policies.google.com/privacy?hl=de"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Datenschutzerklärung von Google ↗
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://policies.google.com/technologies/partner-sites?hl=de"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Datennutzung durch Google auf Websites von Partnern ↗
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://adssettings.google.com/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Einstellungen für personalisierte Werbung bei Google ↗
+                    </a>
+                  </li>
+                </ul>
 
                 <h3>Datenbank und Backend über Supabase</h3>
                 <p>
@@ -1739,8 +1820,12 @@ export default function HomePage() {
                 <p>
                   Für die ausdrücklich gewünschte Funktion „Adresse und Mülltermine merken“ nutzt
                   GlücksburgDirekt den Local Storage des Browsers. Die Speicherung dient der
-                  Bereitstellung dieser Funktion. Es werden derzeit keine Analyse- oder
-                  Marketing-Cookies eingesetzt.
+                  Bereitstellung dieser Funktion. Vercel Web Analytics verwendet für die hier
+                  eingesetzte Reichweitenmessung keine klassischen Tracking-Cookies. Google
+                  AdSense ist derzeit deaktiviert. Nach einer späteren Aktivierung können Google
+                  und weitere beteiligte Anzeigentechnologie-Anbieter – abhängig von der
+                  Einwilligung und den gewählten Einstellungen – Cookies oder vergleichbare
+                  Speichertechnologien für Werbung, Auslieferungssteuerung und Messung einsetzen.
                 </p>
 
                 <h3>Wetterdaten von Open-Meteo</h3>
@@ -1822,7 +1907,7 @@ export default function HomePage() {
                   Datenverarbeitungen, verwendete Dienste oder die maßgebliche Rechtslage ändern.
                 </p>
 
-                <p className="legal-updated">Stand: 21. September 2026</p>
+                <p className="legal-updated">Stand: 21. September 2026 · ergänzt um Google AdSense und Vercel Web Analytics</p>
               </section>
             </>
           )}
