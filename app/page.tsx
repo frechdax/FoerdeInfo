@@ -12,6 +12,7 @@ type View =
   | "urlaub"
   | "urlaub-unterkunft"
   | "urlaub-essen"
+  | "urlaub-freizeit"
   | "family"
   | "rathaus"
   | "rathaus-news"
@@ -290,7 +291,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "urlaub", "urlaub-unterkunft", "urlaub-essen", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
+    if (["home", "street", "waste", "events", "urlaub", "urlaub-unterkunft", "urlaub-essen", "urlaub-freizeit", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -610,6 +611,7 @@ export default function HomePage() {
   const vacationSubItems: Array<{ id: View; label: string; symbol: string }> = [
     { id: "urlaub-unterkunft", label: "Unterkünfte", symbol: "🏡" },
     { id: "urlaub-essen", label: "Essen & Trinken", symbol: "🍽️" },
+    { id: "urlaub-freizeit", label: "Freizeit", symbol: "🎯" },
   ];
 
   const rathausSubItems: Array<{ id: View; label: string }> = [
@@ -648,7 +650,7 @@ export default function HomePage() {
                   "nav-item " +
                   (view === item.id ||
                   (item.id === "urlaub" &&
-                    (view === "urlaub-unterkunft" || view === "urlaub-essen")) ||
+                    (view === "urlaub-unterkunft" || view === "urlaub-essen" || view === "urlaub-freizeit")) ||
                   (item.id === "rathaus" &&
                     (view === "rathaus-news" || view === "official-notices"))
                     ? "active"
@@ -1209,7 +1211,7 @@ export default function HomePage() {
             </>
           )}
 
-          {(view === "urlaub" || view === "urlaub-unterkunft" || view === "urlaub-essen") && (
+          {(view === "urlaub" || view === "urlaub-unterkunft" || view === "urlaub-essen" || view === "urlaub-freizeit") && (
             <>
               <section className="page-heading">
                 <div className="eyebrow">Urlaub in Glücksburg</div>
@@ -1218,14 +1220,18 @@ export default function HomePage() {
                     ? "Unterkünfte in Glücksburg"
                     : view === "urlaub-essen"
                       ? "Essen & Trinken in Glücksburg"
-                      : "Glücksburg entdecken"}
+                      : view === "urlaub-freizeit"
+                        ? "Freizeit in Glücksburg"
+                        : "Glücksburg entdecken"}
                 </h1>
                 <p>
                   {view === "urlaub-unterkunft"
                     ? "Ferienwohnungen und Hotels für deinen Aufenthalt an der Flensburger Förde."
                     : view === "urlaub-essen"
                       ? "Restaurants, Cafés und gastronomische Angebote in Glücksburg auf einen Blick."
-                      : "Unterkünfte, Veranstaltungen und Ideen für deinen Aufenthalt an der Flensburger Förde – kompakt an einem Ort."}
+                      : view === "urlaub-freizeit"
+                        ? "Freizeitideen, Veranstaltungen und familienfreundliche Angebote für deinen Aufenthalt in Glücksburg."
+                        : "Unterkünfte, Veranstaltungen und Ideen für deinen Aufenthalt an der Flensburger Förde – kompakt an einem Ort."}
                 </p>
               </section>
 
@@ -1248,7 +1254,7 @@ export default function HomePage() {
                 ))}
               </nav>
 
-              {view !== "urlaub-essen" && (
+              {view !== "urlaub-essen" && view !== "urlaub-freizeit" && (
                 <section className="travel-feature-card">
                   <div className="travel-feature-icon" aria-hidden="true">🏡</div>
                   <div className="travel-feature-copy">
@@ -1271,7 +1277,7 @@ export default function HomePage() {
                 </section>
               )}
 
-              {view !== "urlaub-unterkunft" && (
+              {view !== "urlaub-unterkunft" && view !== "urlaub-freizeit" && (
                 <section className="restaurant-section">
                   <div className="restaurant-section-heading">
                     <div>
@@ -1330,7 +1336,7 @@ export default function HomePage() {
                 </section>
               )}
 
-              {view === "urlaub" && (
+              {(view === "urlaub" || view === "urlaub-freizeit") && (
                 <>
                   <div className="travel-grid">
                     <article className="travel-card">
