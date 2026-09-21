@@ -707,6 +707,21 @@ export default function HomePage() {
                 )}
               </section>
 
+              <section className="visitor-teaser" aria-label="Urlaub in Glücksburg">
+                <div className="visitor-teaser-icon" aria-hidden="true">🌊</div>
+                <div className="visitor-teaser-copy">
+                  <span className="dashboard-kicker">Zu Besuch in Glücksburg?</span>
+                  <h2>Unterkünfte, Ausflüge & Urlaubstipps</h2>
+                  <p>
+                    Finde Ferienwohnungen und Hotels und entdecke passende Veranstaltungen
+                    für deinen Aufenthalt an der Flensburger Förde.
+                  </p>
+                </div>
+                <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
+                  Urlaub planen →
+                </button>
+              </section>
+
               <section className="home-dashboard-grid">
                 <article className="dashboard-panel rathaus-dashboard-card">
                   <div className="dashboard-panel-heading">
@@ -852,21 +867,6 @@ export default function HomePage() {
                     </div>
                   )}
                 </section>
-              </section>
-
-              <section className="visitor-teaser" aria-label="Urlaub in Glücksburg">
-                <div className="visitor-teaser-icon" aria-hidden="true">🌊</div>
-                <div className="visitor-teaser-copy">
-                  <span className="dashboard-kicker">Zu Besuch in Glücksburg?</span>
-                  <h2>Unterkünfte, Ausflüge & Urlaubstipps</h2>
-                  <p>
-                    Finde Ferienwohnungen und Hotels und entdecke passende Veranstaltungen
-                    für deinen Aufenthalt an der Flensburger Förde.
-                  </p>
-                </div>
-                <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
-                  Urlaub planen →
-                </button>
               </section>
 
             </>
