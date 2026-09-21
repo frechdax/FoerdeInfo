@@ -666,12 +666,6 @@ export default function HomePage() {
 
           {view === "home" && (
             <>
-              <div className="demo-strip">
-                <span className="demo-dot" />
-                <strong>GLÜCKSBURG DIREKT</strong>
-                <span>Aktuelle Daten aus ASF, kulturbytes und der Stadt Glücksburg.</span>
-              </div>
-
               <section className="welcome">
                 <div>
                   <div className="eyebrow">Moin aus Glücksburg</div>
