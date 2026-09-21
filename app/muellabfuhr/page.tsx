@@ -27,6 +27,7 @@ export default function MuellabfuhrPage() {
       ]}
       ctaLabel="Müllkalender öffnen"
       ctaHref="/#street"
+      canonicalPath="/muellabfuhr"
     >
       <section className="seo-card">
         <h2>Wann wird in Glücksburg der Müll abgeholt?</h2>
