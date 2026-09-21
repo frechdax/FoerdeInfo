@@ -50,6 +50,13 @@ type OfficialNotice = {
   source_url: string;
 };
 
+type RathausNews = {
+  id: string;
+  published_at: string | null;
+  title: string;
+  source_url: string;
+};
+
 function today() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Berlin",
@@ -103,6 +110,7 @@ export default function HomePage() {
   const [wasteEvents, setWasteEvents] = useState<WasteEvent[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [officialNotices, setOfficialNotices] = useState<OfficialNotice[]>([]);
+  const [rathausNews, setRathausNews] = useState<RathausNews[]>([]);
   const [familyOnly, setFamilyOnly] = useState(true);
   const [civic, setCivic] = useState<CivicInfo | null>(null);
   const [loadingStreet, setLoadingStreet] = useState(false);
@@ -125,8 +133,13 @@ export default function HomePage() {
     if (!supabase) return;
 
     async function loadBaseData() {
-      const [{ data: streetRows }, { data: eventRows }, { data: civicRows }, { data: noticeRows }] =
-        await Promise.all([
+      const [
+        { data: streetRows },
+        { data: eventRows },
+        { data: civicRows },
+        { data: noticeRows },
+        { data: rathausRows },
+      ] = await Promise.all([
           supabase
             .from("streets")
             .select("id,name,asf_ort_number,asf_street_number")
@@ -148,12 +161,18 @@ export default function HomePage() {
             .select("id,published_at,title,source_url")
             .order("published_at", { ascending: false, nullsFirst: false })
             .limit(30),
+          supabase
+            .from("rathaus_news")
+            .select("id,published_at,title,source_url")
+            .order("published_at", { ascending: false, nullsFirst: false })
+            .limit(30),
         ]);
 
       setStreets((streetRows ?? []) as Street[]);
       setEvents((eventRows ?? []) as EventRow[]);
       setCivic((civicRows ?? null) as CivicInfo | null);
       setOfficialNotices((noticeRows ?? []) as OfficialNotice[]);
+      setRathausNews((rathausRows ?? []) as RathausNews[]);
     }
 
     loadBaseData();
@@ -429,7 +448,7 @@ export default function HomePage() {
                   </div>
                   <p>{civic?.data?.opening_hours?.monday || "Öffnungszeiten werden geladen"}</p>
                   <div className="weather-metrics">
-                    <span>{officialNotices.length} Bekanntmachungen</span>
+                    <span>{rathausNews.length} Rathaus-Meldungen</span>
                     <button onClick={() => navigate("rathaus")}>Öffnen →</button>
                   </div>
                 </article>
@@ -461,23 +480,23 @@ export default function HomePage() {
               <section className="dashboard-bottom">
                 <div>
                   <div className="section-title">
-                    <h2>Amtliche Bekanntmachungen</h2>
+                    <h2>Neues aus dem Rathaus</h2>
                     <button className="text-button" onClick={() => navigate("rathaus")}>Alle ansehen →</button>
                   </div>
                   <div className="news-grid">
-                    {officialNotices.slice(0, 4).map((item) => (
+                    {rathausNews.slice(0, 4).map((item) => (
                       <a className="news-card" href={item.source_url} target="_blank" rel="noreferrer" key={item.id}>
                         <div className="news-art civic">
                           <span>▦</span>
-                          <span>STADT GLÜCKSBURG</span>
+                          <span>RATHAUS</span>
                         </div>
                         <div className="news-body">
                           <div className="meta">
-                            <span>Amtlich</span>
+                            <span>Neuigkeit</span>
                             <span>{item.published_at ? formatDate(item.published_at) : ""}</span>
                           </div>
                           <h3>{item.title}</h3>
-                          <div className="read-more">PDF öffnen →</div>
+                          <div className="read-more">Mehr lesen →</div>
                         </div>
                       </a>
                     ))}
@@ -717,7 +736,7 @@ export default function HomePage() {
               <section className="page-heading">
                 <div className="eyebrow">Stadt Glücksburg</div>
                 <h1>Rathaus</h1>
-                <p>Öffnungszeiten, Kontakt und amtliche Bekanntmachungen.</p>
+                <p>Öffnungszeiten, aktuelle Rathaus-Meldungen und amtliche Bekanntmachungen – klar getrennt.</p>
               </section>
 
               <div className="settings-grid">
@@ -763,7 +782,36 @@ export default function HomePage() {
               </div>
 
               <div className="section-title">
-                <h2>Neueste amtliche Bekanntmachungen</h2>
+                <h2>Aktuelles aus dem Rathaus</h2>
+                <span className="muted">{rathausNews.length} Meldungen</span>
+              </div>
+
+              <div className="stack">
+                {rathausNews.slice(0, 10).map((item) => (
+                  <a
+                    className="content-row"
+                    href={item.source_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    key={item.id}
+                  >
+                    <span className="icon-box teal">▦</span>
+                    <div>
+                      <span className="badge teal">Rathaus</span>
+                      <h3>{item.title}</h3>
+                      <p>{item.published_at ? formatDate(item.published_at) : "Datum laut Stadtseite"}</p>
+                    </div>
+                    <span>Mehr →</span>
+                  </a>
+                ))}
+              </div>
+
+              {!rathausNews.length && (
+                <div className="empty">Zurzeit konnten keine Rathaus-Meldungen geladen werden.</div>
+              )}
+
+              <div className="section-title">
+                <h2>Amtliche Bekanntmachungen</h2>
                 <span className="muted">{officialNotices.length} geladen</span>
               </div>
 
@@ -778,7 +826,7 @@ export default function HomePage() {
                   >
                     <span className="icon-box teal">▦</span>
                     <div>
-                      <span className="badge">Amtlich</span>
+                      <span className="badge">Amtliche Bekanntmachung</span>
                       <h3>{item.title}</h3>
                       <p>{item.published_at ? formatDate(item.published_at) : "Datum laut Stadtseite"}</p>
                     </div>
