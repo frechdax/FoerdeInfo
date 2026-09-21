@@ -736,6 +736,21 @@ export default function HomePage() {
                 </section>
               )}
 
+              <section className="visitor-teaser" aria-label="Urlaub in Glücksburg">
+                <div className="visitor-teaser-icon" aria-hidden="true">🌊</div>
+                <div className="visitor-teaser-copy">
+                  <span className="dashboard-kicker">Zu Besuch in Glücksburg?</span>
+                  <h2>Unterkünfte, Ausflüge & Urlaubstipps</h2>
+                  <p>
+                    Finde Ferienwohnungen und Hotels und entdecke passende Veranstaltungen
+                    für deinen Aufenthalt an der Flensburger Förde.
+                  </p>
+                </div>
+                <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
+                  Urlaub planen →
+                </button>
+              </section>
+
               <section className="today-weather-card" aria-label="Wetter heute in Glücksburg">
                 <div className="today-weather-main">
                   <span className="today-weather-icon" aria-hidden="true">
@@ -764,21 +779,6 @@ export default function HomePage() {
                 ) : (
                   <div className="today-weather-loading">Wetterdaten werden geladen …</div>
                 )}
-              </section>
-
-              <section className="visitor-teaser" aria-label="Urlaub in Glücksburg">
-                <div className="visitor-teaser-icon" aria-hidden="true">🌊</div>
-                <div className="visitor-teaser-copy">
-                  <span className="dashboard-kicker">Zu Besuch in Glücksburg?</span>
-                  <h2>Unterkünfte, Ausflüge & Urlaubstipps</h2>
-                  <p>
-                    Finde Ferienwohnungen und Hotels und entdecke passende Veranstaltungen
-                    für deinen Aufenthalt an der Flensburger Förde.
-                  </p>
-                </div>
-                <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
-                  Urlaub planen →
-                </button>
               </section>
 
               <section className="home-dashboard-grid">
