@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
+import { track } from "@vercel/analytics";
 
 type View =
   | "home"
@@ -396,6 +397,7 @@ export default function HomePage() {
   }, [selectedStreet, supabase]);
 
   function navigate(next: View) {
+    track("App section opened", { section: next });
     setView(next);
     window.location.hash = next;
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -466,6 +468,7 @@ export default function HomePage() {
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+    track("Event calendar downloaded");
   }
 
   async function loadWaste(targetView: View = "waste") {
@@ -503,6 +506,7 @@ export default function HomePage() {
       } catch {}
 
       setNotice("Abfuhrtermine wurden direkt bei ASF aktualisiert.");
+      track("Waste calendar loaded");
       if (targetView) navigate(targetView);
     }
 
@@ -1552,7 +1556,7 @@ export default function HomePage() {
                   genannte Betreiber. Die Website ist so ausgelegt, dass nur die für Betrieb und
                   angeforderte Funktionen erforderlichen Daten verarbeitet werden. Aktuell werden
                   keine Werbenetzwerke oder werbebasierten Nutzerprofile eingesetzt. Für eine
-                  datensparsame Reichweitenmessung wird Vercel Web Analytics verwendet.
+                  datensparsame Reichweiten- und Nutzungsanalyse wird Vercel Web Analytics verwendet.
                 </p>
 
                 <h3>Hosting über Vercel</h3>
@@ -1576,8 +1580,11 @@ export default function HomePage() {
 
                 <h3>Reichweitenmessung mit Vercel Web Analytics</h3>
                 <p>
-                  GlücksburgDirekt nutzt Vercel Web Analytics, um aggregierte Besucher- und
-                  Seitenaufrufzahlen auszuwerten. Der Dienst arbeitet ohne klassische
+                  GlücksburgDirekt nutzt Vercel Web Analytics, um aggregierte Besucher-,
+                  Seitenaufruf- und ausgewählte Interaktionszahlen auszuwerten, beispielsweise
+                  das Öffnen eines Bereichs oder das Laden des Müllkalenders. Dabei werden keine
+                  Straßennamen oder Hausnummern als Analyseereignisse übermittelt. Der Dienst
+                  arbeitet ohne klassische
                   Tracking-Cookies und ist nicht darauf ausgelegt, Besucher über verschiedene
                   Websites hinweg zu verfolgen. Die Auswertung dient dazu, zu erkennen, welche
                   Bereiche der Website genutzt werden und das Angebot entsprechend zu verbessern.
