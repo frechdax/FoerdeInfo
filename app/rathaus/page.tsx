@@ -27,6 +27,7 @@ export default function RathausPage() {
       ]}
       ctaLabel="Rathausbereich öffnen"
       ctaHref="/#rathaus"
+      canonicalPath="/rathaus"
     >
       <section className="seo-card">
         <h2>Privater Überblick mit offiziellen Quellen</h2>
