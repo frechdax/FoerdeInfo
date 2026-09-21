@@ -154,6 +154,20 @@ function wasteTone(type: string) {
   return "";
 }
 
+function wasteIcon(type: string) {
+  if (type === "Restmüll") return "🗑️";
+  if (type === "Biomüll") return "🌿";
+  if (type === "Papier") return "📄";
+  if (type === "Gelbe Tonne") return "♻️";
+  return "🗓️";
+}
+
+function weekdayName(value: string) {
+  return new Intl.DateTimeFormat("de-DE", { weekday: "long" }).format(
+    new Date(value + "T12:00:00")
+  );
+}
+
 function icon(label: string) {
   return <span className="nav-icon" aria-hidden="true">{label}</span>;
 }
@@ -317,7 +331,12 @@ export default function HomePage() {
             .limit(30),
         ]);
 
-      setStreets((streetRows ?? []) as Street[]);
+      const loadedStreets = (streetRows ?? []) as Street[];
+      setStreets(loadedStreets);
+      setStreetSearch((current) => {
+        if (current || !selectedStreet) return current;
+        return loadedStreets.find((street) => street.id === selectedStreet)?.name || "";
+      });
       setEvents((eventRows ?? []) as EventRow[]);
       setCivic((civicRows ?? null) as CivicInfo | null);
       setOfficialNotices((noticeRows ?? []) as OfficialNotice[]);
@@ -535,10 +554,6 @@ export default function HomePage() {
       ? `${selectedStreetName} ${selectedHouseNumberLabel}`
       : selectedStreetName
     : "Noch keine Adresse gewählt";
-
-  const filteredStreets = streets.filter((street) =>
-    street.name.toLocaleLowerCase("de").includes(streetSearch.toLocaleLowerCase("de").trim())
-  );
 
   const eventMonths = Array.from(
     new Set(events.map((event) => event.date.slice(0, 7)))
@@ -851,7 +866,7 @@ export default function HomePage() {
                           onClick={() => navigate("waste")}
                           key={entry.date + entry.type + index}
                         >
-                          <span className={"waste-mini-icon " + wasteTone(entry.type)}>♻</span>
+                          <span className={"waste-mini-icon " + wasteTone(entry.type)}>{wasteIcon(entry.type)}</span>
                           <div>
                             <small>{formatDate(entry.date)}</small>
                             <strong>{entry.type}</strong>
@@ -878,84 +893,93 @@ export default function HomePage() {
           {view === "street" && (
             <>
               <section className="page-heading">
-                <div className="eyebrow">Persönlicher Bereich</div>
-                <h1>Meine Straße</h1>
-                <p>Wähle Straße und Hausnummer für deinen adressgenauen ASF-Abfallkalender.</p>
+                <div className="eyebrow">ASF-Abfallkalender</div>
+                <h1>Adresse auswählen</h1>
+                <p>Wähle deine Adresse, damit die passenden Abfuhrtermine automatisch geladen werden.</p>
               </section>
 
-              <div className="settings-grid">
-                <section className="card padded">
-                  <h2>Adresse auswählen</h2>
-                  <div className="form-stack">
-                    <label>
-                      Straße suchen
-                      <input
-                        type="search"
-                        value={streetSearch}
-                        onChange={(event) => setStreetSearch(event.target.value)}
-                        placeholder="Zum Beispiel Bremsberg oder Uferstraße"
-                      />
-                    </label>
+              <section className="card padded address-picker-card">
+                <div className="address-picker-head">
+                  <div>
+                    <span className="dashboard-kicker">Deine Abfuhradresse</span>
+                    <h2>Straße und Hausnummer</h2>
+                  </div>
+                  <span className="address-picker-icon" aria-hidden="true">📍</span>
+                </div>
 
-                    <label>
-                      Deine Straße
-                      <select
-                        value={selectedStreet}
-                        onChange={(event) => setSelectedStreet(event.target.value)}
-                      >
-                        <option value="">Straße auswählen</option>
-                        {filteredStreets.map((street) => (
-                          <option key={street.id} value={street.id}>{street.name}</option>
-                        ))}
-                      </select>
-                    </label>
+                <div className="address-picker-fields">
+                  <label className="street-autocomplete">
+                    Straße
+                    <input
+                      type="search"
+                      list="gluecksburg-streets"
+                      value={streetSearch}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setStreetSearch(value);
+                        const match = streets.find(
+                          (street) =>
+                            street.name.toLocaleLowerCase("de") ===
+                            value.trim().toLocaleLowerCase("de")
+                        );
+                        setSelectedStreet(match?.id || "");
+                      }}
+                      placeholder="Straße eingeben …"
+                      autoComplete="off"
+                    />
+                    <datalist id="gluecksburg-streets">
+                      {streets.map((street) => (
+                        <option key={street.id} value={street.name} />
+                      ))}
+                    </datalist>
+                    <small>
+                      {streetSearch && !selectedStreet
+                        ? "Bitte eine Straße aus den Vorschlägen auswählen."
+                        : "Tippe den Straßennamen – passende Treffer werden automatisch vorgeschlagen."}
+                    </small>
+                  </label>
 
-                    <label>
-                      Hausnummer
-                      <select
-                        value={selectedHouseNumber}
-                        onChange={(event) => setSelectedHouseNumber(event.target.value)}
-                        disabled={!selectedStreet || loadingStreet}
-                      >
-                        <option value="">
-                          {loadingStreet ? "Hausnummern werden geladen …" : "Hausnummer auswählen"}
-                        </option>
-                        {houseNumbers.map((house) => (
-                          <option key={house.id} value={house.id}>{house.label}</option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <button
-                      className="button primary"
-                      disabled={!selectedStreet || !selectedHouseNumber || loadingWaste}
-                      onClick={() => loadWaste("waste")}
+                  <label>
+                    Hausnummer
+                    <select
+                      value={selectedHouseNumber}
+                      onChange={(event) => setSelectedHouseNumber(event.target.value)}
+                      disabled={!selectedStreet || loadingStreet}
                     >
-                      {loadingWaste ? "Termine werden geladen …" : "Adresse übernehmen & Termine laden"}
-                    </button>
-                  </div>
+                      <option value="">
+                        {loadingStreet
+                          ? "Hausnummern werden geladen …"
+                          : selectedStreet
+                            ? "Hausnummer auswählen"
+                            : "Zuerst Straße auswählen"}
+                      </option>
+                      {houseNumbers.map((house) => (
+                        <option key={house.id} value={house.id}>{house.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
 
-                  <p className="notice">
-                    Die Hausnummer wird nur für die ASF-Abfrage verwendet. Im Cache wird kein Klartext der Hausnummer gespeichert.
-                  </p>
-                </section>
-
-                <section className="card padded">
-                  <h2>Aktuelle Auswahl</h2>
-                  <div className="summary">
-                    <strong>{selectedStreetName || "Noch keine Straße gewählt"}</strong>
-                    <div>
-                      <small>Hausnummer</small>
-                      <p>{selectedHouseNumberLabel || "Noch nicht gewählt"}</p>
-                    </div>
-                    <div>
-                      <small>Datenquelle</small>
-                      <p>Abfallwirtschaft Schleswig-Flensburg (ASF)</p>
-                    </div>
+                <div className="address-picker-actions">
+                  <div className="address-selection-preview">
+                    <span>Ausgewählt</span>
+                    <strong>
+                      {selectedStreetName
+                        ? selectedHouseNumberLabel
+                          ? `${selectedStreetName} ${selectedHouseNumberLabel}`
+                          : selectedStreetName
+                        : "Noch keine vollständige Adresse"}
+                    </strong>
                   </div>
-                  <p className="muted">In Glücksburg sind {streets.length} ASF-Straßeneinträge verfügbar.</p>
-                </section>
-              </div>
+                  <button
+                    className="button primary"
+                    disabled={!selectedStreet || !selectedHouseNumber || loadingWaste}
+                    onClick={() => loadWaste("waste")}
+                  >
+                    {loadingWaste ? "Termine werden geladen …" : "Müllkalender anzeigen"}
+                  </button>
+                </div>
+              </section>
             </>
           )}
 
@@ -979,16 +1003,37 @@ export default function HomePage() {
               </div>
 
               {wasteEvents.length ? (
-                <div className="waste-grid">
-                  {wasteEvents.slice(0, 16).map((entry, index) => (
-                    <article className={"card waste-tile " + wasteTone(entry.type)} key={entry.date + entry.type + index}>
-                      <span className="waste-symbol">♻</span>
-                      <small>{formatDate(entry.date)}</small>
-                      <h2>{entry.type}</h2>
-                      <p>Nächster Termin laut ASF.</p>
-                    </article>
-                  ))}
-                </div>
+                <section className="waste-calendar">
+                  <div className="waste-calendar-head">
+                    <div>
+                      <span className="dashboard-kicker">Deine nächsten Leerungen</span>
+                      <h2>Abfuhrtermine</h2>
+                    </div>
+                    <span>{wasteEvents.length} Termine geladen</span>
+                  </div>
+
+                  <div className="waste-calendar-grid">
+                    {wasteEvents.slice(0, 16).map((entry, index) => (
+                      <article
+                        className={"waste-calendar-card " + wasteTone(entry.type)}
+                        key={entry.date + entry.type + index}
+                      >
+                        <div className="waste-date-badge">
+                          <strong>{dayNumber(entry.date)}</strong>
+                          <span>{monthShort(entry.date)}</span>
+                        </div>
+                        <div className="waste-calendar-copy">
+                          <span className="waste-weekday">{weekdayName(entry.date)}</span>
+                          <h3>{entry.type}</h3>
+                          <small>{formatDate(entry.date)}</small>
+                        </div>
+                        <span className="waste-type-icon" aria-hidden="true">
+                          {wasteIcon(entry.type)}
+                        </span>
+                      </article>
+                    ))}
+                  </div>
+                </section>
               ) : (
                 <div className="empty">
                   <h2>Noch keine Abfuhrtermine geladen</h2>
