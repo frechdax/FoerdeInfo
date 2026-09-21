@@ -208,6 +208,65 @@ function compactIcsTime(value: string) {
   return `${match[1].padStart(2, "0")}${match[2]}${match[3] || "00"}`;
 }
 
+const vacationRestaurants = [
+  {
+    name: "Glückselig Strandrestaurant",
+    detail: "Mediterrane Strandküche · direkt am Wasser",
+    address: "Schwennaustraße 41",
+    href: "https://www.glueck-in-sicht.de/restaurants/glueckselig-strandrestaurant",
+    icon: "🌊",
+  },
+  {
+    name: "Gudlak Restaurant & Bar",
+    detail: "Euro-asiatische Fusionsküche · Fördeblick",
+    address: "Fördestraße 2–4",
+    href: "https://www.glueck-in-sicht.de/restaurants",
+    icon: "🍽️",
+  },
+  {
+    name: "Quellental Café & Restaurant",
+    detail: "Regionale Küche, Fisch & Café · am Yachthafen",
+    address: "Im Quellental 1",
+    href: "https://www.quellental-gluecksburg.de/",
+    icon: "⚓",
+  },
+  {
+    name: "Ristorante San Remo",
+    detail: "Italienische Küche · Strandlage in Holnis",
+    address: "Drei 5",
+    href: "https://sanremo-gluecksburg.de/",
+    icon: "🍝",
+  },
+  {
+    name: "Restaurant Scheune",
+    detail: "Restaurant mitten in Glücksburg",
+    address: "Schinderdam 7",
+    href: "https://www.scheunegluecksburg.de/",
+    icon: "🥘",
+  },
+  {
+    name: "Restaurant Felix",
+    detail: "Restaurant im Strandhotel Glücksburg",
+    address: "Kirstenstraße 6",
+    href: "https://www.strandhotelgluecksburg.de/restaurant-felix",
+    icon: "✨",
+  },
+  {
+    name: "Schlosskeller Glücksburg",
+    detail: "Restaurant direkt am Wasserschloss",
+    address: "Am Schloss 2",
+    href: "https://www.schloss-gluecksburg.de/urlaub-genuss/ferienwohnungen-und-gastronomie",
+    icon: "🏰",
+  },
+  {
+    name: "Restaurant Pico",
+    detail: "Restaurant am Postplatz im Ortszentrum",
+    address: "Postplatz 3",
+    href: "https://www.pico-restaurant.de/",
+    icon: "🍴",
+  },
+] as const;
+
 export default function HomePage() {
   const supabase = useMemo(() => getSupabase(), []);
   const [view, setView] = useState<View>("home");
@@ -1155,6 +1214,47 @@ export default function HomePage() {
                   </a>
                   <small>Externer Link zu Booking.com. Derzeit kein Affiliate-Link.</small>
                 </div>
+              </section>
+
+              <section className="restaurant-section">
+                <div className="restaurant-section-heading">
+                  <div>
+                    <span className="dashboard-kicker">Essen & genießen</span>
+                    <h2>Restaurants in Glücksburg</h2>
+                    <p>
+                      Vom Strandrestaurant bis zum Essen am Schloss – eine Auswahl aktueller
+                      Restaurants für deinen Aufenthalt in Glücksburg.
+                    </p>
+                  </div>
+                  <span className="restaurant-heading-icon" aria-hidden="true">🍽️</span>
+                </div>
+
+                <div className="restaurant-list">
+                  {vacationRestaurants.map((restaurant) => (
+                    <a
+                      className="restaurant-list-item"
+                      href={restaurant.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      key={restaurant.name}
+                    >
+                      <span className="restaurant-list-icon" aria-hidden="true">
+                        {restaurant.icon}
+                      </span>
+                      <span className="restaurant-list-copy">
+                        <strong>{restaurant.name}</strong>
+                        <span>{restaurant.detail}</span>
+                        <small>{restaurant.address} · 24960 Glücksburg</small>
+                      </span>
+                      <span className="restaurant-list-arrow" aria-hidden="true">↗</span>
+                    </a>
+                  ))}
+                </div>
+
+                <p className="restaurant-source-note">
+                  Auswahl nach der Glücksburger Gastrokarte 2026. Öffnungszeiten und
+                  Reservierung bitte direkt beim jeweiligen Restaurant prüfen.
+                </p>
               </section>
 
               <div className="travel-grid">
