@@ -649,7 +649,17 @@ export default function HomePage() {
           </div>
 
           <button className="icon-button" aria-label="Hinweise">◌</button>
-          <div className="avatar" aria-label="Glücksburg Direkt">GD</div>
+          <button
+            className="topbar-brand"
+            aria-label="Glücksburg Direkt – Startseite"
+            onClick={() => navigate("home")}
+          >
+            <span className="topbar-brand-mark" aria-hidden="true">⚓</span>
+            <span className="topbar-brand-text">
+              <strong>Glücksburg</strong>
+              <small>DIREKT</small>
+            </span>
+          </button>
         </header>
 
         <main className="main" id="content">
@@ -670,7 +680,7 @@ export default function HomePage() {
                 <div>
                   <div className="eyebrow">Moin aus Glücksburg</div>
                   <h1>Alles Wichtige für deinen Alltag <span className="wave">👋</span></h1>
-                  <p>Müll, Termine und Rathausinformationen auf einen Blick.</p>
+                  <p>Dein Glücksburg – Alltag, Familie und Freizeit auf einen Blick.</p>
                 </div>
               </section>
 
