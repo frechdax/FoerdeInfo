@@ -466,102 +466,88 @@ export default function HomePage() {
                 </section>
               )}
 
-              <section className="dashboard-top">
-                <article className="card waste-hero">
-                  <div className="card-label">
-                    <span className="icon-box brown">♻</span>
-                    NÄCHSTE ABFUHR
-                    <span className="badge teal">ASF</span>
-                  </div>
-                  <div className="waste-main">
+              <section className="home-dashboard-grid">
+                <article className="dashboard-panel rathaus-dashboard-card">
+                  <div className="dashboard-panel-heading">
                     <div>
-                      <h2>{nextWaste ? nextWaste.type : "Abfuhrkalender"}</h2>
-                      <p>{nextWaste ? formatDate(nextWaste.date) : "Adresse auswählen"}</p>
+                      <span className="dashboard-kicker">Stadt Glücksburg</span>
+                      <h2>Rathaus</h2>
                     </div>
-                    <span className="large-bin">♻</span>
+                    <span className="dashboard-main-icon" aria-hidden="true">🏛️</span>
                   </div>
-                  <div className="card-footer">
-                    <span>{selectedStreetName || "Noch keine Straße gewählt"}</span>
-                    <button onClick={() => nextWaste ? navigate("waste") : navigate("street")}>→</button>
+
+                  <div className="office-hours dashboard-office-hours">
+                    <div>
+                      <strong>Montag</strong>
+                      <span>{civic?.data?.opening_hours?.monday || "—"}</span>
+                    </div>
+                    <div>
+                      <strong>Dienstag</strong>
+                      <span>{civic?.data?.opening_hours?.tuesday || "—"}</span>
+                    </div>
+                    <div>
+                      <strong>Freitag</strong>
+                      <span>{civic?.data?.opening_hours?.friday || "—"}</span>
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card-footer">
+                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
+                    <button className="text-button" onClick={() => navigate("rathaus")}>
+                      Rathaus öffnen →
+                    </button>
                   </div>
                 </article>
 
-                <article className="weather-hero">
-                  <div className="weather-location">
-                    <span>▦</span>
-                    Bürgerbüro
-                    <span>Stadt Glücksburg</span>
+                <section className="dashboard-panel">
+                  <div className="dashboard-panel-heading">
+                    <div>
+                      <span className="dashboard-kicker">Aktuell</span>
+                      <h2>Neues aus dem Rathaus</h2>
+                    </div>
+                    <button className="text-button" onClick={() => navigate("rathaus-news")}>
+                      Alle ansehen →
+                    </button>
                   </div>
-                  <div className="weather-main">
-                    <strong>Rathaus</strong>
-                    <span>🏛️</span>
-                  </div>
-                  <p>{civic?.data?.opening_hours?.monday || "Öffnungszeiten werden geladen"}</p>
-                  <div className="weather-metrics">
-                    <span>{rathausNews.length} Rathaus-Meldungen</span>
-                    <button onClick={() => navigate("rathaus")}>Öffnen →</button>
-                  </div>
-                </article>
-              </section>
 
-              <section className="quick-links">
-                <button onClick={() => navigate("waste")}>
-                  <span className="quick-icon">♻</span>
-                  <div><strong>Müllabfuhr</strong><small>Deine nächsten Termine</small></div>
-                  <span>›</span>
-                </button>
-                <button onClick={() => navigate("events")}>
-                  <span className="quick-icon">□</span>
-                  <div><strong>Veranstaltungen</strong><small>Was ist los?</small></div>
-                  <span>›</span>
-                </button>
-                <button onClick={() => navigate("rathaus")}>
-                  <span className="quick-icon">▦</span>
-                  <div><strong>Rathaus</strong><small>Öffnungszeiten & Termine</small></div>
-                  <span>›</span>
-                </button>
-                <button onClick={() => navigate("official-notices")}>
-                  <span className="quick-icon">!</span>
-                  <div><strong>Bekanntmachungen</strong><small>Amtliche Veröffentlichungen</small></div>
-                  <span>›</span>
-                </button>
-              </section>
-
-              <section className="dashboard-bottom">
-                <div>
-                  <div className="section-title">
-                    <h2>Neues aus dem Rathaus</h2>
-                    <button className="text-button" onClick={() => navigate("rathaus-news")}>Alle ansehen →</button>
-                  </div>
-                  <div className="news-grid">
+                  <div className="dashboard-list">
                     {rathausNews.slice(0, 4).map((item) => (
-                      <a className="news-card" href={item.source_url} target="_blank" rel="noreferrer" key={item.id}>
-                        <div className="news-art civic">
-                          <span>▦</span>
-                          <span>RATHAUS</span>
+                      <a
+                        className="dashboard-list-row"
+                        href={item.source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        key={item.id}
+                      >
+                        <div>
+                          <small>{item.published_at ? formatDate(item.published_at) : "Rathaus"}</small>
+                          <strong>{item.title}</strong>
                         </div>
-                        <div className="news-body">
-                          <div className="meta">
-                            <span>Neuigkeit</span>
-                            <span>{item.published_at ? formatDate(item.published_at) : ""}</span>
-                          </div>
-                          <h3>{item.title}</h3>
-                          <div className="read-more">Mehr lesen →</div>
-                        </div>
+                        <span>›</span>
                       </a>
                     ))}
                   </div>
-                </div>
 
-                <div>
-                  <div className="section-title">
-                    <h2>Demnächst in Glücksburg</h2>
-                    <button className="text-button" onClick={() => navigate("events")}>Alle Termine →</button>
+                  {!rathausNews.length && (
+                    <div className="dashboard-empty">Aktuell sind keine Rathaus-Meldungen geladen.</div>
+                  )}
+                </section>
+
+                <section className="dashboard-panel">
+                  <div className="dashboard-panel-heading">
+                    <div>
+                      <span className="dashboard-kicker">Kalender</span>
+                      <h2>Veranstaltungen</h2>
+                    </div>
+                    <button className="text-button" onClick={() => navigate("events")}>
+                      Alle Termine →
+                    </button>
                   </div>
-                  <div className="card">
+
+                  <div className="dashboard-list">
                     {currentEvents.slice(0, 4).map((event) => (
                       <a
-                        className="event-card"
+                        className="dashboard-list-row event-dashboard-row"
                         href={event.source_url || "#"}
                         target="_blank"
                         rel="noreferrer"
@@ -571,17 +557,62 @@ export default function HomePage() {
                           <span>{monthShort(event.date)}</span>
                           <strong>{dayNumber(event.date)}</strong>
                         </div>
-                        <div className="event-description">
-                          {event.family_friendly && <span className="badge teal">Familie</span>}
-                          <h3>{event.title}</h3>
-                          <p>{event.time ? event.time + " Uhr · " : ""}{event.location || "Glücksburg"}</p>
+                        <div>
+                          <strong>{event.title}</strong>
+                          <small>
+                            {event.time ? event.time + " Uhr · " : ""}
+                            {event.location || "Glücksburg"}
+                          </small>
                         </div>
                         <span>›</span>
                       </a>
                     ))}
                   </div>
-                </div>
+                </section>
+
+                <section className="dashboard-panel">
+                  <div className="dashboard-panel-heading">
+                    <div>
+                      <span className="dashboard-kicker">ASF-Abfallkalender</span>
+                      <h2>Müllabfuhr</h2>
+                    </div>
+                    <button
+                      className="text-button"
+                      onClick={() => wasteEvents.length ? navigate("waste") : navigate("street")}
+                    >
+                      {wasteEvents.length ? "Alle Termine →" : "Adresse wählen →"}
+                    </button>
+                  </div>
+
+                  {wasteEvents.length ? (
+                    <div className="dashboard-list">
+                      {wasteEvents.slice(0, 4).map((entry, index) => (
+                        <button
+                          className="dashboard-list-row waste-dashboard-row"
+                          onClick={() => navigate("waste")}
+                          key={entry.date + entry.type + index}
+                        >
+                          <span className={"waste-mini-icon " + wasteTone(entry.type)}>♻</span>
+                          <div>
+                            <small>{formatDate(entry.date)}</small>
+                            <strong>{entry.type}</strong>
+                          </div>
+                          <span>›</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="dashboard-empty">
+                      <strong>Noch keine Abfuhrtermine geladen</strong>
+                      <span>Wähle einmal deine Adresse, dann erscheinen hier die nächsten Termine.</span>
+                      <button className="button primary" onClick={() => navigate("street")}>
+                        Adresse auswählen
+                      </button>
+                    </div>
+                  )}
+                </section>
               </section>
+
             </>
           )}
 
