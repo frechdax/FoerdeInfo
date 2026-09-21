@@ -10,7 +10,8 @@ type View =
   | "events"
   | "rathaus"
   | "rathaus-news"
-  | "official-notices";
+  | "official-notices"
+  | "impressum";
 
 type Street = {
   id: string;
@@ -173,7 +174,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "rathaus", "rathaus-news", "official-notices"].includes(hash)) setView(hash);
+    if (["home", "street", "waste", "events", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -347,7 +348,7 @@ export default function HomePage() {
   const currentLabel =
     rathausSubItems.find((item) => item.id === view)?.label ||
     navItems.find((item) => item.id === view)?.label ||
-    "Start";
+    view === "impressum" ? "Impressum" : "Start";
 
   return (
     <>
@@ -934,9 +935,54 @@ export default function HomePage() {
             </>
           )}
 
+          {view === "impressum" && (
+            <>
+              <section className="page-heading">
+                <div className="eyebrow">Rechtliches</div>
+                <h1>Impressum</h1>
+                <p>Angaben gemäß § 5 DDG.</p>
+              </section>
+
+              <section className="card padded legal-card">
+                <h2>Betreiber</h2>
+                <p>
+                  Sebastian Schwarz<br />
+                  Klein Bremsberg 20<br />
+                  24960 Glücksburg
+                </p>
+
+                <h2>Kontakt</h2>
+                <p>
+                  E-Mail:{" "}
+                  <a href="mailto:sebastianschwarz1@icloud.de">
+                    sebastianschwarz1@icloud.de
+                  </a>
+                </p>
+
+                <h2>Verantwortlich für den Inhalt</h2>
+                <p>
+                  Sebastian Schwarz<br />
+                  Klein Bremsberg 20<br />
+                  24960 Glücksburg
+                </p>
+
+                <h2>Hinweis</h2>
+                <p className="muted">
+                  GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot und
+                  kein offizielles Angebot der Stadt Glücksburg (Ostsee).
+                </p>
+              </section>
+            </>
+          )}
+
           <footer>
             <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
-            <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
+            <div className="footer-links">
+              <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
+              <button className="footer-link" onClick={() => navigate("impressum")}>
+                Impressum
+              </button>
+            </div>
           </footer>
         </main>
       </div>
