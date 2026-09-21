@@ -270,6 +270,113 @@ const vacationRestaurants = [
   },
 ] as const;
 
+const vacationLeisureLocal = [
+  {
+    name: "Strände & Strandspielplätze",
+    detail: "Sandburgen, Baden und Spielplätze direkt an der Förde. Strand Drei in Holnis eignet sich besonders gut für kleine Kinder, weil das Wasser dort sehr flach ausläuft.",
+    meta: "Sandwig · Holnis · Schwennau",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/straende",
+    icon: "🏖️",
+    tag: "Draußen",
+  },
+  {
+    name: "Waldspielplatz Friedeholz",
+    detail: "Großzügiger Waldspielplatz mit Holzspielgeräten und viel Schatten – besonders angenehm an warmen Tagen.",
+    meta: "Glücksburg",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🌳",
+    tag: "Kostenlos",
+  },
+  {
+    name: "Adventure Fjordgolf Holnis",
+    detail: "Minigolf direkt an der Strandpromenade mit liebevoll gestalteten Bahnen rund um Glücksburg und die Flensburger Förde.",
+    meta: "An der Promenade 18 · Holnis",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "⛳",
+    tag: "Familie",
+  },
+  {
+    name: "Klimapark artefact",
+    detail: "Mitmach-Stationen zu Klima, Energie und Zukunft. Drei Themenrouten machen Technik und Nachhaltigkeit spielerisch erlebbar.",
+    meta: "Bremsbergallee 35",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🌍",
+    tag: "Entdecken",
+  },
+  {
+    name: "Skatepark Glücksburg",
+    detail: "Rampen, Obstacles und Bowl für Skateboard und Scooter – geeignet für unterschiedliche Alters- und Könnensstufen.",
+    meta: "Flensburger Straße",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🛹",
+    tag: "Action",
+  },
+  {
+    name: "Fördeland-Therme",
+    detail: "Kinderwelt, flaches Kinderbecken, Leuchtturmrutsche, Familienrutsche und Außenbereich – ideal auch bei Schietwetter.",
+    meta: "Sandwigstraße 1A",
+    href: "https://www.gluecksburg-urlaub.de/aktiv-erleben/schwimmbaeder-wellness",
+    icon: "🏊",
+    tag: "Schietwetter",
+  },
+] as const;
+
+const vacationLeisureTrips = [
+  {
+    name: "Mr. Scandis Funpark",
+    detail: "Indoor- und Outdoor-Spielepark mit Klettern, Rutschen, Go-Kart, Hüpfburg und eigenem Bereich für kleine Kinder.",
+    meta: "Handewitt · Skandinavien Damm 2",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🎠",
+    tag: "Ausflug",
+  },
+  {
+    name: "Phänomenta",
+    detail: "Interaktive Science-Ausstellung mit vielen Experimenten; für 3- bis 6-Jährige gibt es eine eigene Zwergenphänomenta.",
+    meta: "Flensburg · Norderstraße 157–163",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🔬",
+    tag: "Schietwetter",
+  },
+  {
+    name: "Danfoss Universe",
+    detail: "Erlebnispark in Dänemark rund um Technik und Naturwissenschaften – mit Experimenten, Workshops und vielen Mitmachangeboten.",
+    meta: "Nordborg · Dänemark",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🚀",
+    tag: "Tagesausflug",
+  },
+  {
+    name: "LEGOLAND Billund",
+    detail: "Themenwelten, Fahrgeschäfte und Miniland für einen größeren Familien-Tagesausflug nach Dänemark.",
+    meta: "Billund · Dänemark",
+    href: "https://www.gluecksburg-urlaub.de/entdecken/fuer-familien",
+    icon: "🧱",
+    tag: "Tagesausflug",
+  },
+] as const;
+
+const vacationLeisureMore = [
+  {
+    name: "Wassersport",
+    detail: "Segeln, Surfen, Kiten, SUP und weitere Angebote auf der Innen- und Außenförde.",
+    href: "https://www.gluecksburg-urlaub.de/aktiv-erleben/wassersport",
+    icon: "🏄",
+  },
+  {
+    name: "Schwimmen & Wellness",
+    detail: "Badelandschaften und Wellness-Angebote in und um Glücksburg entdecken.",
+    href: "https://www.gluecksburg-urlaub.de/aktiv-erleben/schwimmbaeder-wellness",
+    icon: "💦",
+  },
+  {
+    name: "Schifffahrten",
+    detail: "Die Flensburger Förde vom Wasser aus erleben oder mit dem Schiff Richtung Dänemark starten.",
+    href: "https://www.gluecksburg-urlaub.de/aktiv-erleben/schifffahrten",
+    icon: "⛴️",
+  },
+] as const;
+
 export default function HomePage() {
   const supabase = useMemo(() => getSupabase(), []);
   const [view, setView] = useState<View>("home");
@@ -1336,7 +1443,7 @@ export default function HomePage() {
                 </section>
               )}
 
-              {(view === "urlaub" || view === "urlaub-freizeit") && (
+              {view === "urlaub" && (
                 <>
                   <div className="travel-grid">
                     <article className="travel-card">
@@ -1388,6 +1495,128 @@ export default function HomePage() {
                     einer Buchung. Es gelten die Bedingungen des jeweiligen externen Anbieters.
                   </p>
                 </>
+              )}
+
+              {view === "urlaub-freizeit" && (
+                <div className="leisure-page">
+                  <section className="leisure-intro-card">
+                    <div>
+                      <span className="dashboard-kicker">Familien & Freizeit</span>
+                      <h2>Was können wir heute unternehmen?</h2>
+                      <p>
+                        Ideen für Sonne, Schietwetter und Tagesausflüge – direkt aus Glücksburg
+                        und der näheren Umgebung.
+                      </p>
+                    </div>
+                    <span className="leisure-intro-icon" aria-hidden="true">🎯</span>
+                  </section>
+
+                  <section className="leisure-section">
+                    <div className="leisure-section-head">
+                      <div>
+                        <span className="dashboard-kicker">Nah dran</span>
+                        <h2>Direkt in Glücksburg</h2>
+                      </div>
+                      <span>{vacationLeisureLocal.length} Tipps</span>
+                    </div>
+                    <div className="leisure-grid">
+                      {vacationLeisureLocal.map((item) => (
+                        <a
+                          className="leisure-card"
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          key={item.name}
+                        >
+                          <div className="leisure-card-top">
+                            <span className="leisure-card-icon" aria-hidden="true">{item.icon}</span>
+                            <span className="leisure-tag">{item.tag}</span>
+                          </div>
+                          <div className="leisure-card-copy">
+                            <h3>{item.name}</h3>
+                            <p>{item.detail}</p>
+                          </div>
+                          <div className="leisure-card-meta">
+                            <span>⌖ {item.meta}</span>
+                            <span aria-hidden="true">↗</span>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="leisure-section">
+                    <div className="leisure-section-head">
+                      <div>
+                        <span className="dashboard-kicker">Etwas weiter</span>
+                        <h2>Ausflüge in die Umgebung</h2>
+                      </div>
+                      <span>{vacationLeisureTrips.length} Ideen</span>
+                    </div>
+                    <div className="leisure-grid leisure-grid-trips">
+                      {vacationLeisureTrips.map((item) => (
+                        <a
+                          className="leisure-card"
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          key={item.name}
+                        >
+                          <div className="leisure-card-top">
+                            <span className="leisure-card-icon" aria-hidden="true">{item.icon}</span>
+                            <span className="leisure-tag">{item.tag}</span>
+                          </div>
+                          <div className="leisure-card-copy">
+                            <h3>{item.name}</h3>
+                            <p>{item.detail}</p>
+                          </div>
+                          <div className="leisure-card-meta">
+                            <span>⌖ {item.meta}</span>
+                            <span aria-hidden="true">↗</span>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="leisure-section">
+                    <div className="leisure-section-head">
+                      <div>
+                        <span className="dashboard-kicker">Noch mehr erleben</span>
+                        <h2>Weitere Freizeitideen</h2>
+                      </div>
+                    </div>
+                    <div className="leisure-more-grid">
+                      {vacationLeisureMore.map((item) => (
+                        <a
+                          className="leisure-more-card"
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          key={item.name}
+                        >
+                          <span className="leisure-more-icon" aria-hidden="true">{item.icon}</span>
+                          <span>
+                            <strong>{item.name}</strong>
+                            <small>{item.detail}</small>
+                          </span>
+                          <span aria-hidden="true">↗</span>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+
+                  <div className="leisure-source">
+                    <span>Quelle und weitere Tipps:</span>
+                    <a
+                      href="https://www.gluecksburg-urlaub.de/entdecken/fuer-familien"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Familienurlaub bei glücksburg-urlaub.de ↗
+                    </a>
+                  </div>
+                </div>
               )}
             </>
           )}
