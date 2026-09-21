@@ -406,3 +406,153 @@ footer span:last-child{margin-left:auto}
     flex-direction:column;
   }
 }
+
+
+/* Startseiten-Dashboard: Rathaus / Rathaus-News / Veranstaltungen / Müllabfuhr */
+.home-dashboard-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+  align-items:stretch;
+  margin-top:22px;
+}
+.dashboard-panel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:#fff;
+  min-width:0;
+  overflow:hidden;
+  padding:22px;
+}
+.dashboard-panel-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  min-height:52px;
+  margin-bottom:16px;
+}
+.dashboard-panel-heading h2{
+  margin-top:2px;
+  font-size:1.35rem;
+}
+.dashboard-kicker{
+  color:var(--teal);
+  display:block;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.dashboard-main-icon{
+  font-size:2.35rem;
+  line-height:1;
+}
+.rathaus-dashboard-card{
+  background:linear-gradient(145deg,#123e4e,#174f5c);
+  border-color:#174c58;
+  color:#fff;
+}
+.rathaus-dashboard-card .dashboard-kicker{color:#8addd2}
+.rathaus-dashboard-card .dashboard-office-hours{
+  border-color:rgba(255,255,255,.16);
+  background:rgba(255,255,255,.04);
+}
+.rathaus-dashboard-card .dashboard-office-hours>div{
+  border-bottom-color:rgba(255,255,255,.14);
+}
+.rathaus-dashboard-card .dashboard-office-hours span{color:#d3e4e9}
+.rathaus-dashboard-card .text-button{color:#fff}
+.dashboard-card-footer{
+  border-top:1px solid rgba(255,255,255,.16);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-top:18px;
+  padding-top:14px;
+  color:#d3e4e9;
+  font-size:.82rem;
+}
+.dashboard-list{
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+}
+.dashboard-list-row{
+  color:var(--ink);
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  gap:13px;
+  width:100%;
+  min-height:67px;
+  padding:12px 14px;
+}
+.dashboard-list-row:last-child{border-bottom:0}
+.dashboard-list-row:hover{background:#f7faf9}
+.dashboard-list-row>div:not(.date-tile){display:grid;gap:2px;flex:1;min-width:0}
+.dashboard-list-row strong{
+  color:var(--ink);
+  font-size:.9rem;
+  line-height:1.35;
+}
+.dashboard-list-row small{
+  color:var(--muted);
+  font-size:.75rem;
+}
+.dashboard-list-row>span:last-child{
+  color:var(--teal);
+  margin-left:auto;
+}
+.event-dashboard-row .date-tile{
+  flex:0 0 52px;
+}
+.event-dashboard-row>div:nth-child(2){
+  display:grid;
+  gap:3px;
+  flex:1;
+  min-width:0;
+}
+.waste-dashboard-row{text-align:left}
+.waste-mini-icon{
+  border-radius:10px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  background:#f0f3f4;
+  font-size:1.1rem;
+}
+.waste-mini-icon.bin-rest{color:#5a6471;background:#eef0f2}
+.waste-mini-icon.bin-paper{color:#4b88b6;background:#e9f1f7}
+.waste-mini-icon.bin-bio{color:#6c8d49;background:#edf3e8}
+.waste-mini-icon.bin-yellow{color:#a67f13;background:#faf3d9}
+.dashboard-empty{
+  color:var(--muted);
+  border:1px dashed #bccdd4;
+  border-radius:12px;
+  display:grid;
+  gap:8px;
+  min-height:190px;
+  align-content:center;
+  justify-items:start;
+  padding:24px;
+}
+.dashboard-empty strong{color:var(--ink)}
+.dashboard-empty .button{margin-top:7px}
+
+@media (max-width:1050px){
+  .home-dashboard-grid{grid-template-columns:1fr}
+}
+@media (max-width:580px){
+  .home-dashboard-grid{gap:14px;margin-top:15px}
+  .dashboard-panel{padding:17px}
+  .dashboard-panel-heading{gap:10px;margin-bottom:12px}
+  .dashboard-panel-heading .text-button{font-size:.78rem}
+  .dashboard-card-footer{align-items:flex-start;flex-direction:column;gap:4px}
+  .dashboard-list-row{padding:11px 12px}
+}
