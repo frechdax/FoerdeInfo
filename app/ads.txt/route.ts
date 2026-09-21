@@ -1,7 +1,9 @@
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const client = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT || "";
+  const client =
+    process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT ||
+    "ca-pub-8846945812828956";
   const publisherId = client.replace(/^ca-/, "");
 
   const body = /^pub-\d+$/.test(publisherId)
