@@ -5,6 +5,7 @@ type SeoLandingProps = {
   bullets: string[];
   ctaLabel: string;
   ctaHref: string;
+  canonicalPath: string;
   children?: React.ReactNode;
 };
 
@@ -15,8 +16,28 @@ export default function SeoLanding({
   bullets,
   ctaLabel,
   ctaHref,
+  canonicalPath,
   children,
 }: SeoLandingProps) {
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "GlücksburgDirekt",
+        item: "https://gluecksburg-direkt.vercel.app/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: title,
+        item: `https://gluecksburg-direkt.vercel.app${canonicalPath}`,
+      },
+    ],
+  };
+
   return (
     <main className="seo-page">
       <div className="seo-shell">
@@ -54,6 +75,11 @@ export default function SeoLanding({
         <p className="seo-disclaimer">
           GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot und kein offizielles Angebot der Stadt Glücksburg (Ostsee).
         </p>
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
+        />
       </div>
     </main>
   );
