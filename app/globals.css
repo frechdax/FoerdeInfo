@@ -366,3 +366,43 @@ footer span:last-child{margin-left:auto}
   .welcome{padding:20px 18px}
   .welcome::after{right:-80px;opacity:.16}
 }
+
+
+.legal-card{
+  max-width:760px;
+}
+.legal-card h2{
+  margin-top:26px;
+  margin-bottom:8px;
+}
+.legal-card h2:first-child{
+  margin-top:0;
+}
+.footer-links{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-left:auto;
+}
+.footer-link{
+  color:var(--teal);
+  font-size:.8125rem;
+  padding:0;
+}
+.footer-link:hover{
+  text-decoration:underline;
+}
+@media (max-width:850px){
+  .footer-links{
+    width:100%;
+    margin-left:0;
+    justify-content:space-between;
+    gap:12px;
+  }
+}
+@media (max-width:580px){
+  .footer-links{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
