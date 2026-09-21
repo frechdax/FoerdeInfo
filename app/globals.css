@@ -1739,6 +1739,10 @@ footer span:last-child{margin-left:auto}
 .leisure-page{
   display:grid;
   gap:22px;
+  min-width:0;
+}
+.leisure-page[data-section="freizeit"]{
+  scroll-margin-top:96px;
 }
 .leisure-intro-card{
   display:flex;
