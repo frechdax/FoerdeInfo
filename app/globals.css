@@ -1689,3 +1689,53 @@ footer span:last-child{margin-left:auto}
   text-decoration:none;
 }
 .restaurant-owner-note a:hover{text-decoration:underline}
+
+
+/* Unterreiter im Urlaubsbereich */
+.vacation-tabs{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:-4px 0 18px;
+  padding:5px;
+  border:1px solid #dbe7e8;
+  border-radius:14px;
+  background:#f6faf9;
+  width:max-content;
+  max-width:100%;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.vacation-tabs::-webkit-scrollbar{display:none}
+.vacation-tabs button{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:8px 13px;
+  border-radius:10px;
+  color:#587079;
+  font-size:.82rem;
+  font-weight:700;
+  white-space:nowrap;
+}
+.vacation-tabs button:hover{
+  background:#fff;
+  color:#174f59;
+}
+.vacation-tabs button.active{
+  color:#176c73;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(16,46,57,.08);
+}
+@media (max-width:580px){
+  .vacation-tabs{
+    width:100%;
+    margin-top:-2px;
+  }
+  .vacation-tabs button{
+    flex:1 0 auto;
+    min-height:42px;
+  }
+}
