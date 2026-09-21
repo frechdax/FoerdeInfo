@@ -50,7 +50,7 @@ small,.meta{font-size:.875rem}
 .breadcrumb strong{color:var(--ink)}
 .search{background:var(--bg);border:1px solid #e6edef;border-radius:10px;display:flex;align-items:center;gap:10px;width:320px;margin-left:auto;padding:8px 12px}
 .search input{background:transparent;border:0;width:100%;min-width:0;padding:3px;font-size:.875rem;outline:none}
-.icon-button,.avatar{border-radius:50%;display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:44px}
+.icon-button,.avatar{border-radius:50%;display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:44px}.icon-button{margin-left:auto}
 .avatar{color:var(--teal);background:#e4efee;font-weight:700}
 .main{max-width:1500px;min-height:calc(100vh - 88px);margin:auto;padding:24px 40px 0}
 
