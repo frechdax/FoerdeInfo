@@ -27,8 +27,7 @@ type EventDateFilter =
   | "today"
   | "tomorrow"
   | "this-week"
-  | "next-week"
-  | "this-month";
+  | "next-week";
 
 type EventRow = {
   id: string;
@@ -112,10 +111,6 @@ function matchesEventDateFilter(date: string, filter: EventDateFilter) {
     return date >= start && date <= end;
   }
 
-  if (filter === "this-month") {
-    return date.slice(0, 7) === current.slice(0, 7);
-  }
-
   return true;
 }
 
@@ -171,6 +166,7 @@ export default function HomePage() {
   const [streetSearch, setStreetSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
   const [eventDateFilter, setEventDateFilter] = useState<EventDateFilter>("all");
+  const [eventMonthFilter, setEventMonthFilter] = useState("all");
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
@@ -319,7 +315,12 @@ export default function HomePage() {
     street.name.toLocaleLowerCase("de").includes(streetSearch.toLocaleLowerCase("de").trim())
   );
 
+  const eventMonths = Array.from(
+    new Set(events.map((event) => event.date.slice(0, 7)))
+  ).sort();
+
   const filteredEvents = events.filter((event) => {
+    if (eventMonthFilter !== "all" && event.date.slice(0, 7) !== eventMonthFilter) return false;
     if (!matchesEventDateFilter(event.date, eventDateFilter)) return false;
     if (!globalSearch.trim()) return true;
     const q = globalSearch.toLocaleLowerCase("de");
@@ -729,7 +730,6 @@ export default function HomePage() {
                   ["tomorrow", "Morgen"],
                   ["this-week", "Diese Woche"],
                   ["next-week", "Nächste Woche"],
-                  ["this-month", "Dieser Monat"],
                 ].map(([id, label]) => (
                   <button
                     key={id}
@@ -742,6 +742,26 @@ export default function HomePage() {
               </div>
 
               <div className="toolbar">
+                <label>
+                  Monat
+                  <select
+                    value={eventMonthFilter}
+                    onChange={(event) => {
+                      setEventMonthFilter(event.target.value);
+                      if (event.target.value !== "all") setEventDateFilter("all");
+                    }}
+                  >
+                    <option value="all">Alle Monate</option>
+                    {eventMonths.map((month) => (
+                      <option key={month} value={month}>
+                        {new Intl.DateTimeFormat("de-DE", {
+                          month: "long",
+                          year: "numeric",
+                        }).format(new Date(month + "-01T12:00:00"))}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <label>
                   Suche
                   <input
