@@ -27,6 +27,7 @@ export default function FamiliePage() {
       ]}
       ctaLabel="Familienangebote öffnen"
       ctaHref="/#family"
+      canonicalPath="/familie"
     >
       <section className="seo-card">
         <h2>Familieninformationen kompakt gebündelt</h2>
