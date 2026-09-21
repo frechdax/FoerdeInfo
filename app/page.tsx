@@ -21,7 +21,6 @@ type Street = {
   asf_street_number?: number | null;
 };
 
-type HouseNumber = { id: string; label: string };
 type WasteEvent = { type: string; date: string };
 
 type WeatherNow = {
@@ -212,9 +211,6 @@ export default function HomePage() {
   const [view, setView] = useState<View>("home");
   const [streets, setStreets] = useState<Street[]>([]);
   const [selectedStreet, setSelectedStreet] = useState("");
-  const [houseNumbers, setHouseNumbers] = useState<HouseNumber[]>([]);
-  const [selectedHouseNumber, setSelectedHouseNumber] = useState("");
-  const [restoreHouseNumber, setRestoreHouseNumber] = useState("");
   const [wasteEvents, setWasteEvents] = useState<WasteEvent[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [officialNotices, setOfficialNotices] = useState<OfficialNotice[]>([]);
@@ -235,14 +231,12 @@ export default function HomePage() {
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
-      if (saved.houseNumberId) setRestoreHouseNumber(saved.houseNumberId);
 
       const cachedWaste = JSON.parse(
         localStorage.getItem("gluecksburg-direkt-waste") || "{}"
       );
       if (
         cachedWaste.streetId === saved.streetId &&
-        cachedWaste.houseNumberId === saved.houseNumberId &&
         Array.isArray(cachedWaste.events)
       ) {
         setWasteEvents(
@@ -348,62 +342,24 @@ export default function HomePage() {
   }, [selectedStreet, streets]);
 
   useEffect(() => {
-    const savedHouseNumber = restoreHouseNumber;
-    setHouseNumbers([]);
-    setSelectedHouseNumber("");
-    if (!savedHouseNumber) setWasteEvents([]);
-    if (!supabase || !selectedStreet) return;
-
-    async function loadHouseNumbers() {
-      setLoadingStreet(true);
-      setNotice("");
-      const { data, error } = await supabase.functions.invoke("waste-address-options", {
-        body: { street_id: selectedStreet },
-      });
-
-      if (error) {
-        setNotice("Hausnummern konnten gerade nicht geladen werden.");
-      } else {
-        const rows = (data?.house_numbers ?? []) as HouseNumber[];
-        setHouseNumbers(rows);
-
-        if (savedHouseNumber && rows.some((item) => item.id === savedHouseNumber)) {
-          setSelectedHouseNumber(savedHouseNumber);
-        }
-
-        if (savedHouseNumber) setRestoreHouseNumber("");
-      }
-      setLoadingStreet(false);
-    }
-
-    loadHouseNumbers();
-  }, [selectedStreet, supabase]);
-
-  useEffect(() => {
-    if (!selectedStreet || restoreHouseNumber) return;
+    if (!selectedStreet) return;
     try {
       localStorage.setItem(
         "gluecksburg-direkt-address",
-        JSON.stringify({
-          streetId: selectedStreet,
-          houseNumberId: selectedHouseNumber || "",
-        })
+        JSON.stringify({ streetId: selectedStreet })
       );
     } catch {}
-  }, [selectedStreet, selectedHouseNumber, restoreHouseNumber]);
+  }, [selectedStreet]);
 
   useEffect(() => {
-    if (!supabase || !selectedStreet || !selectedHouseNumber) return;
+    if (!supabase || !selectedStreet) return;
 
     let cancelled = false;
 
     async function restoreWasteCalendar() {
       setLoadingWaste(true);
       const { data, error } = await supabase.functions.invoke("sync-waste", {
-        body: {
-          street_id: selectedStreet,
-          house_number_id: selectedHouseNumber,
-        },
+        body: { street_id: selectedStreet },
       });
 
       if (!cancelled && !error) {
@@ -415,12 +371,18 @@ export default function HomePage() {
             "gluecksburg-direkt-waste",
             JSON.stringify({
               streetId: selectedStreet,
-              houseNumberId: selectedHouseNumber,
               events: rows,
               savedAt: new Date().toISOString(),
             })
           );
         } catch {}
+      }
+
+      if (!cancelled && error) {
+        setWasteEvents([]);
+        setNotice(
+          "Für diese Straße konnte kein eindeutiger straßenweiter ASF-Abfallkalender geladen werden."
+        );
       }
 
       if (!cancelled) setLoadingWaste(false);
@@ -431,7 +393,7 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedStreet, selectedHouseNumber, supabase]);
+  }, [selectedStreet, supabase]);
 
   function navigate(next: View) {
     setView(next);
@@ -507,8 +469,8 @@ export default function HomePage() {
   }
 
   async function loadWaste(targetView: View = "waste") {
-    if (!supabase || !selectedStreet || !selectedHouseNumber) {
-      setNotice("Bitte zuerst Straße und Hausnummer auswählen.");
+    if (!supabase || !selectedStreet) {
+      setNotice("Bitte zuerst eine Straße auswählen.");
       navigate("street");
       return;
     }
@@ -517,14 +479,14 @@ export default function HomePage() {
     setNotice("");
 
     const { data, error } = await supabase.functions.invoke("sync-waste", {
-      body: {
-        street_id: selectedStreet,
-        house_number_id: selectedHouseNumber,
-      },
+      body: { street_id: selectedStreet },
     });
 
     if (error) {
-      setNotice("Die Abfuhrtermine konnten gerade nicht geladen werden.");
+      setWasteEvents([]);
+      setNotice(
+        "Für diese Straße konnte kein eindeutiger straßenweiter ASF-Abfallkalender geladen werden."
+      );
     } else {
       const rows = (data?.events ?? []) as WasteEvent[];
       setWasteEvents(rows);
@@ -534,7 +496,6 @@ export default function HomePage() {
           "gluecksburg-direkt-waste",
           JSON.stringify({
             streetId: selectedStreet,
-            houseNumberId: selectedHouseNumber,
             events: rows,
             savedAt: new Date().toISOString(),
           })
@@ -549,12 +510,7 @@ export default function HomePage() {
   }
 
   const selectedStreetName = streets.find((street) => street.id === selectedStreet)?.name;
-  const selectedHouseNumberLabel = houseNumbers.find((h) => h.id === selectedHouseNumber)?.label;
-  const addressLabel = selectedStreetName
-    ? selectedHouseNumberLabel
-      ? `${selectedStreetName} ${selectedHouseNumberLabel}`
-      : selectedStreetName
-    : "Noch keine Adresse gewählt";
+  const addressLabel = selectedStreetName || "Noch keine Straße gewählt";
 
   const eventMonths = Array.from(
     new Set(events.map((event) => event.date.slice(0, 7)))
@@ -703,7 +659,7 @@ export default function HomePage() {
                 <section className="onboard-banner">
                   <div>
                     <strong>Richte deine Adresse ein</strong>
-                    <p>Wähle Straße und Hausnummer, damit dein persönlicher Abfallkalender stimmt.</p>
+                    <p>Wähle deine Straße, damit dein persönlicher Abfallkalender automatisch geladen wird.</p>
                   </div>
                   <button className="button primary" onClick={() => navigate("street")}>
                     Adresse wählen
@@ -895,15 +851,15 @@ export default function HomePage() {
             <>
               <section className="page-heading">
                 <div className="eyebrow">ASF-Abfallkalender</div>
-                <h1>Adresse auswählen</h1>
-                <p>Wähle deine Adresse, damit die passenden Abfuhrtermine automatisch geladen werden.</p>
+                <h1>Straße auswählen</h1>
+                <p>Wähle deine Straße – den passenden ASF-Abfallkalender lädt GlücksburgDirekt automatisch.</p>
               </section>
 
               <section className="card padded address-picker-card">
                 <div className="address-picker-head">
                   <div>
                     <span className="dashboard-kicker">Deine Abfuhradresse</span>
-                    <h2>Straße und Hausnummer</h2>
+                    <h2>Straße</h2>
                   </div>
                   <span className="address-picker-icon" aria-hidden="true">📍</span>
                 </div>
@@ -939,42 +895,16 @@ export default function HomePage() {
                         : "Tippe den Straßennamen – passende Treffer werden automatisch vorgeschlagen."}
                     </small>
                   </label>
-
-                  <label>
-                    Hausnummer
-                    <select
-                      value={selectedHouseNumber}
-                      onChange={(event) => setSelectedHouseNumber(event.target.value)}
-                      disabled={!selectedStreet || loadingStreet}
-                    >
-                      <option value="">
-                        {loadingStreet
-                          ? "Hausnummern werden geladen …"
-                          : selectedStreet
-                            ? "Hausnummer auswählen"
-                            : "Zuerst Straße auswählen"}
-                      </option>
-                      {houseNumbers.map((house) => (
-                        <option key={house.id} value={house.id}>{house.label}</option>
-                      ))}
-                    </select>
-                  </label>
                 </div>
 
                 <div className="address-picker-actions">
                   <div className="address-selection-preview">
                     <span>Ausgewählt</span>
-                    <strong>
-                      {selectedStreetName
-                        ? selectedHouseNumberLabel
-                          ? `${selectedStreetName} ${selectedHouseNumberLabel}`
-                          : selectedStreetName
-                        : "Noch keine vollständige Adresse"}
-                    </strong>
+                    <strong>{selectedStreetName || "Noch keine Straße ausgewählt"}</strong>
                   </div>
                   <button
                     className="button primary"
-                    disabled={!selectedStreet || !selectedHouseNumber || loadingWaste}
+                    disabled={!selectedStreet || loadingWaste}
                     onClick={() => loadWaste("waste")}
                   >
                     {loadingWaste ? "Termine werden geladen …" : "Müllkalender anzeigen"}
@@ -996,7 +926,7 @@ export default function HomePage() {
                 <button className="button" onClick={() => navigate("street")}>Adresse ändern</button>
                 <button
                   className="button primary"
-                  disabled={!selectedStreet || !selectedHouseNumber || loadingWaste}
+                  disabled={!selectedStreet || loadingWaste}
                   onClick={() => loadWaste("waste")}
                 >
                   {loadingWaste ? "Aktualisiere …" : "Termine aktualisieren"}
@@ -1038,7 +968,7 @@ export default function HomePage() {
               ) : (
                 <div className="empty">
                   <h2>Noch keine Abfuhrtermine geladen</h2>
-                  <p>Wähle zuerst Straße und Hausnummer oder aktualisiere den Kalender.</p>
+                  <p>Wähle zuerst deine Straße oder aktualisiere den Kalender.</p>
                   <button className="button primary" onClick={() => navigate("street")}>Adresse auswählen</button>
                 </div>
               )}
@@ -1663,18 +1593,19 @@ export default function HomePage() {
 
                 <h3>Gespeicherte Adresse und Müllkalender</h3>
                 <p>
-                  Wenn eine Straße und Hausnummer für die Müllabfuhr ausgewählt werden, speichert
-                  der Browser diese Auswahl sowie die zuletzt geladenen Abfuhrtermine lokal auf
-                  dem verwendeten Gerät. Dies dient ausschließlich dazu, die vom Nutzer gewünschte
-                  Auswahl bei einem späteren Besuch wiederherzustellen. Die lokale Speicherung
-                  kann durch Löschen der Browser- bzw. Website-Daten entfernt werden.
+                  Wenn eine Straße für die Müllabfuhr ausgewählt wird, speichert der Browser diese
+                  Auswahl sowie die zuletzt geladenen Abfuhrtermine lokal auf dem verwendeten
+                  Gerät. Dies dient ausschließlich dazu, die gewünschte Auswahl bei einem späteren
+                  Besuch wiederherzustellen. Die lokale Speicherung kann durch Löschen der Browser-
+                  bzw. Website-Daten entfernt werden.
                 </p>
                 <p>
-                  Zur Aktualisierung der Abfuhrtermine werden technische Kennungen der ausgewählten
-                  Straße und Hausnummer an das Backend übertragen und zur Abfrage bei der ASF
-                  verwendet. In der serverseitigen Abfalltabelle wird die Hausnummer nicht im
-                  Klartext gespeichert; für die adressbezogene Zuordnung wird ein kryptografischer
-                  Hash verwendet. Die Daten werden nicht für Werbung oder Profilbildung genutzt.
+                  Zur Aktualisierung der Abfuhrtermine wird die technische Kennung der ausgewählten
+                  Straße an das Backend übertragen. Das Backend verwendet, soweit von der ASF
+                  angeboten, automatisch den allgemeinen Eintrag „Alle Hausnummern“. Eine konkrete
+                  Hausnummer wird vom Nutzer nicht abgefragt. Für die technische Zuordnung des
+                  abgerufenen ASF-Kalenders wird serverseitig ein kryptografischer Hash verwendet.
+                  Die Daten werden nicht für Werbung oder Profilbildung genutzt.
                 </p>
 
                 <h3>Lokale Speicherung im Browser</h3>
