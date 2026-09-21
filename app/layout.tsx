@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   creator: "GlücksburgDirekt",
   publisher: "GlücksburgDirekt",
   category: "Lokales",
+  other: {
+    "google-adsense-account": "ca-pub-8846945812828956",
+  },
   robots: {
     index: true,
     follow: true,
