@@ -1065,14 +1065,15 @@ export default function HomePage() {
                     </a>
 
                     <div className="event-row-actions">
-                      <button
+                      <a
                         className="event-action-button event-calendar-button"
-                        onClick={() => downloadEventIcs(event)}
-                        aria-label={`${event.title} zum Kalender hinzufügen`}
+                        href={`/api/calendar/${event.id}`}
+                        onClick={() => track("Event calendar opened")}
+                        aria-label={`${event.title} in der Kalender-App öffnen`}
                       >
                         <span className="event-action-icon" aria-hidden="true">+</span>
                         <span>Kalender</span>
-                      </button>
+                      </a>
                       {event.source_url ? (
                         <a
                           className="event-action-button event-details-button"
