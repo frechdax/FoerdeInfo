@@ -650,7 +650,7 @@ export default function HomePage() {
               <section className="welcome">
                 <div>
                   <div className="eyebrow">Moin aus Glücksburg</div>
-                  <h1>Alles Wichtige für deinen Alltag <span className="wave">👋</span></h1>
+                  <h1>Alles Wichtige für deinen Alltag in Glücksburg <span className="wave">👋</span></h1>
                   <p>Dein Glücksburg – Alltag, Familie und Freizeit auf einen Blick.</p>
                 </div>
               </section>
