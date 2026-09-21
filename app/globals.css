@@ -257,3 +257,26 @@ footer span:last-child{margin-left:auto}
 @media (max-width:850px){
   .nav-submenu{display:none}
 }
+
+
+.event-filter-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin:4px 0 18px;
+}
+.event-filter-bar .chip{
+  min-height:42px;
+  padding:8px 15px;
+}
+@media (max-width:580px){
+  .event-filter-bar{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    margin-right:-16px;
+    padding-right:16px;
+    scrollbar-width:none;
+  }
+  .event-filter-bar::-webkit-scrollbar{display:none}
+  .event-filter-bar .chip{white-space:nowrap}
+}
