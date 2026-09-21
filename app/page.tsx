@@ -1719,10 +1719,9 @@ export default function HomePage() {
 
                 <h3>Google AdSense und Werbeanzeigen</h3>
                 <p>
-                  Für die spätere Finanzierung des Angebots ist die Einbindung von Google AdSense
-                  vorgesehen. Anbieter des Dienstes ist Google. Der AdSense-Code ist auf
-                  GlücksburgDirekt technisch vorbereitet, derzeit aber deaktiviert; solange die
-                  Werbeeinbindung nicht aktiviert ist, werden über GlücksburgDirekt keine
+                  Anbieter des Dienstes ist Google. Der AdSense-Code ist auf GlücksburgDirekt
+                  technisch vorbereitet, derzeit aber deaktiviert; solange die Werbeeinbindung
+                  nicht aktiviert ist, werden über GlücksburgDirekt keine
                   AdSense-Anzeigenanfragen ausgelöst.
                 </p>
                 <p>
