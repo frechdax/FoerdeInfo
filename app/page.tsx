@@ -536,14 +536,14 @@ export default function HomePage() {
   const nextWaste = wasteEvents[0];
   const currentEvents = events.slice(0, 4);
 
-  const navItems: Array<{ id: View; label: string; symbol: string }> = [
-    { id: "home", label: "Start", symbol: "🏠" },
-    { id: "waste", label: "Müllabfuhr", symbol: "🗑️" },
-    { id: "events", label: "Veranstaltungen", symbol: "📅" },
-    { id: "urlaub", label: "Urlaub", symbol: "🌊" },
-    { id: "family", label: "Familie", symbol: "👪" },
-    { id: "rathaus", label: "Rathaus", symbol: "🏛️" },
-    { id: "impressum", label: "Impressum", symbol: "📄" },
+  const navItems: Array<{ id: View; label: string; symbol: string; href: string }> = [
+    { id: "home", label: "Start", symbol: "🏠", href: "/" },
+    { id: "waste", label: "Müllabfuhr", symbol: "🗑️", href: "/muellabfuhr" },
+    { id: "events", label: "Veranstaltungen", symbol: "📅", href: "/veranstaltungen" },
+    { id: "urlaub", label: "Urlaub", symbol: "🌊", href: "/urlaub" },
+    { id: "family", label: "Familie", symbol: "👪", href: "/familie" },
+    { id: "rathaus", label: "Rathaus", symbol: "🏛️", href: "/rathaus" },
+    { id: "impressum", label: "Impressum", symbol: "📄", href: "/#impressum" },
   ];
 
   const rathausSubItems: Array<{ id: View; label: string }> = [
@@ -576,7 +576,7 @@ export default function HomePage() {
         <nav>
           {navItems.map((item) => (
             <div key={item.id}>
-              <button
+              <a
                 className={
                   "nav-item " +
                   (view === item.id ||
@@ -585,12 +585,16 @@ export default function HomePage() {
                     ? "active"
                     : "")
                 }
-                onClick={() => navigate(item.id)}
+                href={item.href}
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigate(item.id);
+                }}
               >
                 {icon(item.symbol)}
                 <span>{item.label}</span>
                 {view === item.id && <span className="nav-dot" />}
-              </button>
+              </a>
 
               {item.id === "rathaus" && (
                 <div className="nav-submenu">
@@ -1824,13 +1828,6 @@ export default function HomePage() {
           )}
 
           <footer className="site-footer">
-            <div className="footer-seo-links" aria-label="Wichtige Bereiche">
-              <a href="/muellabfuhr">Müllkalender Glücksburg</a>
-              <a href="/veranstaltungen">Veranstaltungen Glücksburg</a>
-              <a href="/urlaub">Urlaub in Glücksburg</a>
-              <a href="/familie">Familie in Glücksburg</a>
-              <a href="/rathaus">Rathaus Glücksburg</a>
-            </div>
             <div className="footer-note">
               <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
               <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
@@ -1841,14 +1838,18 @@ export default function HomePage() {
 
       <nav className="mobile-nav" aria-label="Mobile Navigation">
         {navItems.map((item) => (
-          <button
+          <a
             key={item.id}
+            href={item.href}
             className={view === item.id ? "active" : ""}
-            onClick={() => navigate(item.id)}
+            onClick={(event) => {
+              event.preventDefault();
+              navigate(item.id);
+            }}
           >
             <span>{item.symbol}</span>
             <span>{item.label}</span>
-          </button>
+          </a>
         ))}
       </nav>
     </>
