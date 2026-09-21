@@ -218,3 +218,42 @@ footer span:last-child{margin-left:auto}
   .office-hours span{text-align:left}.announcement-row>span:last-child{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+.nav-submenu{display:grid;gap:3px;margin:3px 0 8px 50px}
+.nav-subitem{
+  color:#9eb0b7;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:36px;
+  width:calc(100% - 4px);
+  padding:7px 10px;
+  border-radius:8px;
+  font-size:.79rem;
+  line-height:1.3
+}
+.nav-subitem:hover{color:#fff;background:#1c424e}
+.nav-subitem.active{color:#fff;background:#173f49}
+.nav-subline{width:10px;height:1px;background:#55717a;flex:0 0 auto}
+.nav-subitem.active .nav-subline{background:#5ed4c1}
+.rathaus-menu-cards{display:grid;gap:12px;margin-top:14px}
+.rathaus-menu-card{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:14px;
+  width:100%
+}
+.rathaus-menu-card:hover{background:#f7faf9}
+.rathaus-menu-card>div{display:grid;gap:2px;flex:1}
+.rathaus-menu-card strong{font-size:.92rem}
+.rathaus-menu-card small{color:var(--muted);font-size:.78rem}
+.rathaus-menu-card>span:last-child{color:var(--teal)}
+
+@media (max-width:850px){
+  .nav-submenu{display:none}
+}
