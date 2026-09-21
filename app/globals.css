@@ -925,3 +925,206 @@ footer span:last-child{margin-left:auto}
 .legal-card a:hover{
   text-decoration:underline;
 }
+
+
+/* Vereinfachte Adresswahl für den Müllkalender */
+.address-picker-card{
+  max-width:980px;
+  margin:0 auto;
+}
+.address-picker-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:22px;
+}
+.address-picker-head h2{
+  margin-top:3px;
+  font-size:1.35rem;
+}
+.address-picker-icon{
+  width:52px;
+  height:52px;
+  border-radius:14px;
+  background:#eaf5f3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+}
+.address-picker-fields{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(220px,.7fr);
+  gap:18px;
+  align-items:start;
+}
+.street-autocomplete small{
+  color:var(--muted);
+  display:block;
+  margin-top:-7px;
+  font-size:.78rem;
+  line-height:1.4;
+}
+.address-picker-actions{
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-top:8px;
+  padding-top:18px;
+}
+.address-selection-preview{
+  display:grid;
+  gap:3px;
+}
+.address-selection-preview span{
+  color:var(--muted);
+  font-size:.76rem;
+}
+.address-selection-preview strong{
+  font-size:.95rem;
+}
+
+/* Eleganter Abfallkalender */
+.waste-calendar{
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  overflow:hidden;
+}
+.waste-calendar-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  padding:22px 24px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#fbfdfd,#f6faf9);
+}
+.waste-calendar-head h2{
+  margin-top:3px;
+  font-size:1.35rem;
+}
+.waste-calendar-head>span{
+  color:var(--muted);
+  font-size:.8rem;
+}
+.waste-calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.waste-calendar-card{
+  position:relative;
+  min-height:112px;
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr) 48px;
+  align-items:center;
+  gap:15px;
+  padding:18px 20px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:#fff;
+}
+.waste-calendar-card:nth-child(2n){border-right:0}
+.waste-calendar-card:nth-last-child(-n+2){border-bottom:0}
+.waste-calendar-card.bin-rest{--waste-accent:#5a6471;--waste-soft:#eef0f2}
+.waste-calendar-card.bin-bio{--waste-accent:#6c8d49;--waste-soft:#edf3e8}
+.waste-calendar-card.bin-paper{--waste-accent:#4b88b6;--waste-soft:#e9f1f7}
+.waste-calendar-card.bin-yellow{--waste-accent:#b48a16;--waste-soft:#faf3d9}
+.waste-date-badge{
+  width:58px;
+  height:66px;
+  border-radius:13px;
+  background:var(--waste-soft,#eef3f4);
+  color:var(--waste-accent,var(--navy));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  line-height:1.05;
+}
+.waste-date-badge strong{
+  font-size:1.45rem;
+}
+.waste-date-badge span{
+  margin-top:4px;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.7px;
+}
+.waste-calendar-copy{
+  min-width:0;
+}
+.waste-weekday{
+  color:var(--muted);
+  text-transform:capitalize;
+  font-size:.78rem;
+}
+.waste-calendar-copy h3{
+  margin:3px 0 4px;
+  font-size:1rem;
+}
+.waste-calendar-copy small{
+  color:var(--muted);
+  font-size:.76rem;
+}
+.waste-type-icon{
+  width:46px;
+  height:46px;
+  border-radius:13px;
+  background:var(--waste-soft,#eef3f4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.35rem;
+}
+
+@media (max-width:760px){
+  .address-picker-fields{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+  .address-picker-actions{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .address-picker-actions .button{
+    width:100%;
+  }
+  .waste-calendar-grid{
+    grid-template-columns:1fr;
+  }
+  .waste-calendar-card,
+  .waste-calendar-card:nth-child(2n),
+  .waste-calendar-card:nth-last-child(-n+2){
+    border-right:0;
+    border-bottom:1px solid var(--line);
+  }
+  .waste-calendar-card:last-child{
+    border-bottom:0;
+  }
+}
+@media (max-width:480px){
+  .waste-calendar-head{
+    align-items:flex-start;
+    flex-direction:column;
+    padding:18px;
+  }
+  .waste-calendar-card{
+    grid-template-columns:52px minmax(0,1fr) 42px;
+    gap:12px;
+    min-height:98px;
+    padding:15px 16px;
+  }
+  .waste-date-badge{
+    width:52px;
+    height:60px;
+  }
+  .waste-type-icon{
+    width:40px;
+    height:40px;
+    font-size:1.15rem;
+  }
+}
