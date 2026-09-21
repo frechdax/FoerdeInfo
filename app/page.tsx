@@ -331,8 +331,10 @@ export default function HomePage() {
       } else {
         const rows = (data?.house_numbers ?? []) as HouseNumber[];
         setHouseNumbers(rows);
-        if (restoreHouseNumber && rows.some((item) => item.id === restoreHouseNumber)) {
-          setSelectedHouseNumber(restoreHouseNumber);
+        if (restoreHouseNumber) {
+          if (rows.some((item) => item.id === restoreHouseNumber)) {
+            setSelectedHouseNumber(restoreHouseNumber);
+          }
           setRestoreHouseNumber("");
         }
       }
@@ -343,7 +345,7 @@ export default function HomePage() {
   }, [selectedStreet, supabase, restoreHouseNumber]);
 
   useEffect(() => {
-    if (!selectedStreet) return;
+    if (!selectedStreet || restoreHouseNumber) return;
     try {
       localStorage.setItem(
         "gluecksburg-direkt-address",
@@ -353,7 +355,35 @@ export default function HomePage() {
         })
       );
     } catch {}
-  }, [selectedStreet, selectedHouseNumber]);
+  }, [selectedStreet, selectedHouseNumber, restoreHouseNumber]);
+
+  useEffect(() => {
+    if (!supabase || !selectedStreet || !selectedHouseNumber) return;
+
+    let cancelled = false;
+
+    async function restoreWasteCalendar() {
+      setLoadingWaste(true);
+      const { data, error } = await supabase.functions.invoke("sync-waste", {
+        body: {
+          street_id: selectedStreet,
+          house_number_id: selectedHouseNumber,
+        },
+      });
+
+      if (!cancelled && !error) {
+        setWasteEvents((data?.events ?? []) as WasteEvent[]);
+      }
+
+      if (!cancelled) setLoadingWaste(false);
+    }
+
+    restoreWasteCalendar();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedStreet, selectedHouseNumber, supabase]);
 
   function navigate(next: View) {
     setView(next);
