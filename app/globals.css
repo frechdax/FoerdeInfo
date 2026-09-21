@@ -1535,3 +1535,116 @@ footer span:last-child{margin-left:auto}
   color:inherit;
   text-decoration:none;
 }
+
+
+/* Restaurantliste im Urlaubsbereich */
+.restaurant-section{
+  margin:20px 0;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+}
+.restaurant-section-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:18px;
+}
+.restaurant-section-heading h2{
+  margin:4px 0 6px;
+  font-size:1.3rem;
+}
+.restaurant-section-heading p{
+  margin:0;
+  max-width:720px;
+  color:var(--muted);
+  font-size:.9rem;
+  line-height:1.55;
+}
+.restaurant-heading-icon{
+  width:48px;
+  height:48px;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  background:#edf6f5;
+  font-size:1.35rem;
+}
+.restaurant-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.restaurant-list-item{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border:1px solid #dde8e9;
+  border-radius:14px;
+  background:#fbfdfc;
+  color:var(--ink);
+  text-decoration:none;
+  transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+.restaurant-list-item:hover{
+  transform:translateY(-1px);
+  border-color:#bfd9d7;
+  background:#f4faf9;
+}
+.restaurant-list-icon{
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(16,46,57,.07);
+  font-size:1.12rem;
+}
+.restaurant-list-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.restaurant-list-copy strong{
+  font-size:.93rem;
+}
+.restaurant-list-copy span{
+  color:#4f6871;
+  font-size:.8rem;
+  line-height:1.35;
+}
+.restaurant-list-copy small{
+  color:var(--muted);
+  font-size:.73rem;
+}
+.restaurant-list-arrow{
+  color:#6f8b92;
+  font-size:.95rem;
+}
+.restaurant-source-note{
+  margin:14px 2px 0;
+  color:var(--muted);
+  font-size:.72rem;
+  line-height:1.45;
+}
+@media (max-width:760px){
+  .restaurant-section{
+    padding:18px 15px;
+  }
+  .restaurant-list{
+    grid-template-columns:1fr;
+  }
+  .restaurant-section-heading{
+    gap:12px;
+  }
+}
