@@ -556,3 +556,93 @@ footer span:last-child{margin-left:auto}
   .dashboard-card-footer{align-items:flex-start;flex-direction:column;gap:4px}
   .dashboard-list-row{padding:11px 12px}
 }
+
+
+/* Wetter heute */
+.today-weather-card{
+  border:1px solid #cfe2e4;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255,255,255,.85), transparent 32%),
+    linear-gradient(120deg,#eaf6f6 0%,#f6fbfb 48%,#e5f0f4 100%);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:26px;
+  margin-top:18px;
+  padding:20px 24px;
+  overflow:hidden;
+}
+.today-weather-main{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+}
+.today-weather-icon{
+  font-size:3rem;
+  line-height:1;
+  filter:drop-shadow(0 6px 10px rgba(16,46,57,.12));
+}
+.today-weather-main h2{
+  margin-top:2px;
+  font-size:1.35rem;
+}
+.today-weather-main p{
+  color:var(--muted);
+  margin:3px 0 0;
+  font-size:.86rem;
+}
+.today-weather-values{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(120px,1fr));
+  gap:12px;
+  min-width:320px;
+}
+.today-weather-values>div{
+  border:1px solid rgba(16,46,57,.10);
+  border-radius:13px;
+  background:rgba(255,255,255,.72);
+  display:grid;
+  gap:1px;
+  padding:11px 14px;
+}
+.today-weather-values small{
+  color:var(--muted);
+  font-size:.72rem;
+}
+.today-weather-values strong{
+  color:var(--navy);
+  font-size:1.2rem;
+}
+.today-weather-values span{
+  color:var(--muted);
+  font-size:.75rem;
+}
+.today-weather-loading{
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+@media (max-width:850px){
+  .today-weather-card{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .today-weather-values{
+    min-width:0;
+    width:100%;
+  }
+}
+@media (max-width:580px){
+  .today-weather-card{
+    gap:16px;
+    padding:17px;
+  }
+  .today-weather-icon{font-size:2.5rem}
+  .today-weather-values{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .today-weather-values>div{padding:10px 11px}
+}
