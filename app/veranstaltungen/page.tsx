@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SeoLanding from "../seo-landing";
+import { createPublicServerSupabase } from "@/lib/supabase-public-server";
 
 export const metadata: Metadata = {
   title: "Veranstaltungen Glücksburg – Was ist los in Glücksburg?",
@@ -13,7 +14,37 @@ export const metadata: Metadata = {
   },
 };
 
-export default function VeranstaltungenPage() {
+export const revalidate = 1800;
+
+function todayBerlin() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function eventDate(value: string) {
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value + "T12:00:00"));
+}
+
+export default async function VeranstaltungenPage() {
+  const supabase = createPublicServerSupabase();
+  const { data } = await supabase
+    .from("events")
+    .select("id,title,date,time,location,source_url")
+    .eq("status", "published")
+    .gte("date", todayBerlin())
+    .order("date")
+    .limit(8);
+
+  const upcoming = data ?? [];
+
   return (
     <SeoLanding
       eyebrow="Was ist los in Glücksburg?"
@@ -30,12 +61,38 @@ export default function VeranstaltungenPage() {
       canonicalPath="/veranstaltungen"
     >
       <section className="seo-card">
+        <h2>Was ist demnächst in Glücksburg los?</h2>
+        {upcoming.length ? (
+          <div className="seo-live-list">
+            {upcoming.map((event) => (
+              <article key={event.id} className="seo-live-row">
+                <div>
+                  <strong>{event.title}</strong>
+                  <span>
+                    {eventDate(event.date)}
+                    {event.time ? ` · ${String(event.time).slice(0, 5)} Uhr` : ""}
+                    {event.location ? ` · ${event.location}` : ""}
+                  </span>
+                </div>
+                {event.source_url ? (
+                  <a href={event.source_url} target="_blank" rel="noreferrer">Details ↗</a>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>Aktuell konnten keine kommenden Termine geladen werden.</p>
+        )}
+      </section>
+
+      <section className="seo-card">
         <h2>Aktuelle Termine für Glücksburg</h2>
         <p>
           Die Veranstaltungsübersicht bündelt öffentlich verfügbare Termine und verlinkt nach
-          Möglichkeit direkt zur jeweiligen Originalquelle. Da Veranstaltungen kurzfristig
-          geändert oder abgesagt werden können, empfiehlt sich vor dem Besuch ein Blick auf die
-          Veranstalterseite.
+          Möglichkeit direkt zur jeweiligen Originalquelle. So findest du schneller heraus, was
+          heute, morgen oder am Wochenende in Glücksburg stattfindet. Da Veranstaltungen
+          kurzfristig geändert oder abgesagt werden können, empfiehlt sich vor dem Besuch ein
+          Blick auf die Veranstalterseite.
         </p>
       </section>
     </SeoLanding>
