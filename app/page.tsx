@@ -21,6 +21,13 @@ type Street = {
 
 type HouseNumber = { id: string; label: string };
 type WasteEvent = { type: string; date: string };
+type EventDateFilter =
+  | "all"
+  | "today"
+  | "tomorrow"
+  | "this-week"
+  | "next-week"
+  | "this-month";
 
 type EventRow = {
   id: string;
@@ -71,6 +78,44 @@ function today() {
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
+}
+
+function addDays(value: string, days: number) {
+  const date = new Date(value + "T00:00:00Z");
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function getMonday(value: string) {
+  const date = new Date(value + "T00:00:00Z");
+  const day = date.getUTCDay() || 7;
+  return addDays(value, 1 - day);
+}
+
+function matchesEventDateFilter(date: string, filter: EventDateFilter) {
+  const current = today();
+
+  if (filter === "all") return true;
+  if (filter === "today") return date === current;
+  if (filter === "tomorrow") return date === addDays(current, 1);
+
+  if (filter === "this-week") {
+    const start = getMonday(current);
+    const end = addDays(start, 6);
+    return date >= start && date <= end;
+  }
+
+  if (filter === "next-week") {
+    const start = addDays(getMonday(current), 7);
+    const end = addDays(start, 6);
+    return date >= start && date <= end;
+  }
+
+  if (filter === "this-month") {
+    return date.slice(0, 7) === current.slice(0, 7);
+  }
+
+  return true;
 }
 
 function formatDate(value: string) {
@@ -124,6 +169,7 @@ export default function HomePage() {
   const [notice, setNotice] = useState("");
   const [streetSearch, setStreetSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
+  const [eventDateFilter, setEventDateFilter] = useState<EventDateFilter>("all");
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
@@ -273,6 +319,7 @@ export default function HomePage() {
   );
 
   const filteredEvents = events.filter((event) => {
+    if (!matchesEventDateFilter(event.date, eventDateFilter)) return false;
     if (!globalSearch.trim()) return true;
     const q = globalSearch.toLocaleLowerCase("de");
     return [event.title, event.description, event.location, event.organizer]
@@ -709,6 +756,25 @@ export default function HomePage() {
                 <p>Aktuelle Termine in Glücksburg mit direktem Link zur jeweiligen Veranstaltungsseite.</p>
               </section>
 
+              <div className="event-filter-bar" aria-label="Veranstaltungen nach Zeitraum filtern">
+                {[
+                  ["all", "Alle"],
+                  ["today", "Heute"],
+                  ["tomorrow", "Morgen"],
+                  ["this-week", "Diese Woche"],
+                  ["next-week", "Nächste Woche"],
+                  ["this-month", "Dieser Monat"],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    className={"chip " + (eventDateFilter === id ? "active" : "")}
+                    onClick={() => setEventDateFilter(id as EventDateFilter)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
               <div className="toolbar">
                 <label>
                   Suche
@@ -748,7 +814,9 @@ export default function HomePage() {
               </div>
 
               {!filteredEvents.length && (
-                <div className="empty">Keine passenden Veranstaltungen gefunden.</div>
+                <div className="empty">
+                  Für den gewählten Zeitraum wurden keine passenden Veranstaltungen gefunden.
+                </div>
               )}
 
               <div className="source-note">
