@@ -1312,7 +1312,6 @@ export default function HomePage() {
                     Reservierung bitte direkt beim jeweiligen Restaurant prüfen.
                   </p>
                   <div className="restaurant-owner-note">
-                    <span className="restaurant-owner-note-icon" aria-hidden="true">💬</span>
                     <div>
                       <strong>Dein Restaurant fehlt?</strong>
                       <p>
@@ -1320,9 +1319,12 @@ export default function HomePage() {
                         Glücksburg und bist hier noch nicht aufgeführt? Melde dich gern bei mir,
                         damit ich den Eintrag prüfen und ergänzen kann.
                       </p>
-                      <a href="mailto:sebastianschwarz1@icloud.de">
-                        sebastianschwarz1@icloud.de
-                      </a>
+                      <p className="restaurant-owner-email">
+                        E-Mail:{" "}
+                        <a href="mailto:sebastianschwarz1@icloud.de">
+                          sebastianschwarz1@icloud.de
+                        </a>
+                      </p>
                     </div>
                   </div>
                 </section>
