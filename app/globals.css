@@ -864,3 +864,17 @@ footer span:last-child{margin-left:auto}
   .topbar-brand-text strong{font-size:.8rem}
   .topbar-brand-text small{font-size:.56rem}
 }
+
+
+/* Mobile Header: Logo mittig */
+@media (max-width:850px){
+  .topbar{
+    justify-content:center;
+    position:sticky;
+  }
+  .topbar-brand{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+  }
+}
