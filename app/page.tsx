@@ -648,7 +648,6 @@ export default function HomePage() {
             <strong>{currentLabel}</strong>
           </div>
 
-          <button className="icon-button" aria-label="Hinweise">◌</button>
           <button
             className="topbar-brand"
             aria-label="Glücksburg Direkt – Startseite"
