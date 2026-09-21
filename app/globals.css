@@ -955,7 +955,7 @@ footer span:last-child{margin-left:auto}
 }
 .address-picker-fields{
   display:grid;
-  grid-template-columns:minmax(0,1.5fr) minmax(220px,.7fr);
+  grid-template-columns:minmax(0,1fr);
   gap:18px;
   align-items:start;
 }
