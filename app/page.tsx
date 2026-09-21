@@ -1066,21 +1066,24 @@ export default function HomePage() {
 
                     <div className="event-row-actions">
                       <button
-                        className="button event-ical-button"
+                        className="event-action-button event-calendar-button"
                         onClick={() => downloadEventIcs(event)}
-                        aria-label={`${event.title} als iCalendar-Datei herunterladen`}
+                        aria-label={`${event.title} zum Kalender hinzufügen`}
                       >
-                        <span aria-hidden="true">▣</span>
-                        iCalendar
+                        <span className="event-action-icon" aria-hidden="true">+</span>
+                        <span>Kalender</span>
                       </button>
-                      <a
-                        className="event-more-link"
-                        href={event.source_url || "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Details ↗
-                      </a>
+                      {event.source_url ? (
+                        <a
+                          className="event-action-button event-details-button"
+                          href={event.source_url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <span>Mehr erfahren</span>
+                          <span className="event-action-arrow" aria-hidden="true">↗</span>
+                        </a>
+                      ) : null}
                     </div>
                   </div>
                 ))}
