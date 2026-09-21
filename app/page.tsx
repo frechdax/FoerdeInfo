@@ -538,11 +538,11 @@ export default function HomePage() {
 
   const navItems: Array<{ id: View; label: string; symbol: string; href: string }> = [
     { id: "home", label: "Start", symbol: "🏠", href: "/" },
-    { id: "waste", label: "Müllabfuhr", symbol: "🗑️", href: "/muellabfuhr" },
     { id: "events", label: "Veranstaltungen", symbol: "📅", href: "/veranstaltungen" },
     { id: "urlaub", label: "Urlaub", symbol: "🌊", href: "/urlaub" },
     { id: "family", label: "Familie", symbol: "👪", href: "/familie" },
     { id: "rathaus", label: "Rathaus", symbol: "🏛️", href: "/rathaus" },
+    { id: "waste", label: "Müllabfuhr", symbol: "🗑️", href: "/muellabfuhr" },
     { id: "impressum", label: "Impressum", symbol: "📄", href: "/#impressum" },
   ];
 
