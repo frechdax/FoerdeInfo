@@ -417,19 +417,6 @@ export default function HomePage() {
             <strong>{currentLabel}</strong>
           </div>
 
-          <div className="search">
-            <span>⌕</span>
-            <input
-              aria-label="Veranstaltungen durchsuchen"
-              placeholder="Veranstaltungen suchen …"
-              value={globalSearch}
-              onChange={(event) => setGlobalSearch(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") navigate("events");
-              }}
-            />
-          </div>
-
           <button className="icon-button" aria-label="Hinweise">◌</button>
           <div className="avatar" aria-label="Glücksburg Direkt">GD</div>
         </header>
