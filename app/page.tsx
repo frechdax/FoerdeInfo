@@ -221,6 +221,19 @@ export default function HomePage() {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
       if (saved.houseNumberId) setRestoreHouseNumber(saved.houseNumberId);
+
+      const cachedWaste = JSON.parse(
+        localStorage.getItem("gluecksburg-direkt-waste") || "{}"
+      );
+      if (
+        cachedWaste.streetId === saved.streetId &&
+        cachedWaste.houseNumberId === saved.houseNumberId &&
+        Array.isArray(cachedWaste.events)
+      ) {
+        setWasteEvents(
+          (cachedWaste.events as WasteEvent[]).filter((entry) => entry.date >= today())
+        );
+      }
     } catch {}
   }, []);
 
@@ -314,9 +327,10 @@ export default function HomePage() {
   }, [supabase]);
 
   useEffect(() => {
+    const savedHouseNumber = restoreHouseNumber;
     setHouseNumbers([]);
     setSelectedHouseNumber("");
-    setWasteEvents([]);
+    if (!savedHouseNumber) setWasteEvents([]);
     if (!supabase || !selectedStreet) return;
 
     async function loadHouseNumbers() {
@@ -331,18 +345,18 @@ export default function HomePage() {
       } else {
         const rows = (data?.house_numbers ?? []) as HouseNumber[];
         setHouseNumbers(rows);
-        if (restoreHouseNumber) {
-          if (rows.some((item) => item.id === restoreHouseNumber)) {
-            setSelectedHouseNumber(restoreHouseNumber);
-          }
-          setRestoreHouseNumber("");
+
+        if (savedHouseNumber && rows.some((item) => item.id === savedHouseNumber)) {
+          setSelectedHouseNumber(savedHouseNumber);
         }
+
+        if (savedHouseNumber) setRestoreHouseNumber("");
       }
       setLoadingStreet(false);
     }
 
     loadHouseNumbers();
-  }, [selectedStreet, supabase, restoreHouseNumber]);
+  }, [selectedStreet, supabase]);
 
   useEffect(() => {
     if (!selectedStreet || restoreHouseNumber) return;
@@ -372,7 +386,20 @@ export default function HomePage() {
       });
 
       if (!cancelled && !error) {
-        setWasteEvents((data?.events ?? []) as WasteEvent[]);
+        const rows = (data?.events ?? []) as WasteEvent[];
+        setWasteEvents(rows);
+
+        try {
+          localStorage.setItem(
+            "gluecksburg-direkt-waste",
+            JSON.stringify({
+              streetId: selectedStreet,
+              houseNumberId: selectedHouseNumber,
+              events: rows,
+              savedAt: new Date().toISOString(),
+            })
+          );
+        } catch {}
       }
 
       if (!cancelled) setLoadingWaste(false);
@@ -478,7 +505,21 @@ export default function HomePage() {
     if (error) {
       setNotice("Die Abfuhrtermine konnten gerade nicht geladen werden.");
     } else {
-      setWasteEvents((data?.events ?? []) as WasteEvent[]);
+      const rows = (data?.events ?? []) as WasteEvent[];
+      setWasteEvents(rows);
+
+      try {
+        localStorage.setItem(
+          "gluecksburg-direkt-waste",
+          JSON.stringify({
+            streetId: selectedStreet,
+            houseNumberId: selectedHouseNumber,
+            events: rows,
+            savedAt: new Date().toISOString(),
+          })
+        );
+      } catch {}
+
       setNotice("Abfuhrtermine wurden direkt bei ASF aktualisiert.");
       if (targetView) navigate(targetView);
     }
