@@ -331,12 +331,7 @@ export default function HomePage() {
             .limit(30),
         ]);
 
-      const loadedStreets = (streetRows ?? []) as Street[];
-      setStreets(loadedStreets);
-      setStreetSearch((current) => {
-        if (current || !selectedStreet) return current;
-        return loadedStreets.find((street) => street.id === selectedStreet)?.name || "";
-      });
+      setStreets((streetRows ?? []) as Street[]);
       setEvents((eventRows ?? []) as EventRow[]);
       setCivic((civicRows ?? null) as CivicInfo | null);
       setOfficialNotices((noticeRows ?? []) as OfficialNotice[]);
@@ -345,6 +340,12 @@ export default function HomePage() {
 
     loadBaseData();
   }, [supabase]);
+
+  useEffect(() => {
+    if (!selectedStreet || !streets.length) return;
+    const streetName = streets.find((street) => street.id === selectedStreet)?.name;
+    if (streetName) setStreetSearch(streetName);
+  }, [selectedStreet, streets]);
 
   useEffect(() => {
     const savedHouseNumber = restoreHouseNumber;
