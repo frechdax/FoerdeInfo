@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
 const siteUrl = "https://gluecksburg-direkt.vercel.app";
-const googleVerification = process.env.GOOGLE_SITE_VERIFICATION;
+const googleVerification =
+  process.env.GOOGLE_SITE_VERIFICATION ||
+  "yhScvTLAqjL9Z2zvqCixkpq612QAJss1EbD2FxgwTzQ";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
