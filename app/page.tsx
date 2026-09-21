@@ -1551,8 +1551,8 @@ export default function HomePage() {
                   Verantwortlicher für die Datenverarbeitung auf dieser Website ist der oben
                   genannte Betreiber. Die Website ist so ausgelegt, dass nur die für Betrieb und
                   angeforderte Funktionen erforderlichen Daten verarbeitet werden. Aktuell werden
-                  keine Werbenetzwerke, Nutzerprofile oder eigenen Reichweiten-Tracking-Dienste
-                  eingesetzt.
+                  keine Werbenetzwerke oder werbebasierten Nutzerprofile eingesetzt. Für eine
+                  datensparsame Reichweitenmessung wird Vercel Web Analytics verwendet.
                 </p>
 
                 <h3>Hosting über Vercel</h3>
@@ -1572,6 +1572,17 @@ export default function HomePage() {
                   >
                     Datenschutzhinweise von Vercel ↗
                   </a>
+                </p>
+
+                <h3>Reichweitenmessung mit Vercel Web Analytics</h3>
+                <p>
+                  GlücksburgDirekt nutzt Vercel Web Analytics, um aggregierte Besucher- und
+                  Seitenaufrufzahlen auszuwerten. Der Dienst arbeitet ohne klassische
+                  Tracking-Cookies und ist nicht darauf ausgelegt, Besucher über verschiedene
+                  Websites hinweg zu verfolgen. Die Auswertung dient dazu, zu erkennen, welche
+                  Bereiche der Website genutzt werden und das Angebot entsprechend zu verbessern.
+                  Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt
+                  in der Reichweitenmessung und Optimierung dieses lokalen Informationsangebots.
                 </p>
 
                 <h3>Datenbank und Backend über Supabase</h3>
@@ -1700,9 +1711,17 @@ export default function HomePage() {
             </>
           )}
 
-          <footer>
-            <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
-            <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
+          <footer className="site-footer">
+            <div className="footer-seo-links" aria-label="Wichtige Bereiche">
+              <a href="/muellabfuhr">Müllkalender Glücksburg</a>
+              <a href="/veranstaltungen">Veranstaltungen Glücksburg</a>
+              <a href="/familie">Familie in Glücksburg</a>
+              <a href="/rathaus">Rathaus Glücksburg</a>
+            </div>
+            <div className="footer-note">
+              <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
+              <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
+            </div>
           </footer>
         </main>
       </div>
