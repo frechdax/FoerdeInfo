@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     "Lokale Informationen für Glücksburg (Ostsee): Müllkalender, Veranstaltungen, Familienangebote, Rathaus-News und amtliche Bekanntmachungen auf einen Blick.",
+  alternates: { canonical: "/" },
   keywords: [
     "Glücksburg",
     "Glücksburg Ostsee",
