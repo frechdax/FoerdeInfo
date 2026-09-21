@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import SeoLanding from "../seo-landing";
 
 export const metadata: Metadata = {
-  title: "Urlaub in Glücksburg – Ferienwohnungen, Hotels & Veranstaltungen",
+  title: "Urlaub in Glücksburg – Unterkünfte, Restaurants & Veranstaltungen",
   description:
-    "Urlaub in Glücksburg (Ostsee): Ferienwohnungen und Hotels finden, aktuelle Veranstaltungen entdecken und den Aufenthalt an der Flensburger Förde planen.",
+    "Urlaub in Glücksburg (Ostsee): Ferienwohnungen und Hotels finden, Restaurants entdecken, aktuelle Veranstaltungen ansehen und den Aufenthalt an der Flensburger Förde planen.",
   alternates: { canonical: "/urlaub" },
   openGraph: {
     title: "Urlaub in Glücksburg",
@@ -19,9 +19,10 @@ export default function UrlaubPage() {
     <SeoLanding
       eyebrow="Urlaub in Glücksburg"
       title="Glücksburg an der Ostsee entdecken"
-      intro="Plane deinen Aufenthalt an der Flensburger Förde: Finde Unterkünfte und entdecke aktuelle Veranstaltungen und familienfreundliche Angebote in Glücksburg."
+      intro="Plane deinen Aufenthalt an der Flensburger Förde: Finde Unterkünfte, entdecke Restaurants, aktuelle Veranstaltungen und familienfreundliche Angebote in Glücksburg."
       bullets={[
         "Ferienwohnungen und Hotels in Glücksburg",
+        "Restaurants und Gastronomie in Glücksburg",
         "Aktuelle Veranstaltungen während deines Aufenthalts",
         "Familienangebote und lokale Informationen",
         "Wetter und praktische Tipps für die Tagesplanung",
@@ -46,6 +47,42 @@ export default function UrlaubPage() {
         </a>
         <p className="travel-note">
           Externer Link zu Booking.com. Derzeit kein Affiliate-Link.
+        </p>
+      </section>
+
+      <section className="seo-card">
+        <h2>Restaurants in Glücksburg</h2>
+        <p>
+          Glücksburg bietet Gastronomie vom Strand bis zum Schloss. Zur aktuellen
+          Auswahl gehören unter anderem mediterrane Strandküche, regionale Küche,
+          italienische Restaurants und Restaurants mit Blick auf die Flensburger Förde.
+        </p>
+        <div className="seo-live-list">
+          {[
+            ["Glückselig Strandrestaurant", "Schwennaustraße 41", "https://www.glueck-in-sicht.de/restaurants/glueckselig-strandrestaurant"],
+            ["Gudlak Restaurant & Bar", "Fördestraße 2–4", "https://www.glueck-in-sicht.de/restaurants"],
+            ["Quellental Café & Restaurant", "Im Quellental 1", "https://www.quellental-gluecksburg.de/"],
+            ["Ristorante San Remo", "Drei 5", "https://sanremo-gluecksburg.de/"],
+            ["Restaurant Scheune", "Schinderdam 7", "https://www.scheunegluecksburg.de/"],
+            ["Restaurant Felix", "Kirstenstraße 6", "https://www.strandhotelgluecksburg.de/restaurant-felix"],
+            ["Schlosskeller Glücksburg", "Am Schloss 2", "https://www.schloss-gluecksburg.de/urlaub-genuss/ferienwohnungen-und-gastronomie"],
+            ["Restaurant Pico", "Postplatz 3", "https://www.pico-restaurant.de/"],
+          ].map(([name, address, href]) => (
+            <a
+              className="seo-live-row"
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              key={name}
+            >
+              <strong>{name}</strong>
+              <span>{address} · 24960 Glücksburg ↗</span>
+            </a>
+          ))}
+        </div>
+        <p className="travel-note">
+          Auswahl nach der Glücksburger Gastrokarte 2026. Öffnungszeiten bitte direkt
+          beim jeweiligen Restaurant prüfen.
         </p>
       </section>
 
