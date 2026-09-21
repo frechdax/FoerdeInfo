@@ -646,3 +646,60 @@ footer span:last-child{margin-left:auto}
   }
   .today-weather-values>div{padding:10px 11px}
 }
+
+
+/* iCalendar actions in event list */
+.event-content-row{
+  align-items:center;
+}
+.event-details-link{
+  color:var(--ink);
+  flex:1;
+  min-width:0;
+}
+.event-details-link h3{margin-top:5px}
+.event-details-link p{
+  color:var(--muted);
+  margin-bottom:0;
+  font-size:.9375rem;
+}
+.event-row-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-left:auto;
+}
+.event-ical-button{
+  color:var(--teal);
+  min-height:40px;
+  padding:8px 12px;
+  white-space:nowrap;
+}
+.event-more-link{
+  color:var(--teal);
+  font-size:.84rem;
+  white-space:nowrap;
+}
+
+@media (max-width:700px){
+  .event-content-row{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .event-details-link{
+    flex:1 1 calc(100% - 70px);
+  }
+  .event-row-actions{
+    width:100%;
+    margin-left:64px;
+    justify-content:flex-start;
+  }
+}
+@media (max-width:480px){
+  .event-row-actions{
+    margin-left:0;
+  }
+  .event-ical-button{
+    flex:1;
+  }
+}
