@@ -407,6 +407,7 @@ export default function HomePage() {
     { id: "waste", label: "Müllabfuhr", symbol: "♻" },
     { id: "events", label: "Veranstaltungen", symbol: "□" },
     { id: "rathaus", label: "Rathaus", symbol: "▦" },
+    { id: "impressum", label: "Impressum", symbol: "§" },
   ];
 
   const rathausSubItems: Array<{ id: View; label: string }> = [
@@ -417,7 +418,7 @@ export default function HomePage() {
   const currentLabel =
     rathausSubItems.find((item) => item.id === view)?.label ||
     navItems.find((item) => item.id === view)?.label ||
-    (view === "impressum" ? "Impressum" : "Start");
+    "Start";
 
   const currentWeather = weather ? weatherMeta(weather.weatherCode, weather.isDay) : null;
 
@@ -1128,12 +1129,7 @@ export default function HomePage() {
 
           <footer>
             <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
-            <div className="footer-links">
-              <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
-              <button className="footer-link" onClick={() => navigate("impressum")}>
-                Impressum
-              </button>
-            </div>
+            <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
           </footer>
         </main>
       </div>
