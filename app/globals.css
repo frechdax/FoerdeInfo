@@ -1527,3 +1527,11 @@ footer span:last-child{margin-left:auto}
     height:50px;
   }
 }
+
+
+/* Crawlbare Navigation ohne Link-Look */
+.nav-item{text-decoration:none}
+.mobile-nav a{
+  color:inherit;
+  text-decoration:none;
+}
