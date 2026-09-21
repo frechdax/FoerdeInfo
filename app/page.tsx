@@ -334,7 +334,6 @@ export default function HomePage() {
 
   const navItems: Array<{ id: View; label: string; symbol: string }> = [
     { id: "home", label: "Start", symbol: "⌂" },
-    { id: "street", label: "Meine Straße", symbol: "⌖" },
     { id: "waste", label: "Müllabfuhr", symbol: "♻" },
     { id: "events", label: "Veranstaltungen", symbol: "□" },
     { id: "rathaus", label: "Rathaus", symbol: "▦" },
@@ -984,7 +983,7 @@ export default function HomePage() {
             onClick={() => navigate(item.id)}
           >
             <span>{item.symbol}</span>
-            <span>{item.label === "Meine Straße" ? "Straße" : item.label}</span>
+            <span>{item.label}</span>
           </button>
         ))}
       </nav>
