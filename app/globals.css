@@ -878,3 +878,50 @@ footer span:last-child{margin-left:auto}
     transform:translateX(-50%);
   }
 }
+
+
+/* Erweiterte Rechtstexte */
+.legal-card{
+  max-width:900px;
+  line-height:1.62;
+}
+.legal-card h3{
+  margin-top:22px;
+  margin-bottom:7px;
+  font-size:1rem;
+}
+.legal-card p{
+  max-width:78ch;
+}
+.legal-list{
+  display:grid;
+  gap:10px;
+  margin:12px 0 6px 20px;
+  padding:0;
+  max-width:78ch;
+}
+.legal-list li{
+  color:var(--muted);
+  padding-left:4px;
+}
+.legal-list strong{
+  color:var(--ink);
+}
+.legal-divider{
+  height:1px;
+  background:var(--line);
+  margin:30px 0;
+}
+.legal-updated{
+  color:var(--muted);
+  border-top:1px solid var(--line);
+  margin-top:30px;
+  padding-top:16px;
+  font-size:.82rem;
+}
+.legal-card a{
+  color:var(--teal);
+}
+.legal-card a:hover{
+  text-decoration:underline;
+}
