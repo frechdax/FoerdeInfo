@@ -84,6 +84,20 @@ export default function UrlaubPage() {
           Auswahl nach der Glücksburger Gastrokarte 2026. Öffnungszeiten bitte direkt
           beim jeweiligen Restaurant prüfen.
         </p>
+        <div className="restaurant-owner-note">
+          <span className="restaurant-owner-note-icon" aria-hidden="true">💬</span>
+          <div>
+            <strong>Dein Restaurant fehlt?</strong>
+            <p>
+              Du betreibst ein Restaurant, Café oder einen gastronomischen Betrieb in
+              Glücksburg und bist noch nicht aufgeführt? Schreib mir gern, damit ich den
+              Eintrag prüfen und ergänzen kann.
+            </p>
+            <a href="mailto:sebastianschwarz1@icloud.de">
+              sebastianschwarz1@icloud.de
+            </a>
+          </div>
+        </div>
       </section>
 
       <section className="seo-card">
