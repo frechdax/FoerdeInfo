@@ -16,10 +16,25 @@ function compactIcsDate(value: string) {
   return value.replace(/-/g, "");
 }
 
-function compactIcsTime(value: string) {
-  const match = value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+function compactTime(value: string) {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
   if (!match) return null;
   return `${match[1].padStart(2, "0")}${match[2]}${match[3] || "00"}`;
+}
+
+function parseTimeRange(value: string | null) {
+  if (!value) return { start: null, end: null };
+
+  const match = value
+    .trim()
+    .match(/^(\d{1,2}:\d{2}(?::\d{2})?)(?:\s*[–—-]\s*(\d{1,2}:\d{2}(?::\d{2})?))?/);
+
+  if (!match) return { start: null, end: null };
+
+  return {
+    start: compactTime(match[1]),
+    end: match[2] ? compactTime(match[2]) : null,
+  };
 }
 
 function addDays(value: string, days: number) {
@@ -72,18 +87,33 @@ export async function GET(_request: Request, { params }: RouteContext) {
       .replace(/\.\d{3}Z$/, "Z")}`,
   ];
 
-  const eventTime = event.time ? compactIcsTime(event.time) : null;
+  const { start: startTime, end: endTime } = parseTimeRange(event.time);
+  const endDate = event.end_date || event.date;
 
-  if (eventTime) {
+  if (startTime) {
     lines.push(
-      `DTSTART;TZID=Europe/Berlin:${compactIcsDate(event.date)}T${eventTime}`
+      `DTSTART;TZID=Europe/Berlin:${compactIcsDate(event.date)}T${startTime}`
     );
+
+    if (endTime) {
+      let resolvedEndDate = endDate;
+
+      if (resolvedEndDate === event.date && endTime <= startTime) {
+        resolvedEndDate = addDays(event.date, 1);
+      }
+
+      lines.push(
+        `DTEND;TZID=Europe/Berlin:${compactIcsDate(resolvedEndDate)}T${endTime}`
+      );
+    } else if (endDate > event.date) {
+      lines.push(
+        `DTEND;TZID=Europe/Berlin:${compactIcsDate(endDate)}T${startTime}`
+      );
+    }
   } else {
     lines.push(`DTSTART;VALUE=DATE:${compactIcsDate(event.date)}`);
     lines.push(
-      `DTEND;VALUE=DATE:${compactIcsDate(
-        addDays(event.end_date || event.date, 1)
-      )}`
+      `DTEND;VALUE=DATE:${compactIcsDate(addDays(endDate, 1))}`
     );
   }
 
