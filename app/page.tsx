@@ -484,27 +484,6 @@ export default function HomePage() {
                   </div>
                 </article>
 
-                <article className="card street-hero">
-                  <div className="card-label">
-                    <span className="icon-box teal">⌖</span>
-                    MEINE STRASSE
-                  </div>
-                  <h2>{selectedStreetName || "Straße festlegen"}</h2>
-                  <div className="street-status">
-                    <span className={"dot " + (selectedStreetName ? "" : "amber")} />
-                    {selectedStreetName ? "Adresse bereit" : "Noch nicht eingerichtet"}
-                  </div>
-                  <p>
-                    {selectedHouseNumberLabel
-                      ? `Hausnummer ${selectedHouseNumberLabel} · ASF verknüpft`
-                      : "Straße und Hausnummer für lokale Termine auswählen."}
-                  </p>
-                  <div className="card-footer">
-                    <span>{selectedHouseNumberLabel || "Hausnummer fehlt"}</span>
-                    <button onClick={() => navigate("street")}>→</button>
-                  </div>
-                </article>
-
                 <article className="weather-hero">
                   <div className="weather-location">
                     <span>▦</span>
