@@ -27,6 +27,7 @@ export default function VeranstaltungenPage() {
       ]}
       ctaLabel="Veranstaltungen anzeigen"
       ctaHref="/#events"
+      canonicalPath="/veranstaltungen"
     >
       <section className="seo-card">
         <h2>Aktuelle Termine für Glücksburg</h2>
