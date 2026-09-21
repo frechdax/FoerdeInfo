@@ -111,7 +111,6 @@ export default function HomePage() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [officialNotices, setOfficialNotices] = useState<OfficialNotice[]>([]);
   const [rathausNews, setRathausNews] = useState<RathausNews[]>([]);
-  const [familyOnly, setFamilyOnly] = useState(true);
   const [civic, setCivic] = useState<CivicInfo | null>(null);
   const [loadingStreet, setLoadingStreet] = useState(false);
   const [loadingWaste, setLoadingWaste] = useState(false);
@@ -267,7 +266,6 @@ export default function HomePage() {
   );
 
   const filteredEvents = events.filter((event) => {
-    if (familyOnly && !event.family_friendly) return false;
     if (!globalSearch.trim()) return true;
     const q = globalSearch.toLocaleLowerCase("de");
     return [event.title, event.description, event.location, event.organizer]
@@ -278,9 +276,7 @@ export default function HomePage() {
   });
 
   const nextWaste = wasteEvents[0];
-  const nextEvents = events.slice(0, 4);
-  const nextFamilyEvents = events.filter((event) => event.family_friendly).slice(0, 4);
-  const currentEvents = familyOnly ? nextFamilyEvents : nextEvents;
+  const currentEvents = events.slice(0, 4);
 
   const navItems: Array<{ id: View; label: string; symbol: string }> = [
     { id: "home", label: "Start", symbol: "⌂" },
@@ -512,7 +508,7 @@ export default function HomePage() {
                     {currentEvents.slice(0, 4).map((event) => (
                       <a
                         className="event-card"
-                        href={event.source_url || "https://gluecksburg.kulturbytes.de"}
+                        href={event.source_url || "#"}
                         target="_blank"
                         rel="noreferrer"
                         key={event.id}
@@ -670,18 +666,10 @@ export default function HomePage() {
               <section className="page-heading">
                 <div className="eyebrow">kulturbytes</div>
                 <h1>Veranstaltungen</h1>
-                <p>Aktuelle Termine in Glücksburg – familienfreundliche Angebote auf Wunsch hervorgehoben.</p>
+                <p>Aktuelle Termine in Glücksburg mit direktem Link zur jeweiligen Veranstaltungsseite.</p>
               </section>
 
               <div className="toolbar">
-                <div className="filter-row">
-                  <button className={"chip " + (!familyOnly ? "active" : "")} onClick={() => setFamilyOnly(false)}>
-                    Alle
-                  </button>
-                  <button className={"chip " + (familyOnly ? "active" : "")} onClick={() => setFamilyOnly(true)}>
-                    Familienfreundlich
-                  </button>
-                </div>
                 <label>
                   Suche
                   <input
@@ -697,7 +685,7 @@ export default function HomePage() {
                 {filteredEvents.map((event) => (
                   <a
                     className="content-row"
-                    href={event.source_url || "https://gluecksburg.kulturbytes.de"}
+                    href={event.source_url || "#"}
                     target="_blank"
                     rel="noreferrer"
                     key={event.id}
