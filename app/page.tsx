@@ -1498,7 +1498,7 @@ export default function HomePage() {
               )}
 
               {view === "urlaub-freizeit" && (
-                <div className="leisure-page">
+                <div className="leisure-page" data-section="freizeit">
                   <section className="leisure-intro-card">
                     <div>
                       <span className="dashboard-kicker">Familien & Freizeit</span>
