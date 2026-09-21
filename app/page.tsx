@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 
-type View = "home" | "street" | "waste" | "events" | "rathaus";
+type View =
+  | "home"
+  | "street"
+  | "waste"
+  | "events"
+  | "rathaus"
+  | "rathaus-news"
+  | "official-notices";
 
 type Street = {
   id: string;
@@ -120,7 +127,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "rathaus"].includes(hash)) setView(hash);
+    if (["home", "street", "waste", "events", "rathaus", "rathaus-news", "official-notices"].includes(hash)) setView(hash);
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -286,6 +293,16 @@ export default function HomePage() {
     { id: "rathaus", label: "Rathaus", symbol: "▦" },
   ];
 
+  const rathausSubItems: Array<{ id: View; label: string }> = [
+    { id: "rathaus-news", label: "Aktuelles aus dem Rathaus" },
+    { id: "official-notices", label: "Amtl. Bekanntmachungen" },
+  ];
+
+  const currentLabel =
+    rathausSubItems.find((item) => item.id === view)?.label ||
+    navItems.find((item) => item.id === view)?.label ||
+    "Start";
+
   return (
     <>
       <a className="skip" href="#content">Zum Inhalt springen</a>
@@ -303,15 +320,38 @@ export default function HomePage() {
 
         <nav>
           {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={"nav-item " + (view === item.id ? "active" : "")}
-              onClick={() => navigate(item.id)}
-            >
-              {icon(item.symbol)}
-              <span>{item.label}</span>
-              {view === item.id && <span className="nav-dot" />}
-            </button>
+            <div key={item.id}>
+              <button
+                className={
+                  "nav-item " +
+                  (view === item.id ||
+                  (item.id === "rathaus" &&
+                    (view === "rathaus-news" || view === "official-notices"))
+                    ? "active"
+                    : "")
+                }
+                onClick={() => navigate(item.id)}
+              >
+                {icon(item.symbol)}
+                <span>{item.label}</span>
+                {view === item.id && <span className="nav-dot" />}
+              </button>
+
+              {item.id === "rathaus" && (
+                <div className="nav-submenu">
+                  {rathausSubItems.map((subitem) => (
+                    <button
+                      key={subitem.id}
+                      className={"nav-subitem " + (view === subitem.id ? "active" : "")}
+                      onClick={() => navigate(subitem.id)}
+                    >
+                      <span className="nav-subline" />
+                      <span>{subitem.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
 
@@ -328,7 +368,7 @@ export default function HomePage() {
           <div className="breadcrumb">
             <span>Glücksburg Direkt</span>
             <span>›</span>
-            <strong>{navItems.find((item) => item.id === view)?.label}</strong>
+            <strong>{currentLabel}</strong>
           </div>
 
           <div className="search">
@@ -466,7 +506,7 @@ export default function HomePage() {
                   <div><strong>Rathaus</strong><small>Öffnungszeiten & Termine</small></div>
                   <span>›</span>
                 </button>
-                <button onClick={() => navigate("rathaus")}>
+                <button onClick={() => navigate("official-notices")}>
                   <span className="quick-icon">!</span>
                   <div><strong>Bekanntmachungen</strong><small>Amtliche Veröffentlichungen</small></div>
                   <span>›</span>
@@ -477,7 +517,7 @@ export default function HomePage() {
                 <div>
                   <div className="section-title">
                     <h2>Neues aus dem Rathaus</h2>
-                    <button className="text-button" onClick={() => navigate("rathaus")}>Alle ansehen →</button>
+                    <button className="text-button" onClick={() => navigate("rathaus-news")}>Alle ansehen →</button>
                   </div>
                   <div className="news-grid">
                     {rathausNews.slice(0, 4).map((item) => (
@@ -724,7 +764,7 @@ export default function HomePage() {
               <section className="page-heading">
                 <div className="eyebrow">Stadt Glücksburg</div>
                 <h1>Rathaus</h1>
-                <p>Öffnungszeiten, aktuelle Rathaus-Meldungen und amtliche Bekanntmachungen – klar getrennt.</p>
+                <p>Öffnungszeiten, Kontakt und die wichtigsten Rathausbereiche.</p>
               </section>
 
               <div className="settings-grid">
@@ -753,29 +793,40 @@ export default function HomePage() {
                 </section>
 
                 <section className="card padded">
-                  <span className="badge teal">Täglich aktualisiert</span>
-                  <h2>Amtliche Bekanntmachungen</h2>
-                  <p className="muted">
-                    Direkte Verweise auf die veröffentlichten Dokumente der Stadt Glücksburg.
-                  </p>
-                  <a
-                    className="button"
-                    href="https://stadt.gluecksburg.de/rathaus/amtliche-bekanntmachungen"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Alle bei der Stadt öffnen ↗
-                  </a>
+                  <h2>Rathaus-Bereiche</h2>
+                  <div className="rathaus-menu-cards">
+                    <button className="rathaus-menu-card" onClick={() => navigate("rathaus-news")}>
+                      <span className="icon-box teal">▦</span>
+                      <div>
+                        <strong>Aktuelles aus dem Rathaus</strong>
+                        <small>Neuigkeiten und Hinweise der Stadt</small>
+                      </div>
+                      <span>›</span>
+                    </button>
+                    <button className="rathaus-menu-card" onClick={() => navigate("official-notices")}>
+                      <span className="icon-box amber">!</span>
+                      <div>
+                        <strong>Amtl. Bekanntmachungen</strong>
+                        <small>Formelle Veröffentlichungen und PDFs</small>
+                      </div>
+                      <span>›</span>
+                    </button>
+                  </div>
                 </section>
               </div>
+            </>
+          )}
 
-              <div className="section-title">
-                <h2>Aktuelles aus dem Rathaus</h2>
-                <span className="muted">{rathausNews.length} Meldungen</span>
-              </div>
+          {view === "rathaus-news" && (
+            <>
+              <section className="page-heading">
+                <div className="eyebrow">Rathaus · Stadt Glücksburg</div>
+                <h1>Aktuelles aus dem Rathaus</h1>
+                <p>Neuigkeiten, Hinweise und aktuelle Informationen der Stadt Glücksburg.</p>
+              </section>
 
               <div className="stack">
-                {rathausNews.slice(0, 10).map((item) => (
+                {rathausNews.map((item) => (
                   <a
                     className="content-row"
                     href={item.source_url}
@@ -798,13 +849,24 @@ export default function HomePage() {
                 <div className="empty">Zurzeit konnten keine Rathaus-Meldungen geladen werden.</div>
               )}
 
-              <div className="section-title">
-                <h2>Amtliche Bekanntmachungen</h2>
-                <span className="muted">{officialNotices.length} geladen</span>
+              <div className="source-note">
+                <a href="https://stadt.gluecksburg.de/rathaus/neuigkeiten" target="_blank" rel="noreferrer">
+                  Alle Neuigkeiten bei der Stadt öffnen ↗
+                </a>
               </div>
+            </>
+          )}
+
+          {view === "official-notices" && (
+            <>
+              <section className="page-heading">
+                <div className="eyebrow">Rathaus · Stadt Glücksburg</div>
+                <h1>Amtliche Bekanntmachungen</h1>
+                <p>Formelle Bekanntmachungen der Stadt Glücksburg mit direktem Link zum jeweiligen Dokument.</p>
+              </section>
 
               <div className="stack">
-                {officialNotices.slice(0, 20).map((item) => (
+                {officialNotices.map((item) => (
                   <a
                     className="content-row announcement-row"
                     href={item.source_url}
@@ -812,7 +874,7 @@ export default function HomePage() {
                     rel="noreferrer"
                     key={item.id}
                   >
-                    <span className="icon-box teal">▦</span>
+                    <span className="icon-box amber">!</span>
                     <div>
                       <span className="badge">Amtliche Bekanntmachung</span>
                       <h3>{item.title}</h3>
@@ -826,6 +888,16 @@ export default function HomePage() {
               {!officialNotices.length && (
                 <div className="empty">Zurzeit konnten keine Bekanntmachungen geladen werden.</div>
               )}
+
+              <div className="source-note">
+                <a
+                  href="https://stadt.gluecksburg.de/rathaus/amtliche-bekanntmachungen"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Alle amtlichen Bekanntmachungen bei der Stadt öffnen ↗
+                </a>
+              </div>
             </>
           )}
 
