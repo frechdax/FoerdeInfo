@@ -11,11 +11,11 @@ const googleVerification =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "GlücksburgDirekt – Müllkalender, Veranstaltungen, Familie & Rathaus",
+    default: "GlücksburgDirekt – Urlaub, Events, Familie & Müllkalender",
     template: "%s | GlücksburgDirekt",
   },
   description:
-    "Lokale Informationen für Glücksburg (Ostsee): Müllkalender, Veranstaltungen, Familienangebote, Rathaus-News und amtliche Bekanntmachungen auf einen Blick.",
+    "Urlaubstipps, Veranstaltungen, Familienangebote, Rathaus-News und Müllkalender für Glücksburg (Ostsee) – lokal, kompakt und unabhängig.",
   alternates: { canonical: "/" },
   keywords: [
     "Glücksburg",
