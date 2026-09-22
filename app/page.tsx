@@ -204,9 +204,19 @@ function trackUsageEvent(
   name: string,
   properties?: Record<string, string | number | boolean>
 ) {
-  track(name, properties);
-
   if (typeof window === "undefined") return;
+
+  let statisticsAllowed = false;
+  try {
+    const stored = JSON.parse(
+      localStorage.getItem("gluecksburg-direkt-consent-v1") || "null"
+    ) as { statistics?: boolean } | null;
+    statisticsAllowed = stored?.statistics === true;
+  } catch {}
+
+  if (!statisticsAllowed) return;
+
+  track(name, properties);
 
   const gtag = (
     window as Window & {
