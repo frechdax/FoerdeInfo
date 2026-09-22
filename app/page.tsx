@@ -834,6 +834,32 @@ export default function HomePage() {
               <small>DIREKT</small>
             </span>
           </button>
+
+          <div
+            className="header-weather"
+            aria-label={
+              weather && currentWeather
+                ? `Wetter in Glücksburg: ${currentWeather.label}, ${Math.round(weather.temperature)} Grad`
+                : "Wetter in Glücksburg wird geladen"
+            }
+            title={
+              weather && currentWeather
+                ? `${currentWeather.label} · ${Math.round(weather.temperature)}°C · ${Math.round(weather.min)}° / ${Math.round(weather.max)}°`
+                : "Wetter wird geladen"
+            }
+          >
+            <span className="header-weather-icon" aria-hidden="true">
+              {currentWeather?.icon || "🌤️"}
+            </span>
+            {weather ? (
+              <>
+                <strong>{Math.round(weather.temperature)}°</strong>
+                <span className="header-weather-label">{currentWeather?.label || "Wetter"}</span>
+              </>
+            ) : (
+              <span className="header-weather-label">…</span>
+            )}
+          </div>
         </header>
 
         <main className="main" id="content">
@@ -883,36 +909,6 @@ export default function HomePage() {
                 <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
                   Urlaub planen →
                 </button>
-              </section>
-
-              <section className="today-weather-card" aria-label="Wetter heute in Glücksburg">
-                <div className="today-weather-main">
-                  <span className="today-weather-icon" aria-hidden="true">
-                    {currentWeather?.icon || "🌤️"}
-                  </span>
-                  <div>
-                    <span className="dashboard-kicker">Heute in Glücksburg</span>
-                    <h2>{currentWeather?.label || "Wetter wird geladen"}</h2>
-                    <p>Aktuelle Wetterlage an der Flensburger Förde</p>
-                  </div>
-                </div>
-
-                {weather ? (
-                  <div className="today-weather-values">
-                    <div>
-                      <small>Temperatur</small>
-                      <strong>{Math.round(weather.temperature)}°C</strong>
-                      <span>{Math.round(weather.min)}° / {Math.round(weather.max)}°</span>
-                    </div>
-                    <div>
-                      <small>Wind</small>
-                      <strong>{Math.round(weather.windSpeed)} km/h</strong>
-                      <span>aus {windDirectionLabel(weather.windDirection)}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="today-weather-loading">Wetterdaten werden geladen …</div>
-                )}
               </section>
 
               <section className="home-discovery-section" aria-labelledby="home-discovery-title">
