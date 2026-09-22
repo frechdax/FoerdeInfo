@@ -418,45 +418,74 @@ footer span:last-child{margin-left:auto}
 }
 .home-rathaus-mini-pharmacy{
   color:inherit;
-  border-top:1px solid #e3eaec;
-  border-bottom:1px solid #e3eaec;
+  border:1px solid #d6e7e4;
+  border-radius:10px;
+  background:#f2f8f6;
   display:grid;
-  grid-template-columns:auto minmax(0,1fr);
-  align-items:center;
-  gap:2px 8px;
-  padding:6px 1px;
+  gap:2px;
+  margin-top:4px;
+  padding:6px 8px;
   min-width:0;
+  text-decoration:none;
 }
 .home-rathaus-mini-pharmacy:hover{
-  color:var(--teal);
+  border-color:#b9d7d1;
+  background:#edf7f4;
 }
-.home-rathaus-mini-pharmacy>strong{
-  font-size:.69rem;
+.home-rathaus-mini-pharmacy-head{
+  display:grid;
+  grid-template-columns:auto auto minmax(0,1fr);
+  align-items:center;
+  gap:5px;
+  min-width:0;
+}
+.home-rathaus-mini-pharmacy-head>strong{
+  color:#195e62;
+  font-size:.68rem;
+  line-height:1.15;
+}
+.home-rathaus-mini-pharmacy-live{
+  justify-self:end;
+  color:#236c4f;
+  background:#dff1e8;
+  border-radius:999px;
+  padding:2px 6px;
+  font-size:.55rem;
+  font-weight:800;
+  line-height:1.2;
   white-space:nowrap;
 }
 .home-rathaus-mini-pharmacy-name{
+  color:var(--ink);
   min-width:0;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  text-align:right;
   font-size:.72rem;
-  font-weight:700;
+  font-weight:800;
+  line-height:1.2;
 }
-.home-rathaus-mini-pharmacy>small{
+.home-rathaus-mini-pharmacy-meta,
+.home-rathaus-mini-pharmacy-time{
   color:var(--muted);
-  grid-column:1/-1;
-  font-size:.61rem;
-  line-height:1.25;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:.59rem;
+  line-height:1.2;
+}
+.home-rathaus-mini-pharmacy-time{
+  color:#4e666d;
+  font-weight:650;
 }
 .home-rathaus-mini-pharmacy--empty{
   color:var(--muted);
 }
 .home-rathaus-mini-footer{
   display:grid;
-  gap:2px;
+  gap:1px;
   margin-top:auto;
-  padding-top:5px;
+  padding-top:4px;
 }
 .home-rathaus-mini-footer>span{
   color:var(--muted);
@@ -495,7 +524,8 @@ footer span:last-child{margin-left:auto}
     padding:4px 0;
   }
   .home-rathaus-mini-pharmacy{
-    padding:5px 0;
+    margin-top:4px;
+    padding:5px 7px;
   }
   .home-rathaus-mini-footer{
     grid-template-columns:1fr auto;
@@ -537,18 +567,26 @@ footer span:last-child{margin-left:auto}
     font-size:.69rem;
   }
   .home-rathaus-mini-pharmacy{
-    gap:1px 6px;
-    padding:4px 0;
+    gap:1px;
+    margin-top:3px;
+    padding:5px 7px;
   }
-  .home-rathaus-mini-pharmacy>strong{
-    font-size:.63rem;
+  .home-rathaus-mini-pharmacy-head{
+    gap:4px;
+  }
+  .home-rathaus-mini-pharmacy-head>strong{
+    font-size:.62rem;
+  }
+  .home-rathaus-mini-pharmacy-live{
+    padding:1px 5px;
+    font-size:.51rem;
   }
   .home-rathaus-mini-pharmacy-name{
-    font-size:.66rem;
+    font-size:.65rem;
   }
-  .home-rathaus-mini-pharmacy>small{
-    font-size:.56rem;
-    line-height:1.2;
+  .home-rathaus-mini-pharmacy-meta,
+  .home-rathaus-mini-pharmacy-time{
+    font-size:.54rem;
   }
   .home-rathaus-mini-footer{
     grid-template-columns:1fr auto;
