@@ -1,11 +1,13 @@
-const fallbackBookingUrl = "https://www.booking.com/city/de/glucksburg.de.html";
+const stay22Aid = "glcksburgdirekt";
 
-const stay22Aid = process.env.NEXT_PUBLIC_STAY22_AID?.trim();
+export const stay22AffiliateEnabled = true;
 
-export const stay22AffiliateEnabled = Boolean(stay22Aid);
+const stay22Params = new URLSearchParams({
+  aid: stay22Aid,
+  address: "Glücksburg, Schleswig-Holstein, Germany",
+  source: "direct",
+  campaign: "gluecksburg-unterkunft",
+});
 
-export const stay22AccommodationUrl = stay22Aid
-  ? `https://www.stay22.com/allez/roam?aid=${encodeURIComponent(
-      stay22Aid
-    )}&address=${encodeURIComponent("Glücksburg, Schleswig-Holstein, Germany")}`
-  : fallbackBookingUrl;
+export const stay22AccommodationUrl =
+  `https://www.stay22.com/allez/roam?${stay22Params.toString()}`;
