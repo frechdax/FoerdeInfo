@@ -1428,7 +1428,7 @@ footer span:last-child{margin-left:auto}
   text-decoration:none;
 }
 
-/* Kompakte kombinierte Übersicht, z. B. "Heute in Glücksburg" */
+/* Kompakte kombinierte Übersicht für die Tagesseite */
 .seo-hero-compact-overview{
   max-width:none;
   padding:38px 0 20px;
