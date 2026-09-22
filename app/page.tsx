@@ -839,12 +839,12 @@ export default function HomePage() {
             className="header-weather"
             aria-label={
               weather && currentWeather
-                ? `Wetter in Glücksburg: ${currentWeather.label}, ${Math.round(weather.temperature)} Grad`
+                ? `Wetter in Glücksburg: ${currentWeather.label}, ${Math.round(weather.temperature)} Grad, Wind ${Math.round(weather.windSpeed)} Kilometer pro Stunde aus ${windDirectionLabel(weather.windDirection)}`
                 : "Wetter in Glücksburg wird geladen"
             }
             title={
               weather && currentWeather
-                ? `${currentWeather.label} · ${Math.round(weather.temperature)}°C · ${Math.round(weather.min)}° / ${Math.round(weather.max)}°`
+                ? `${currentWeather.label} · ${Math.round(weather.temperature)}°C · ${Math.round(weather.min)}° / ${Math.round(weather.max)}° · Wind ${Math.round(weather.windSpeed)} km/h aus ${windDirectionLabel(weather.windDirection)}`
                 : "Wetter wird geladen"
             }
           >
@@ -852,10 +852,15 @@ export default function HomePage() {
               {currentWeather?.icon || "🌤️"}
             </span>
             {weather ? (
-              <>
-                <strong>{Math.round(weather.temperature)}°</strong>
-                <span className="header-weather-label">{currentWeather?.label || "Wetter"}</span>
-              </>
+              <span className="header-weather-copy">
+                <span className="header-weather-topline">
+                  <strong>{Math.round(weather.temperature)}°</strong>
+                  <span className="header-weather-label">{currentWeather?.label || "Wetter"}</span>
+                </span>
+                <span className="header-weather-wind">
+                  {Math.round(weather.windSpeed)} km/h · {windDirectionLabel(weather.windDirection)}
+                </span>
+              </span>
             ) : (
               <span className="header-weather-label">…</span>
             )}
