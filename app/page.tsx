@@ -1251,7 +1251,6 @@ export default function HomePage() {
           {view === "events" && (
             <>
               <section className="page-heading">
-                <div className="eyebrow">kulturbytes</div>
                 <h1>Veranstaltungen</h1>
                 <p>Aktuelle Termine in Glücksburg – mit direktem Detail-Link und iCalendar-Download (.ics).</p>
               </section>
