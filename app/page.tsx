@@ -2409,6 +2409,15 @@ export default function HomePage() {
             <div className="footer-note">
               <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
               <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
+              <button
+                type="button"
+                className="footer-link"
+                onClick={() =>
+                  window.dispatchEvent(new CustomEvent("gluecksburg:open-consent"))
+                }
+              >
+                Datenschutz-Einstellungen
+              </button>
             </div>
           </footer>
         </main>
