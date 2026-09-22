@@ -1012,6 +1012,7 @@ export default function HomePage() {
               </section>
 
               <section className="home-dashboard-grid">
+                {/* Besucherbox anstelle der früheren großen Rathaus-Kachel. */}
                 <article className="dashboard-panel visitor-dashboard-card" aria-label="Urlaub in Glücksburg">
                   <div className="dashboard-panel-heading">
                     <div>
