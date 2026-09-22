@@ -177,6 +177,31 @@ function icon(label: string) {
   return <span className="nav-icon" aria-hidden="true">{label}</span>;
 }
 
+function trackUsageEvent(
+  name: string,
+  properties?: Record<string, string | number | boolean>
+) {
+  track(name, properties);
+
+  if (typeof window === "undefined") return;
+
+  const gtag = (
+    window as Window & {
+      gtag?: (...args: unknown[]) => void;
+    }
+  ).gtag;
+
+  if (!gtag) return;
+
+  const eventName = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
+
+  gtag("event", eventName, properties || {});
+}
+
 function weatherMeta(code: number, isDay: boolean) {
   if (code === 0) return { icon: isDay ? "☀️" : "🌙", label: "Klar" };
   if ([1, 2].includes(code)) return { icon: isDay ? "🌤️" : "☁️", label: "Leicht bewölkt" };
@@ -595,7 +620,7 @@ export default function HomePage() {
   }, [selectedStreet, supabase]);
 
   function navigate(next: View) {
-    track("App section opened", { section: next });
+    trackUsageEvent("App section opened", { section: next });
     setView(next);
     window.location.hash = next;
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -666,7 +691,7 @@ export default function HomePage() {
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    track("Event calendar downloaded");
+    trackUsageEvent("Event calendar downloaded");
   }
 
   async function loadWaste(targetView: View = "waste") {
@@ -704,7 +729,7 @@ export default function HomePage() {
       } catch {}
 
       setNotice("Abfuhrtermine wurden direkt bei ASF aktualisiert.");
-      track("Waste calendar loaded");
+      trackUsageEvent("Waste calendar loaded");
       if (targetView) navigate(targetView);
     }
 
@@ -1415,7 +1440,7 @@ export default function HomePage() {
                       <a
                         className="event-action-button event-calendar-button"
                         href={`/api/calendar/${event.id}`}
-                        onClick={() => track("Event calendar opened")}
+                        onClick={() => trackUsageEvent("Event calendar opened")}
                         aria-label={`${event.title} in der Kalender-App öffnen`}
                       >
                         <span className="event-action-icon" aria-hidden="true">+</span>
