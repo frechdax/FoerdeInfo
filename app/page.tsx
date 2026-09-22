@@ -398,8 +398,33 @@ export default function HomePage() {
   const [weather, setWeather] = useState<WeatherNow | null>(null);
 
   useEffect(() => {
-    const hash = window.location.hash.replace("#", "") as View;
-    if (["home", "street", "waste", "events", "urlaub", "urlaub-unterkunft", "urlaub-essen", "urlaub-freizeit", "family", "rathaus", "rathaus-news", "official-notices", "impressum"].includes(hash)) setView(hash);
+    const validViews: View[] = [
+      "home",
+      "street",
+      "waste",
+      "events",
+      "urlaub",
+      "urlaub-unterkunft",
+      "urlaub-essen",
+      "urlaub-freizeit",
+      "family",
+      "rathaus",
+      "rathaus-news",
+      "official-notices",
+      "impressum",
+    ];
+
+    function syncViewFromHash() {
+      const hash = window.location.hash.replace("#", "") as View;
+      if (validViews.includes(hash)) {
+        setView(hash);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    syncViewFromHash();
+    window.addEventListener("hashchange", syncViewFromHash);
+
     try {
       const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
       if (saved.streetId) setSelectedStreet(saved.streetId);
@@ -416,6 +441,8 @@ export default function HomePage() {
         );
       }
     } catch {}
+
+    return () => window.removeEventListener("hashchange", syncViewFromHash);
   }, []);
 
   useEffect(() => {
