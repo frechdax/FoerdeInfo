@@ -86,6 +86,24 @@ export default async function VeranstaltungenPage() {
       </section>
 
       <section className="seo-card">
+        <h2>Schnell finden</h2>
+        <p>
+          Für spontane Pläne gibt es eigene Übersichten für den heutigen Tag und das kommende
+          beziehungsweise laufende Wochenende.
+        </p>
+        <div className="seo-live-list">
+          <a className="seo-live-row" href="/heute-in-gluecksburg">
+            <strong>📍 Heute in Glücksburg</strong>
+            <span>Alle Termine des heutigen Tages →</span>
+          </a>
+          <a className="seo-live-row" href="/wochenende-in-gluecksburg">
+            <strong>📅 Dieses Wochenende</strong>
+            <span>Freitag bis Sonntag auf einen Blick →</span>
+          </a>
+        </div>
+      </section>
+
+      <section className="seo-card">
         <h2>Aktuelle Termine für Glücksburg</h2>
         <p>
           Die Veranstaltungsübersicht bündelt öffentlich verfügbare Termine und verlinkt nach
