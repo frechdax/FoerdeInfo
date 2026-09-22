@@ -2351,21 +2351,6 @@ footer span:last-child{margin-left:auto}
   accent-color:var(--teal);
   flex:0 0 auto;
 }
-.consent-reopen{
-  position:fixed;
-  left:14px;
-  bottom:14px;
-  z-index:90;
-  color:#536b77;
-  border:1px solid var(--line);
-  border-radius:999px;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 6px 18px rgba(16,46,57,.1);
-  padding:7px 10px;
-  font-size:.68rem;
-  font-weight:700;
-}
-
 @media (max-width:850px){
   .consent-banner{
     bottom:82px;
@@ -2373,10 +2358,7 @@ footer span:last-child{margin-left:auto}
     padding:16px;
     border-radius:16px;
   }
-  .consent-reopen{
-    bottom:78px;
-    left:8px;
-  }
+  
 }
 @media (max-width:580px){
   .consent-copy h2{font-size:1.05rem}
@@ -2395,5 +2377,17 @@ footer span:last-child{margin-left:auto}
   .consent-settings .consent-actions{
     display:grid;
     grid-template-columns:1fr;
+  }
+}
+
+
+.footer-note .footer-link{
+  margin-left:auto;
+}
+@media (max-width:700px){
+  .footer-note .footer-link{
+    margin-left:0;
+    justify-self:start;
+    margin-top:6px;
   }
 }
