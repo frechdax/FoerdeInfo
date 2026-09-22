@@ -2166,14 +2166,12 @@ export default function HomePage() {
                   Analyseereignisse an Vercel übermittelt.
                 </p>
                 <p>
-                  Vercel beschreibt Web Analytics als datenschutzfreundliche First-Party-Analyse
-                  ohne klassische Tracking-Cookies. Zur Unterscheidung von Besuchen kann aus
-                  technischen Anfrageinformationen ein Hash gebildet werden; nach Angaben von
-                  Vercel wird dieser nach 24 Stunden verworfen und dient nicht dazu, Besucher über
-                  verschiedene Websites hinweg zu verfolgen. Die Auswertung dient der
-                  Reichweitenmessung und Verbesserung des Angebots. Rechtsgrundlage ist
-                  Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt in der
-                  bedarfsgerechten Optimierung dieses lokalen Informationsangebots.
+                  Vercel Web Analytics wird auf GlücksburgDirekt erst geladen, wenn du im
+                  Datenschutz-Banner der Kategorie „Statistik“ zugestimmt hast. Die Einwilligung
+                  kann jederzeit über die Schaltfläche „Datenschutz“ geändert oder widerrufen
+                  werden. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Vercel beschreibt Web
+                  Analytics als datenschutzfreundliche First-Party-Analyse ohne klassische
+                  Tracking-Cookies.
                 </p>
                 <p>
                   <a
@@ -2285,14 +2283,13 @@ export default function HomePage() {
 
                 <h3>Lokale Speicherung im Browser</h3>
                 <p>
-                  Für die ausdrücklich gewünschte Funktion „Adresse und Mülltermine merken“ nutzt
-                  GlücksburgDirekt den Local Storage des Browsers. Die Speicherung dient der
-                  Bereitstellung dieser Funktion. Vercel Web Analytics verwendet für die hier
-                  eingesetzte Reichweitenmessung keine klassischen Tracking-Cookies. Google
-                  AdSense ist derzeit deaktiviert. Nach einer späteren Aktivierung können Google
-                  und weitere beteiligte Anzeigentechnologie-Anbieter – abhängig von der
-                  Einwilligung und den gewählten Einstellungen – Cookies oder vergleichbare
-                  Speichertechnologien für Werbung, Auslieferungssteuerung und Messung einsetzen.
+                  Für die ausdrücklich gewünschte Funktion „Adresse und Mülltermine merken“ sowie
+                  zum Speichern deiner Datenschutz-Auswahl nutzt GlücksburgDirekt den Local Storage
+                  des Browsers. Diese technisch erforderlichen Speicherungen dienen der
+                  Bereitstellung der gewünschten Funktionen. Vercel Web Analytics wird erst nach
+                  Zustimmung zur Kategorie „Statistik“ geladen. Google AdSense ist derzeit
+                  deaktiviert und wird auch nach einer späteren Aktivierung nur nach entsprechender
+                  Einwilligung geladen.
                 </p>
 
                 <h3>Wetterdaten von Open-Meteo</h3>
@@ -2389,7 +2386,7 @@ export default function HomePage() {
                   Datenverarbeitungen, verwendete Dienste oder die maßgebliche Rechtslage ändern.
                 </p>
 
-                <p className="legal-updated">Stand: 22. September 2026 · ergänzt um Stay22, Google AdSense und Vercel Web Analytics</p>
+                <p className="legal-updated">Stand: 22. September 2026 · ergänzt um Datenschutz-Einstellungen, Stay22, Google AdSense und Vercel Web Analytics</p>
               </section>
             </>
           )}
