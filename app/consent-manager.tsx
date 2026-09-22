@@ -20,40 +20,42 @@ export default function ConsentManager() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
+    function readStoredConsent(): ConsentChoice | null {
+      try {
+        const raw = localStorage.getItem(CONSENT_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw) as ConsentChoice;
+        if (
+          parsed?.version === 1 &&
+          typeof parsed.statistics === "boolean" &&
+          typeof parsed.marketing === "boolean"
+        ) {
+          return parsed;
+        }
+      } catch {}
+
+      return null;
+    }
+
     function handleOpenConsentSettings() {
-      setStatistics(consent?.statistics ?? false);
-      setMarketing(consent?.marketing ?? false);
+      const stored = readStoredConsent();
+      setStatistics(stored?.statistics ?? false);
+      setMarketing(stored?.marketing ?? false);
       setShowSettings(true);
     }
 
-    window.addEventListener("gluecksburg:open-consent", handleOpenConsentSettings);
-
-    try {
-      const raw = localStorage.getItem(CONSENT_KEY);
-      if (!raw) {
-        setConsent(null);
-        return;
-      }
-
-      const parsed = JSON.parse(raw) as ConsentChoice;
-      if (
-        parsed?.version === 1 &&
-        typeof parsed.statistics === "boolean" &&
-        typeof parsed.marketing === "boolean"
-      ) {
-        setConsent(parsed);
-        setStatistics(parsed.statistics);
-        setMarketing(parsed.marketing);
-      } else {
-        setConsent(null);
-      }
-    } catch {
-      setConsent(null);
+    const stored = readStoredConsent();
+    setConsent(stored);
+    if (stored) {
+      setStatistics(stored.statistics);
+      setMarketing(stored.marketing);
     }
 
+    window.addEventListener("gluecksburg:open-consent", handleOpenConsentSettings);
     return () =>
       window.removeEventListener("gluecksburg:open-consent", handleOpenConsentSettings);
-  }, [consent]);
+  }, []);
 
   function saveChoice(nextStatistics: boolean, nextMarketing: boolean) {
     const next: ConsentChoice = {
