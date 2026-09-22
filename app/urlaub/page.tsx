@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { stay22AccommodationUrl, stay22AffiliateEnabled } from "@/lib/stay22";
 import SeoLanding from "../seo-landing";
 
 export const metadata: Metadata = {
@@ -39,14 +40,16 @@ export default function UrlaubPage() {
         </p>
         <a
           className="button primary seo-cta"
-          href="https://www.booking.com/city/de/glucksburg.de.html"
+          href={stay22AccommodationUrl}
           target="_blank"
           rel="noopener noreferrer"
         >
-          Unterkünfte bei Booking.com ansehen ↗
+          Unterkünfte ansehen ↗
         </a>
         <p className="travel-note">
-          Externer Link zu Booking.com. Derzeit kein Affiliate-Link.
+          {stay22AffiliateEnabled
+            ? "Affiliate-Link über Stay22. Bei einer Buchung kann GlücksburgDirekt eine Provision erhalten. Für dich entstehen dadurch keine zusätzlichen Kosten."
+            : "Externer Link zu Booking.com. Derzeit kein Affiliate-Link."}
         </p>
       </section>
 
