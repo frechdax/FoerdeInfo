@@ -2205,3 +2205,52 @@ footer span:last-child{margin-left:auto}
     font-size:.54rem;
   }
 }
+
+
+/* Begrüßungsbox kompakter und ruhiger */
+.welcome{
+  margin:18px 0 20px;
+  padding:18px 22px;
+  border-radius:16px;
+}
+.welcome h1{
+  max-width:760px;
+  margin:0;
+  font-size:clamp(1.8rem,3vw,2.55rem);
+  line-height:1.08;
+  letter-spacing:-.035em;
+}
+.welcome .eyebrow{
+  margin-bottom:6px;
+  font-size:.8rem;
+}
+.welcome p{
+  margin:10px 0 0;
+  font-size:1rem;
+  line-height:1.45;
+}
+.welcome .wave{
+  font-size:1.5rem;
+}
+@media (max-width:580px){
+  .welcome{
+    margin:14px 0 18px;
+    padding:16px 16px;
+    border-radius:15px;
+  }
+  .welcome h1{
+    font-size:1.75rem;
+    line-height:1.08;
+  }
+  .welcome .eyebrow{
+    font-size:.74rem;
+  }
+  .welcome p{
+    margin-top:8px;
+    font-size:.9rem;
+    line-height:1.4;
+  }
+  .welcome .wave{
+    font-size:1.25rem;
+  }
+}
