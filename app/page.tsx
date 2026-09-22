@@ -2327,6 +2327,23 @@ export default function HomePage() {
                   Datenschutzbestimmungen des jeweiligen Drittanbieters.
                 </p>
 
+                <h3>Affiliate-Links über Stay22</h3>
+                <p>
+                  Im Bereich Unterkünfte verwendet GlücksburgDirekt Affiliate-Links des Anbieters
+                  Stay22. Der Aufruf von Stay22 erfolgt erst, wenn ein entsprechend gekennzeichneter
+                  Unterkunftslink bewusst angeklickt wird. Stay22 leitet anschließend zu einem
+                  passenden externen Buchungsanbieter weiter. Dabei können technisch erforderliche
+                  Verbindungsdaten, insbesondere IP-Adresse, Browser- und Geräteinformationen,
+                  Zeitpunkt, Zielort sowie Informationen zum angeklickten Link verarbeitet werden.
+                  Die Partnerkennung <strong>glcksburgdirekt</strong> dient dazu, eine mögliche
+                  Buchung GlücksburgDirekt zuzuordnen. Für Nutzer entstehen durch den Affiliate-Link
+                  keine zusätzlichen Kosten.
+                </p>
+                <p>
+                  Weitere Informationen zur Datenverarbeitung durch Stay22 findest du in den
+                  Datenschutzhinweisen des Anbieters.
+                </p>
+
                 <h3>SSL-/TLS-Verschlüsselung</h3>
                 <p>
                   Die Website wird verschlüsselt über HTTPS übertragen. Dadurch werden Daten
@@ -2374,7 +2391,7 @@ export default function HomePage() {
                   Datenverarbeitungen, verwendete Dienste oder die maßgebliche Rechtslage ändern.
                 </p>
 
-                <p className="legal-updated">Stand: 21. September 2026 · ergänzt um Google AdSense und Vercel Web Analytics</p>
+                <p className="legal-updated">Stand: 22. September 2026 · ergänzt um Stay22, Google AdSense und Vercel Web Analytics</p>
               </section>
             </>
           )}
