@@ -1531,19 +1531,6 @@ export default function HomePage() {
                       </button>
                     </article>
 
-                    <article className="travel-card">
-                      <span className="travel-card-icon" aria-hidden="true">🌤️</span>
-                      <div>
-                        <span className="dashboard-kicker">Vor Ort</span>
-                        <h2>Wetter & Tagesplanung</h2>
-                        <p>
-                          Die aktuelle Wetterlage für Glücksburg findest du direkt auf der Startseite.
-                        </p>
-                      </div>
-                      <button className="text-button" onClick={() => navigate("home")}>
-                        Zur Startseite →
-                      </button>
-                    </article>
                   </div>
 
                   <p className="travel-note">
