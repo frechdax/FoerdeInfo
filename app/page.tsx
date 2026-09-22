@@ -73,6 +73,18 @@ type CivicInfo = {
   source_url: string;
 };
 
+type PharmacyDuty = {
+  pharmacy_name: string;
+  street: string;
+  postal_code: string;
+  city: string;
+  duty_start: string;
+  duty_end: string;
+  distance_km?: number | null;
+  source_url: string;
+  last_synced_at: string;
+};
+
 type OfficialNotice = {
   id: string;
   published_at: string | null;
@@ -136,6 +148,17 @@ function formatDate(value: string) {
     month: "2-digit",
     year: "numeric",
   }).format(new Date(value + "T12:00:00"));
+}
+
+function formatDutyDateTime(value: string) {
+  return new Intl.DateTimeFormat("de-DE", {
+    timeZone: "Europe/Berlin",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(value));
 }
 
 function monthShort(value: string) {
@@ -413,6 +436,7 @@ export default function HomePage() {
   const [officialNotices, setOfficialNotices] = useState<OfficialNotice[]>([]);
   const [rathausNews, setRathausNews] = useState<RathausNews[]>([]);
   const [civic, setCivic] = useState<CivicInfo | null>(null);
+  const [pharmacyDuty, setPharmacyDuty] = useState<PharmacyDuty | null>(null);
   const [loadingStreet, setLoadingStreet] = useState(false);
   const [loadingWaste, setLoadingWaste] = useState(false);
   const [notice, setNotice] = useState("");
@@ -518,6 +542,7 @@ export default function HomePage() {
         { data: streetRows },
         { data: eventRows },
         { data: civicRows },
+        { data: pharmacyRows },
         { data: noticeRows },
         { data: rathausRows },
       ] = await Promise.all([
@@ -538,6 +563,11 @@ export default function HomePage() {
             .eq("key", "buergerbuero")
             .maybeSingle(),
           supabase
+            .from("pharmacy_duty")
+            .select("pharmacy_name,street,postal_code,city,duty_start,duty_end,distance_km,source_url,last_synced_at")
+            .eq("key", "gluecksburg")
+            .maybeSingle(),
+          supabase
             .from("official_notices")
             .select("id,published_at,title,source_url")
             .order("published_at", { ascending: false, nullsFirst: false })
@@ -552,6 +582,15 @@ export default function HomePage() {
       setStreets((streetRows ?? []) as Street[]);
       setEvents((eventRows ?? []) as EventRow[]);
       setCivic((civicRows ?? null) as CivicInfo | null);
+
+      const currentPharmacy = (pharmacyRows ?? null) as PharmacyDuty | null;
+      const now = Date.now();
+      const dutyIsCurrent =
+        currentPharmacy &&
+        new Date(currentPharmacy.duty_start).getTime() <= now &&
+        now < new Date(currentPharmacy.duty_end).getTime();
+
+      setPharmacyDuty(dutyIsCurrent ? currentPharmacy : null);
       setOfficialNotices((noticeRows ?? []) as OfficialNotice[]);
       setRathausNews((rathausRows ?? []) as RathausNews[]);
     }
@@ -967,6 +1006,31 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  {pharmacyDuty ? (
+                    <a
+                      className="home-rathaus-mini-pharmacy"
+                      href={pharmacyDuty.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Aktuelle Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
+                    >
+                      <strong>💊 Notfallapotheke</strong>
+                      <span className="home-rathaus-mini-pharmacy-name">
+                        {pharmacyDuty.pharmacy_name}
+                      </span>
+                      <small>
+                        {pharmacyDuty.street}, {pharmacyDuty.postal_code} {pharmacyDuty.city}
+                        {" · "}
+                        {formatDutyDateTime(pharmacyDuty.duty_start)}–{formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
+                      </small>
+                    </a>
+                  ) : (
+                    <div className="home-rathaus-mini-pharmacy home-rathaus-mini-pharmacy--empty">
+                      <strong>💊 Notfallapotheke</strong>
+                      <small>Aktueller Dienst wird geprüft.</small>
+                    </div>
+                  )}
+
                   <div className="home-rathaus-mini-footer">
                     <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
                     <button className="text-button" onClick={() => navigate("rathaus")}>
@@ -1098,6 +1162,31 @@ export default function HomePage() {
                       <span>{civic?.data?.opening_hours?.friday || "—"}</span>
                     </div>
                   </div>
+
+                  {pharmacyDuty ? (
+                    <a
+                      className="home-rathaus-mini-pharmacy"
+                      href={pharmacyDuty.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Aktuelle Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
+                    >
+                      <strong>💊 Notfallapotheke</strong>
+                      <span className="home-rathaus-mini-pharmacy-name">
+                        {pharmacyDuty.pharmacy_name}
+                      </span>
+                      <small>
+                        {pharmacyDuty.street}, {pharmacyDuty.postal_code} {pharmacyDuty.city}
+                        {" · "}
+                        {formatDutyDateTime(pharmacyDuty.duty_start)}–{formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
+                      </small>
+                    </a>
+                  ) : (
+                    <div className="home-rathaus-mini-pharmacy home-rathaus-mini-pharmacy--empty">
+                      <strong>💊 Notfallapotheke</strong>
+                      <small>Aktueller Dienst wird geprüft.</small>
+                    </div>
+                  )}
 
                   <div className="home-rathaus-mini-footer">
                     <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
