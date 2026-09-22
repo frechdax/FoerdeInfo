@@ -1027,6 +1027,22 @@ export default function HomePage() {
                     für deinen Aufenthalt an der Flensburger Förde.
                   </p>
 
+                  <div className="visitor-dashboard-links" aria-label="Urlaub Unterbereiche">
+                    {vacationSubItems.map((subitem) => (
+                      <button
+                        className="visitor-dashboard-link"
+                        key={subitem.id}
+                        onClick={() => navigate(subitem.id)}
+                      >
+                        <span className="visitor-dashboard-link-icon" aria-hidden="true">
+                          {subitem.symbol}
+                        </span>
+                        <span>{subitem.label}</span>
+                        <span aria-hidden="true">›</span>
+                      </button>
+                    ))}
+                  </div>
+
                   <div className="visitor-dashboard-footer">
                     <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
                       Urlaub planen →
