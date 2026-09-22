@@ -1,6 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Analytics } from "@vercel/analytics/next";
 import AdSenseLoader from "./adsense-loader";
 
@@ -58,21 +57,12 @@ export const metadata: Metadata = {
     title: "GlücksburgDirekt – Dein lokaler Überblick",
     description:
       "Müllkalender, Veranstaltungen, Familie und Rathausinformationen für Glücksburg (Ostsee).",
-    images: [
-      {
-        url: "/images/gluecksburg-header.webp",
-        width: 1400,
-        height: 271,
-        alt: "Schloss Glücksburg – Wahrzeichen von Glücksburg an der Ostsee",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "GlücksburgDirekt",
     description:
       "Müllkalender, Veranstaltungen, Familie und Rathausinformationen für Glücksburg.",
-    images: ["/images/gluecksburg-header.webp"],
   },
   ...(googleVerification
     ? { verification: { google: googleVerification } }
@@ -93,21 +83,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="de">
       <body>
-        <a className="global-castle-hero" href="/" aria-label="GlücksburgDirekt – Startseite">
-          <Image
-            src="/images/gluecksburg-header.webp"
-            alt="Schloss Glücksburg – Wahrzeichen von Glücksburg"
-            fill
-            priority
-            sizes="(max-width: 850px) 100vw, calc(100vw - 256px)"
-            className="global-castle-hero-image"
-          />
-          <span className="global-castle-hero-shade" aria-hidden="true" />
-          <span className="global-castle-hero-caption">
-            <strong>Glücksburg</strong>
-            <small>Schloss an der Flensburger Förde</small>
-          </span>
-        </a>
         {children}
         <script
           type="application/ld+json"
