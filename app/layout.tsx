@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import AdSenseLoader from "./adsense-loader";
+import ConsentManager from "./consent-manager";
 
 const siteUrl = "https://gluecksburg-direkt.vercel.app";
 const googleVerification =
@@ -88,8 +87,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData) }}
         />
-        <Analytics />
-        <AdSenseLoader />
+        <ConsentManager />
       </body>
     </html>
   );
