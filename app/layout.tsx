@@ -11,7 +11,7 @@ const googleVerification =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "GlücksburgDirekt – Urlaub, Events, Familie & Müllkalender",
+    default: "GlücksburgDirekt – Veranstaltungen, Freizeit, Urlaub und mehr",
     template: "%s | GlücksburgDirekt",
   },
   description:
