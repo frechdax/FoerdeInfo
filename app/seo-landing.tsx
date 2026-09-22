@@ -6,6 +6,7 @@ type SeoLandingProps = {
   ctaLabel: string;
   ctaHref: string;
   canonicalPath: string;
+  compactOverview?: boolean;
   children?: React.ReactNode;
 };
 
@@ -17,6 +18,7 @@ export default function SeoLanding({
   ctaLabel,
   ctaHref,
   canonicalPath,
+  compactOverview = false,
   children,
 }: SeoLandingProps) {
   const breadcrumbData = {
@@ -49,19 +51,30 @@ export default function SeoLanding({
           <a className="seo-back" href="/">Zur Übersicht</a>
         </header>
 
-        <section className="seo-hero">
+        <section className={"seo-hero " + (compactOverview ? "seo-hero-compact-overview" : "")}>
           <div className="eyebrow">{eyebrow}</div>
           <h1>{title}</h1>
           <p>{intro}</p>
+
+          {compactOverview ? (
+            <div className="seo-hero-overview" aria-label="Auf GlücksburgDirekt findest du">
+              {bullets.map((bullet) => (
+                <span key={bullet}>✓ {bullet}</span>
+              ))}
+            </div>
+          ) : null}
+
           <a className="button primary seo-cta" href={ctaHref}>{ctaLabel}</a>
         </section>
 
-        <section className="seo-card">
-          <h2>Auf GlücksburgDirekt findest du</h2>
-          <ul>
-            {bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
-          </ul>
-        </section>
+        {!compactOverview ? (
+          <section className="seo-card">
+            <h2>Auf GlücksburgDirekt findest du</h2>
+            <ul>
+              {bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
+            </ul>
+          </section>
+        ) : null}
 
         {children}
 
