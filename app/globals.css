@@ -357,6 +357,114 @@ footer span:last-child{margin-left:auto}
   color:#26737b;
   font-weight:700;
 }
+
+.home-intro-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.7fr) minmax(285px,.72fr);
+  gap:18px;
+  align-items:stretch;
+  margin:25px 0;
+}
+.home-intro-grid .welcome{
+  margin:0;
+  min-height:100%;
+}
+.home-rathaus-mini{
+  border:1px solid #d7e4e6;
+  border-radius:18px;
+  background:rgba(255,255,255,.82);
+  box-shadow:0 8px 24px rgba(16,46,57,.05);
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  padding:18px 19px 15px;
+}
+.home-rathaus-mini-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:11px;
+}
+.home-rathaus-mini-heading h2{
+  margin-top:2px;
+  font-size:1.18rem;
+}
+.home-rathaus-mini-icon{
+  font-size:1.55rem;
+  line-height:1;
+  opacity:.82;
+}
+.home-rathaus-mini-hours{
+  border-top:1px solid #e3eaec;
+  border-bottom:1px solid #e3eaec;
+  display:grid;
+  gap:0;
+}
+.home-rathaus-mini-hours>div{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:7px 1px;
+  font-size:.8rem;
+}
+.home-rathaus-mini-hours strong{
+  font-size:.78rem;
+}
+.home-rathaus-mini-hours span{
+  color:var(--muted);
+  text-align:right;
+}
+.home-rathaus-mini-footer{
+  display:grid;
+  gap:2px;
+  margin-top:auto;
+  padding-top:9px;
+}
+.home-rathaus-mini-footer>span{
+  color:var(--muted);
+  font-size:.72rem;
+}
+.home-rathaus-mini-footer .text-button{
+  min-height:34px;
+  padding:0;
+  font-size:.8rem;
+  font-weight:700;
+}
+
+@media (max-width:1050px){
+  .home-intro-grid{
+    grid-template-columns:minmax(0,1.45fr) minmax(260px,.8fr);
+  }
+}
+@media (max-width:850px){
+  .home-intro-grid{
+    grid-template-columns:1fr;
+    margin:20px 0;
+  }
+  .home-rathaus-mini{
+    padding:16px 18px 13px;
+  }
+  .home-rathaus-mini-footer{
+    grid-template-columns:1fr auto;
+    align-items:center;
+    gap:12px;
+  }
+}
+@media (max-width:580px){
+  .home-intro-grid{
+    gap:12px;
+    margin:17px 0;
+  }
+  .home-intro-grid .welcome{margin:0}
+  .home-rathaus-mini-footer{
+    grid-template-columns:1fr;
+    align-items:start;
+    gap:0;
+  }
+}
+
 .location-pill{
   border-color:#c9dfe2;
   box-shadow:0 6px 18px rgba(16,46,57,.07);
