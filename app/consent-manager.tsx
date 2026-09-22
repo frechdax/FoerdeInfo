@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import AdSenseLoader from "./adsense-loader";
@@ -13,13 +13,37 @@ type ConsentChoice = {
 };
 
 const CONSENT_KEY = "gluecksburg-direkt-consent-v1";
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-QQLYW4KZYN";
+const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-QQLYW4KZYN";
+
+function googleTag() {
+  if (typeof window === "undefined") return null;
+
+  return (
+    window as Window & {
+      gtag?: (...args: unknown[]) => void;
+    }
+  ).gtag ?? null;
+}
+
+function updateGoogleConsent(statistics: boolean, marketing: boolean) {
+  const gtag = googleTag();
+  if (!gtag) return;
+
+  gtag("consent", "update", {
+    analytics_storage: statistics ? "granted" : "denied",
+    ad_storage: marketing ? "granted" : "denied",
+    ad_user_data: marketing ? "granted" : "denied",
+    ad_personalization: marketing ? "granted" : "denied",
+  });
+}
 
 export default function ConsentManager() {
   const [consent, setConsent] = useState<ConsentChoice | null | undefined>(undefined);
   const [showSettings, setShowSettings] = useState(false);
   const [statistics, setStatistics] = useState(false);
   const [marketing, setMarketing] = useState(false);
+  const lastPageLocation = useRef<string | null>(null);
 
   useEffect(() => {
     function readStoredConsent(): ConsentChoice | null {
@@ -52,6 +76,9 @@ export default function ConsentManager() {
     if (stored) {
       setStatistics(stored.statistics);
       setMarketing(stored.marketing);
+      updateGoogleConsent(stored.statistics, stored.marketing);
+    } else {
+      updateGoogleConsent(false, false);
     }
 
     window.addEventListener("gluecksburg:open-consent", handleOpenConsentSettings);
@@ -74,6 +101,7 @@ export default function ConsentManager() {
     setStatistics(nextStatistics);
     setMarketing(nextMarketing);
     setConsent(next);
+    updateGoogleConsent(nextStatistics, nextMarketing);
     setShowSettings(false);
   }
 
@@ -82,6 +110,45 @@ export default function ConsentManager() {
     setMarketing(consent?.marketing ?? false);
     setShowSettings(true);
   }
+
+  useEffect(() => {
+    if (!consent?.statistics) {
+      lastPageLocation.current = null;
+      return;
+    }
+
+    const gtag = googleTag();
+    if (!gtag) return;
+
+    gtag("js", new Date());
+    gtag("config", GA_MEASUREMENT_ID, {
+      send_page_view: false,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+    });
+
+    function sendPageView() {
+      const currentLocation = window.location.href;
+      if (lastPageLocation.current === currentLocation) return;
+
+      gtag("event", "page_view", {
+        page_title: document.title,
+        page_location: currentLocation,
+        page_referrer: lastPageLocation.current || document.referrer || undefined,
+      });
+
+      lastPageLocation.current = currentLocation;
+    }
+
+    sendPageView();
+    window.addEventListener("hashchange", sendPageView);
+    window.addEventListener("popstate", sendPageView);
+
+    return () => {
+      window.removeEventListener("hashchange", sendPageView);
+      window.removeEventListener("popstate", sendPageView);
+    };
+  }, [consent?.statistics]);
 
   const bannerVisible = consent === null || showSettings;
 
@@ -94,15 +161,7 @@ export default function ConsentManager() {
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
             strategy="afterInteractive"
           />
-          <Script id="google-analytics-4" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){window.dataLayer.push(arguments);}
-              window.gtag = window.gtag || gtag;
-              gtag('js', new Date());
-              gtag('config', '${GA_MEASUREMENT_ID}');
-            `}
-          </Script>
+
         </>
       ) : null}
       {consent?.marketing ? <AdSenseLoader /> : null}
