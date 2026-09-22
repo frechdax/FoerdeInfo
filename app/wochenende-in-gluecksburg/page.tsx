@@ -87,6 +87,7 @@ export default async function WochenendeInGluecksburgPage() {
       ctaLabel="Vollständigen Kalender öffnen"
       ctaHref="/#events"
       canonicalPath="/wochenende-in-gluecksburg"
+      compactOverview
     >
       <section className="seo-card">
         <h2>{events.length ? `${events.length} Termine am Wochenende` : "Noch keine Termine gefunden"}</h2>
