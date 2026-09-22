@@ -1501,11 +1501,65 @@ footer span:last-child{margin-left:auto}
 }
 .seo-live-row a:hover{text-decoration:underline}
 
+.seo-event-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex:0 0 auto;
+  margin-left:auto;
+}
+.seo-live-row .seo-event-button{
+  min-height:40px;
+  border:1px solid #d5e3e5;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:8px 12px;
+  text-decoration:none;
+  white-space:nowrap;
+  font-size:.8rem;
+  font-weight:700;
+}
+.seo-live-row .seo-event-calendar-button{
+  color:#176c73;
+  background:#edf7f6;
+  border-color:#cfe6e3;
+}
+.seo-live-row .seo-event-calendar-button:hover{
+  background:#e4f2f0;
+  border-color:#bcdcd8;
+  text-decoration:none;
+}
+.seo-live-row .seo-event-source-button{
+  color:#425b66;
+  background:#fff;
+}
+.seo-live-row .seo-event-source-button:hover{
+  color:var(--navy);
+  background:#f7faf9;
+  border-color:#c7d8dc;
+  text-decoration:none;
+}
+
 @media (max-width:620px){
   .seo-live-row{
     align-items:flex-start;
     flex-direction:column;
-    gap:7px;
+    gap:10px;
+  }
+  .seo-event-actions{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(0,1fr);
+    width:100%;
+    margin-left:0;
+  }
+  .seo-live-row .seo-event-button{
+    width:100%;
+    min-height:42px;
   }
 }
 
