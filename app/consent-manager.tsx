@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import AdSenseLoader from "./adsense-loader";
 
@@ -12,6 +13,7 @@ type ConsentChoice = {
 };
 
 const CONSENT_KEY = "gluecksburg-direkt-consent-v1";
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-QQLYW4KZYN";
 
 export default function ConsentManager() {
   const [consent, setConsent] = useState<ConsentChoice | null | undefined>(undefined);
@@ -85,7 +87,24 @@ export default function ConsentManager() {
 
   return (
     <>
-      {consent?.statistics ? <Analytics /> : null}
+      {consent?.statistics ? (
+        <>
+          <Analytics />
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics-4" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){window.dataLayer.push(arguments);}
+              window.gtag = window.gtag || gtag;
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            `}
+          </Script>
+        </>
+      ) : null}
       {consent?.marketing ? <AdSenseLoader /> : null}
 
       {bannerVisible ? (
@@ -120,7 +139,7 @@ export default function ConsentManager() {
               <label className="consent-option">
                 <span>
                   <strong>Statistik</strong>
-                  <small>Vercel Web Analytics zur anonymisierten Reichweitenmessung.</small>
+                  <small>Vercel Web Analytics und Google Analytics 4 zur Reichweiten- und Nutzungsanalyse.</small>
                 </span>
                 <input
                   type="checkbox"
