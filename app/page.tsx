@@ -915,6 +915,54 @@ export default function HomePage() {
                 )}
               </section>
 
+              <section className="home-discovery-section" aria-labelledby="home-discovery-title">
+                <div className="home-discovery-heading">
+                  <div>
+                    <span className="dashboard-kicker">Neu entdecken</span>
+                    <h2 id="home-discovery-title">Glücksburg entdecken</h2>
+                    <p>Aktuelle Termine, Wochenendtipps und die wichtigsten Ziele für deinen Aufenthalt.</p>
+                  </div>
+                </div>
+
+                <div className="home-discovery-grid">
+                  <a className="home-discovery-card" href="/heute-in-gluecksburg">
+                    <span className="home-discovery-icon" aria-hidden="true">📍</span>
+                    <span>
+                      <small>Aktuell</small>
+                      <strong>Heute in Glücksburg</strong>
+                      <em>Was heute los ist →</em>
+                    </span>
+                  </a>
+
+                  <a className="home-discovery-card" href="/wochenende-in-gluecksburg">
+                    <span className="home-discovery-icon" aria-hidden="true">📅</span>
+                    <span>
+                      <small>Planen</small>
+                      <strong>Dieses Wochenende</strong>
+                      <em>Freitag bis Sonntag →</em>
+                    </span>
+                  </a>
+
+                  <a className="home-discovery-card" href="/sehenswuerdigkeiten-gluecksburg">
+                    <span className="home-discovery-icon" aria-hidden="true">🏰</span>
+                    <span>
+                      <small>Entdecken</small>
+                      <strong>Sehenswürdigkeiten</strong>
+                      <em>Die Highlights der Stadt →</em>
+                    </span>
+                  </a>
+
+                  <a className="home-discovery-card" href="/straende-gluecksburg">
+                    <span className="home-discovery-icon" aria-hidden="true">🏖️</span>
+                    <span>
+                      <small>Ostsee</small>
+                      <strong>Strände in Glücksburg</strong>
+                      <em>Sandwig, Holnis & Quellental →</em>
+                    </span>
+                  </a>
+                </div>
+              </section>
+
               <section className="home-dashboard-grid">
                 <article className="dashboard-panel rathaus-dashboard-card">
                   <div className="dashboard-panel-heading">
