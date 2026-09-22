@@ -158,7 +158,7 @@ function formatDutyDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(new Date(value));
+  }).format(new Date(value)).replace(",", "");
 }
 
 function monthShort(value: string) {
@@ -1006,6 +1006,13 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  <div className="home-rathaus-mini-footer">
+                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
+                    <button className="text-button" onClick={() => navigate("rathaus")}>
+                      Rathaus öffnen →
+                    </button>
+                  </div>
+
                   {pharmacyDuty ? (
                     <a
                       className="home-rathaus-mini-pharmacy"
@@ -1014,29 +1021,32 @@ export default function HomePage() {
                       rel="noreferrer"
                       aria-label={`Aktuelle Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
                     >
-                      <strong>💊 Notfallapotheke</strong>
+                      <div className="home-rathaus-mini-pharmacy-head">
+                        <span aria-hidden="true">💊</span>
+                        <strong>Notfallapotheke</strong>
+                        <span className="home-rathaus-mini-pharmacy-live">Jetzt im Dienst</span>
+                      </div>
                       <span className="home-rathaus-mini-pharmacy-name">
                         {pharmacyDuty.pharmacy_name}
                       </span>
-                      <small>
-                        {pharmacyDuty.street}, {pharmacyDuty.postal_code} {pharmacyDuty.city}
-                        {" · "}
-                        {formatDutyDateTime(pharmacyDuty.duty_start)}–{formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
-                      </small>
+                      <span className="home-rathaus-mini-pharmacy-meta">
+                        {pharmacyDuty.street} · {pharmacyDuty.postal_code} {pharmacyDuty.city}
+                      </span>
+                      <span className="home-rathaus-mini-pharmacy-time">
+                        Notdienst: {formatDutyDateTime(pharmacyDuty.duty_start)} – {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
+                      </span>
                     </a>
                   ) : (
                     <div className="home-rathaus-mini-pharmacy home-rathaus-mini-pharmacy--empty">
-                      <strong>💊 Notfallapotheke</strong>
-                      <small>Aktueller Dienst wird geprüft.</small>
+                      <div className="home-rathaus-mini-pharmacy-head">
+                        <span aria-hidden="true">💊</span>
+                        <strong>Notfallapotheke</strong>
+                      </div>
+                      <span className="home-rathaus-mini-pharmacy-time">
+                        Aktueller Dienst wird geprüft.
+                      </span>
                     </div>
                   )}
-
-                  <div className="home-rathaus-mini-footer">
-                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
-                    <button className="text-button" onClick={() => navigate("rathaus")}>
-                      Rathaus öffnen →
-                    </button>
-                  </div>
                 </article>
               </div>
 
@@ -1163,6 +1173,13 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  <div className="home-rathaus-mini-footer">
+                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
+                    <button className="text-button" onClick={() => navigate("rathaus")}>
+                      Rathaus öffnen →
+                    </button>
+                  </div>
+
                   {pharmacyDuty ? (
                     <a
                       className="home-rathaus-mini-pharmacy"
@@ -1171,29 +1188,32 @@ export default function HomePage() {
                       rel="noreferrer"
                       aria-label={`Aktuelle Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
                     >
-                      <strong>💊 Notfallapotheke</strong>
+                      <div className="home-rathaus-mini-pharmacy-head">
+                        <span aria-hidden="true">💊</span>
+                        <strong>Notfallapotheke</strong>
+                        <span className="home-rathaus-mini-pharmacy-live">Jetzt im Dienst</span>
+                      </div>
                       <span className="home-rathaus-mini-pharmacy-name">
                         {pharmacyDuty.pharmacy_name}
                       </span>
-                      <small>
-                        {pharmacyDuty.street}, {pharmacyDuty.postal_code} {pharmacyDuty.city}
-                        {" · "}
-                        {formatDutyDateTime(pharmacyDuty.duty_start)}–{formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
-                      </small>
+                      <span className="home-rathaus-mini-pharmacy-meta">
+                        {pharmacyDuty.street} · {pharmacyDuty.postal_code} {pharmacyDuty.city}
+                      </span>
+                      <span className="home-rathaus-mini-pharmacy-time">
+                        Notdienst: {formatDutyDateTime(pharmacyDuty.duty_start)} – {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
+                      </span>
                     </a>
                   ) : (
                     <div className="home-rathaus-mini-pharmacy home-rathaus-mini-pharmacy--empty">
-                      <strong>💊 Notfallapotheke</strong>
-                      <small>Aktueller Dienst wird geprüft.</small>
+                      <div className="home-rathaus-mini-pharmacy-head">
+                        <span aria-hidden="true">💊</span>
+                        <strong>Notfallapotheke</strong>
+                      </div>
+                      <span className="home-rathaus-mini-pharmacy-time">
+                        Aktueller Dienst wird geprüft.
+                      </span>
                     </div>
                   )}
-
-                  <div className="home-rathaus-mini-footer">
-                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
-                    <button className="text-button" onClick={() => navigate("rathaus")}>
-                      Rathaus öffnen →
-                    </button>
-                  </div>
                 </article>
 
                 <section className="dashboard-panel">
