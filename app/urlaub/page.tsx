@@ -103,6 +103,24 @@ export default function UrlaubPage() {
       </section>
 
       <section className="seo-card">
+        <h2>Glücksburg entdecken</h2>
+        <p>
+          Für die Urlaubsplanung gibt es zusätzlich eigene Übersichten zu den wichtigsten
+          Sehenswürdigkeiten und den Strandbereichen in Glücksburg.
+        </p>
+        <div className="seo-live-list">
+          <a className="seo-live-row" href="/sehenswuerdigkeiten-gluecksburg">
+            <strong>🏰 Sehenswürdigkeiten in Glücksburg</strong>
+            <span>Schloss, Natur, Planetarium und weitere Highlights →</span>
+          </a>
+          <a className="seo-live-row" href="/straende-gluecksburg">
+            <strong>🏖️ Strände in Glücksburg</strong>
+            <span>Sandwig, Holnis und Quellental vergleichen →</span>
+          </a>
+        </div>
+      </section>
+
+      <section className="seo-card">
         <h2>Was ist während des Urlaubs in Glücksburg los?</h2>
         <p>
           Im Veranstaltungskalender findest du aktuelle Termine in Glücksburg – von Kultur
