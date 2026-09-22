@@ -571,6 +571,41 @@ footer span:last-child{margin-left:auto}
 }
 .rathaus-dashboard-card .dashboard-office-hours span{color:#d3e4e9}
 .rathaus-dashboard-card .text-button{color:#fff}
+
+.visitor-dashboard-card{
+  background:linear-gradient(145deg,#eef8f8 0%,#f8fbfa 62%,#eef5f7 100%);
+  border-color:#cfe2e4;
+}
+.visitor-dashboard-card .dashboard-kicker{color:#176c73}
+.visitor-dashboard-card .dashboard-main-icon{
+  background:#fff;
+  border:1px solid #d7e7e9;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:48px;
+  min-width:48px;
+  height:48px;
+  box-shadow:0 5px 16px rgba(16,46,57,.06);
+  font-size:1.5rem;
+}
+.visitor-dashboard-copy{
+  color:var(--muted);
+  margin:2px 0 18px;
+  max-width:52ch;
+  font-size:.9rem;
+  line-height:1.55;
+}
+.visitor-dashboard-footer{
+  border-top:1px solid #d8e7e8;
+  margin-top:auto;
+  padding-top:14px;
+}
+.visitor-dashboard-footer .visitor-teaser-button{
+  min-height:42px;
+}
+
 .dashboard-card-footer{
   border-top:1px solid rgba(255,255,255,.16);
   display:flex;
