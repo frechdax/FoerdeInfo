@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { track } from "@vercel/analytics";
+import { stay22AccommodationUrl, stay22AffiliateEnabled } from "@/lib/stay22";
 
 type View =
   | "home"
@@ -1421,13 +1422,20 @@ export default function HomePage() {
                     </p>
                     <a
                       className="button primary travel-primary-action"
-                      href="https://www.booking.com/city/de/glucksburg.de.html"
+                      href={stay22AccommodationUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       Unterkünfte ansehen ↗
                     </a>
-                    <small>Externer Link zu Booking.com. Derzeit kein Affiliate-Link.</small>
+                    {stay22AffiliateEnabled ? (
+                      <small>
+                        Affiliate-Link über Stay22. Bei einer Buchung kann GlücksburgDirekt eine
+                        Provision erhalten. Für dich entstehen dadurch keine zusätzlichen Kosten.
+                      </small>
+                    ) : (
+                      <small>Externer Link zu Booking.com. Derzeit kein Affiliate-Link.</small>
+                    )}
                   </div>
                 </section>
               )}
