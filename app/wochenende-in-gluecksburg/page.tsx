@@ -5,7 +5,7 @@ import { createPublicServerSupabase } from "@/lib/supabase-public-server";
 export const metadata: Metadata = {
   title: "Dieses Wochenende in Glücksburg – Veranstaltungen",
   description:
-    "Was ist dieses Wochenende in Glücksburg los? Veranstaltungen und Familienangebote von Freitag bis Sonntag aktuell zusammengestellt.",
+    "Was ist dieses Wochenende in Glücksburg los? Veranstaltungen und Termine von Freitag bis Sonntag aktuell zusammengestellt.",
   alternates: { canonical: "/wochenende-in-gluecksburg" },
   openGraph: {
     title: "Dieses Wochenende in Glücksburg",
@@ -77,10 +77,10 @@ export default async function WochenendeInGluecksburgPage() {
     <SeoLanding
       eyebrow={`${shortDate(start)} – ${shortDate(end)}`}
       title="Dieses Wochenende in Glücksburg"
-      intro="Freitag bis Sonntag auf einen Blick: aktuelle Veranstaltungen, Familienangebote und lokale Termine in Glücksburg."
+      intro="Freitag bis Sonntag auf einen Blick: aktuelle Veranstaltungen und lokale Termine in Glücksburg."
       bullets={[
         "Veranstaltungen von Freitag bis Sonntag",
-        "Familienfreundliche Termine",
+        "Vielfältige Veranstaltungen und Termine",
         "Datum, Uhrzeit und Ort kompakt",
         "Direkte Links zu den Veranstaltern",
       ]}
