@@ -918,7 +918,7 @@ export default function HomePage() {
                   </div>
                 </section>
 
-                <article className="home-rathaus-mini" aria-label="Rathaus Glücksburg">
+                <article className="home-rathaus-mini home-rathaus-mini--intro" aria-label="Rathaus Glücksburg">
                   <div className="home-rathaus-mini-heading">
                     <div>
                       <span className="dashboard-kicker">Stadt Glücksburg</span>
@@ -1030,6 +1030,38 @@ export default function HomePage() {
                   <div className="visitor-dashboard-footer">
                     <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
                       Urlaub planen →
+                    </button>
+                  </div>
+                </article>
+
+                <article className="home-rathaus-mini home-rathaus-mini--mobile-dashboard" aria-label="Rathaus Glücksburg">
+                  <div className="home-rathaus-mini-heading">
+                    <div>
+                      <span className="dashboard-kicker">Stadt Glücksburg</span>
+                      <h2>Rathaus</h2>
+                    </div>
+                    <span className="home-rathaus-mini-icon" aria-hidden="true">🏛️</span>
+                  </div>
+
+                  <div className="home-rathaus-mini-hours">
+                    <div>
+                      <strong>Montag</strong>
+                      <span>{civic?.data?.opening_hours?.monday || "—"}</span>
+                    </div>
+                    <div>
+                      <strong>Dienstag</strong>
+                      <span>{civic?.data?.opening_hours?.tuesday || "—"}</span>
+                    </div>
+                    <div>
+                      <strong>Freitag</strong>
+                      <span>{civic?.data?.opening_hours?.friday || "—"}</span>
+                    </div>
+                  </div>
+
+                  <div className="home-rathaus-mini-footer">
+                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
+                    <button className="text-button" onClick={() => navigate("rathaus")}>
+                      Rathaus öffnen →
                     </button>
                   </div>
                 </article>
