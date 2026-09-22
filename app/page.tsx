@@ -2340,8 +2340,9 @@ export default function HomePage() {
                   keine zusätzlichen Kosten.
                 </p>
                 <p>
-                  Weitere Informationen zur Datenverarbeitung durch Stay22 findest du in den
-                  Datenschutzhinweisen des Anbieters.
+                  <a href="https://www.stay22.com/privacy" target="_blank" rel="noreferrer">
+                    Datenschutzhinweise von Stay22 ↗
+                  </a>
                 </p>
 
                 <h3>SSL-/TLS-Verschlüsselung</h3>
