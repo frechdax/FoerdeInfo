@@ -76,9 +76,25 @@ export default async function HeuteInGluecksburgPage() {
                     {event.location ? ` · ${event.location}` : ""}
                   </span>
                 </div>
-                {event.source_url ? (
-                  <a href={event.source_url} target="_blank" rel="noreferrer">Details ↗</a>
-                ) : null}
+                <div className="seo-event-actions">
+                  <a
+                    className="seo-event-button seo-event-calendar-button"
+                    href={`/api/calendar/${event.id}`}
+                    download
+                  >
+                    📅 Kalender
+                  </a>
+                  {event.source_url ? (
+                    <a
+                      className="seo-event-button seo-event-source-button"
+                      href={event.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Mehr erfahren ↗
+                    </a>
+                  ) : null}
+                </div>
               </article>
             ))}
           </div>
