@@ -2203,8 +2203,10 @@ export default function HomePage() {
                   Verantwortlicher für die Datenverarbeitung auf dieser Website ist der oben
                   genannte Betreiber. Die Website ist so ausgelegt, dass nur die für Betrieb und
                   angeforderte Funktionen erforderlichen Daten verarbeitet werden. Für eine
-                  datensparsame Reichweiten- und Nutzungsanalyse wird Vercel Web Analytics
-                  eingesetzt. Google AdSense ist technisch vorbereitet, die Auslieferung von
+                  Reichweiten- und Nutzungsanalyse werden Vercel Web Analytics und Google
+                  Analytics 4 eingesetzt. Beide Analysedienste werden erst nach deiner Zustimmung
+                  zur Kategorie „Statistik“ geladen. Google AdSense ist technisch vorbereitet, die
+                  Auslieferung von
                   Werbeanzeigen ist derzeit jedoch noch deaktiviert. Vor einer Aktivierung werden
                   die hierfür erforderlichen Einwilligungs- und Datenschutzmechanismen umgesetzt.
                 </p>
@@ -2251,6 +2253,32 @@ export default function HomePage() {
                     rel="noreferrer"
                   >
                     Datenschutzhinweise von Vercel ↗
+                  </a>
+                </p>
+
+                <h3>Google Analytics 4</h3>
+                <p>
+                  GlücksburgDirekt nutzt Google Analytics 4 von Google zur Auswertung der Nutzung
+                  dieser Website. Dabei können insbesondere aufgerufene Seiten, technische
+                  Geräte- und Browserinformationen, ungefähre Standortinformationen sowie
+                  Nutzungs- und Interaktionsdaten verarbeitet werden. Google Analytics 4 kann
+                  hierfür Cookies oder vergleichbare Technologien einsetzen.
+                </p>
+                <p>
+                  Google Analytics 4 wird erst geladen, wenn du im Datenschutz-Banner der
+                  Kategorie „Statistik“ zugestimmt hast. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a
+                  DSGVO. Deine Einwilligung kannst du jederzeit über die Datenschutz-Einstellungen
+                  mit Wirkung für die Zukunft ändern oder widerrufen. Straßennamen oder andere
+                  von dir im Müllkalender ausgewählte Adressangaben werden nicht gezielt als
+                  Analyseparameter an Google Analytics übermittelt.
+                </p>
+                <p>
+                  <a
+                    href="https://policies.google.com/privacy?hl=de"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Datenschutzerklärung von Google ↗
                   </a>
                 </p>
 
