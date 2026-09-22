@@ -62,6 +62,7 @@ export default async function HeuteInGluecksburgPage() {
       ctaLabel="Alle Veranstaltungen öffnen"
       ctaHref="/#events"
       canonicalPath="/heute-in-gluecksburg"
+      compactOverview
     >
       <section className="seo-card">
         <h2>{events.length ? `${events.length} Termine heute` : "Heute keine Termine gefunden"}</h2>
