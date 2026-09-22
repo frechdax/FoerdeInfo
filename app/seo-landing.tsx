@@ -68,7 +68,11 @@ export default function SeoLanding({
         <nav className="seo-links" aria-label="Weitere Bereiche">
           <a href="/muellabfuhr">Müllabfuhr</a>
           <a href="/veranstaltungen">Veranstaltungen</a>
+          <a href="/heute-in-gluecksburg">Heute</a>
+          <a href="/wochenende-in-gluecksburg">Wochenende</a>
           <a href="/urlaub">Urlaub</a>
+          <a href="/sehenswuerdigkeiten-gluecksburg">Sehenswürdigkeiten</a>
+          <a href="/straende-gluecksburg">Strände</a>
           <a href="/familie">Familie</a>
           <a href="/rathaus">Rathaus</a>
         </nav>
