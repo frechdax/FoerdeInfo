@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import ConsentManager from "./consent-manager";
 
-const siteUrl = "https://gluecksburg-direkt.vercel.app";
+const siteUrl = "https://www.xn--glcksburg-direkt-kzb.de";
 const googleVerification =
   process.env.GOOGLE_SITE_VERIFICATION ||
   "yhScvTLAqjL9Z2zvqCixkpq612QAJss1EbD2FxgwTzQ";
