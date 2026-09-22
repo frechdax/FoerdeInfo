@@ -2335,9 +2335,6 @@ export default function HomePage() {
                   passenden externen Buchungsanbieter weiter. Dabei können technisch erforderliche
                   Verbindungsdaten, insbesondere IP-Adresse, Browser- und Geräteinformationen,
                   Zeitpunkt, Zielort sowie Informationen zum angeklickten Link verarbeitet werden.
-                  Die Partnerkennung <strong>glcksburgdirekt</strong> dient dazu, eine mögliche
-                  Buchung GlücksburgDirekt zuzuordnen. Für Nutzer entstehen durch den Affiliate-Link
-                  keine zusätzlichen Kosten.
                 </p>
                 <p>
                   <a href="https://www.stay22.com/privacy" target="_blank" rel="noreferrer">
