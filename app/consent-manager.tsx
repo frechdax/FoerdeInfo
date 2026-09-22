@@ -20,6 +20,14 @@ export default function ConsentManager() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
+    function handleOpenConsentSettings() {
+      setStatistics(consent?.statistics ?? false);
+      setMarketing(consent?.marketing ?? false);
+      setShowSettings(true);
+    }
+
+    window.addEventListener("gluecksburg:open-consent", handleOpenConsentSettings);
+
     try {
       const raw = localStorage.getItem(CONSENT_KEY);
       if (!raw) {
@@ -42,7 +50,10 @@ export default function ConsentManager() {
     } catch {
       setConsent(null);
     }
-  }, []);
+
+    return () =>
+      window.removeEventListener("gluecksburg:open-consent", handleOpenConsentSettings);
+  }, [consent]);
 
   function saveChoice(nextStatistics: boolean, nextMarketing: boolean) {
     const next: ConsentChoice = {
@@ -74,17 +85,6 @@ export default function ConsentManager() {
     <>
       {consent?.statistics ? <Analytics /> : null}
       {consent?.marketing ? <AdSenseLoader /> : null}
-
-      {consent && !showSettings ? (
-        <button
-          type="button"
-          className="consent-reopen"
-          onClick={openSettings}
-          aria-label="Cookie- und Datenschutz-Einstellungen öffnen"
-        >
-          Datenschutz
-        </button>
-      ) : null}
 
       {bannerVisible ? (
         <section
