@@ -5,7 +5,7 @@ import { createPublicServerSupabase } from "@/lib/supabase-public-server";
 export const metadata: Metadata = {
   title: "Heute in Glücksburg – Veranstaltungen & Tipps",
   description:
-    "Was ist heute in Glücksburg los? Aktuelle Veranstaltungen, Familienangebote und Termine für heute auf einen Blick.",
+    "Was ist heute in Glücksburg los? Aktuelle Veranstaltungen und Termine für heute auf einen Blick.",
   alternates: { canonical: "/heute-in-gluecksburg" },
   openGraph: {
     title: "Heute in Glücksburg",
@@ -55,7 +55,7 @@ export default async function HeuteInGluecksburgPage() {
       intro="Was ist heute in Glücksburg los? Hier findest du die aktuellen Veranstaltungen und Termine des Tages kompakt an einem Ort."
       bullets={[
         "Aktuelle Termine für heute",
-        "Familienangebote und lokale Veranstaltungen",
+        "Lokale Veranstaltungen und Freizeitangebote",
         "Ort und Uhrzeit auf einen Blick",
         "Direkter Link zur jeweiligen Originalquelle",
       ]}
