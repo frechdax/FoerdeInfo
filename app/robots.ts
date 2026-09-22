@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://gluecksburg-direkt.vercel.app/sitemap.xml",
-    host: "https://gluecksburg-direkt.vercel.app",
+    sitemap: "https://www.xn--glcksburg-direkt-kzb.de/sitemap.xml",
+    host: "https://www.xn--glcksburg-direkt-kzb.de",
   };
 }

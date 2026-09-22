@@ -29,13 +29,13 @@ export default function SeoLanding({
         "@type": "ListItem",
         position: 1,
         name: "GlücksburgDirekt",
-        item: "https://gluecksburg-direkt.vercel.app/",
+        item: "https://www.xn--glcksburg-direkt-kzb.de/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: title,
-        item: `https://gluecksburg-direkt.vercel.app${canonicalPath}`,
+        item: `https://www.xn--glcksburg-direkt-kzb.de${canonicalPath}`,
       },
     ],
   };

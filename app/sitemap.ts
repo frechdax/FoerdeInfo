@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://gluecksburg-direkt.vercel.app";
+const baseUrl = "https://www.xn--glcksburg-direkt-kzb.de";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
