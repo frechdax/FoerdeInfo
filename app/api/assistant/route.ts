@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { generateText } from "ai";
 import { affiliateLinks } from "@/lib/affiliate";
 
 export const dynamic = "force-dynamic";
@@ -525,7 +526,23 @@ async function callGateway(instructions: string, input: string) {
   }
 }
 
-async function generateText(instructions: string, input: string) {
+async function callVercelAiSdk(instructions: string, input: string) {
+  try {
+    const result = await generateText({
+      model: "openai/gpt-5.6-luna",
+      system: instructions,
+      prompt: input,
+    });
+    return result.text?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+async function generateAssistantText(instructions: string, input: string) {
+  const vercelAi = await callVercelAiSdk(instructions, input);
+  if (vercelAi) return { text: vercelAi, aiEnabled: true };
+
   const gateway = await callGateway(instructions, input);
   if (gateway) return { text: gateway, aiEnabled: true };
 
@@ -539,7 +556,7 @@ export async function GET(request: NextRequest) {
   const context = await loadContext(request);
   const fallback = buildFallbackHome(context);
 
-  const generated = await generateText(
+  const generated = await generateAssistantText(
     [
       "Du schreibst genau eine kurze, hilfreiche Zusammenfassung für die Startseite von GlücksburgDirekt.",
       "Verwende ausschließlich die bereitgestellten aktuellen Daten.",
@@ -593,7 +610,7 @@ export async function POST(request: NextRequest) {
   const context = await loadContext(request);
   const fallback = fallbackAnswer(question, context);
 
-  const generated = await generateText(
+  const generated = await generateAssistantText(
     [
       "Du bist der lokale Assistent von GlücksburgDirekt für Glücksburg (Ostsee).",
       "Beantworte die Nutzerfrage ausschließlich anhand des DATA-Blocks.",
