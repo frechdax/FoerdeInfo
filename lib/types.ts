@@ -1,4 +1,4 @@
-export type AccuracyType = "gps" | "estimated";
+export type AccuracyType = "gps" | "realtime" | "estimated";
 
 export interface Vehicle {
   id: string;
