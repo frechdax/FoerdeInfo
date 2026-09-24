@@ -1082,6 +1082,15 @@ export default function HomePage() {
                 </div>
 
                 <div className="home-discovery-grid">
+                  <a className="home-discovery-card" href="/live">
+                    <span className="home-discovery-icon" aria-hidden="true">🌤️</span>
+                    <span>
+                      <small>Live</small>
+                      <strong>Glücksburg Jetzt</strong>
+                      <em>Wetter, Warnungen & Fördepegel →</em>
+                    </span>
+                  </a>
+
                   <a className="home-discovery-card" href="/heute-in-gluecksburg">
                     <span className="home-discovery-icon" aria-hidden="true">📍</span>
                     <span>
