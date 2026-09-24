@@ -14,17 +14,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Inspect Mobilithek public offer service
+      - name: Inspect Mobilithek public API base
         shell: bash
         run: |
           node <<'NODE'
-          for (const file of ["OfferService-CGwN8qO2.js","RequestUtils-BYX7BqyI.js"]) {
-            const url = "https://mobilithek.info/assets/" + file;
-            const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.5" } });
-            const js = await res.text();
-            console.log("\nMODULE", file, "STATUS", res.status, "LEN", js.length);
-            console.log(js.slice(0, 20000).replace(/\s+/g, " "));
-            const strings=[...js.matchAll(/["'`]([^"'`]{3,300})["'`]/g)].map(m=>m[1]);
-            for(const s of [...new Set(strings)].filter(s=>/offer|publication|marketplace|resource|content|access|subscription|api|download/i.test(s)).slice(0,250)) console.log("STRING",s);
+          const url = "https://mobilithek.info/assets/index-ChSLynr4.js";
+          const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.6" } });
+          const js = await res.text();
+          console.log("INDEX", res.status, "LEN", js.length);
+          for (const needle of ["getAPIUrl","METADATA","CONNECTION","apiUrl","metadata-service","connection-service","api-gateway","VITE_","/v2/","/v1/"]) {
+            let pos = -1, count = 0;
+            while ((pos = js.indexOf(needle, pos + 1)) >= 0 && count < 25) {
+              console.log("CONTEXT", needle, pos, js.slice(Math.max(0,pos-1200),Math.min(js.length,pos+1800)).replace(/\s+/g," "));
+              count++;
+            }
           }
+          const urls=[...js.matchAll(/https?:\\?\/\\?\/[^"'<>\\s)]+/g)].map(m=>m[0].replaceAll("\\/","/"));
+          for(const u of [...new Set(urls)].filter(u=>/mobilithek|mdm|metadata|connection|api/i.test(u)).slice(0,200)) console.log("URL",u);
           NODE
