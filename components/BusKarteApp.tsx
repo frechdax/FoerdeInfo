@@ -23,8 +23,10 @@ function cityMatch(v: Vehicle, area: Area) {
 }
 
 export default function BusKarteApp() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [fastVehicles, setFastVehicles] = useState<Vehicle[]>([]);
+  const [realtimeVehicles, setRealtimeVehicles] = useState<Vehicle[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string>();
+  const [realtimePending, setRealtimePending] = useState(true);
   const [selected, setSelected] = useState<Vehicle>();
   const [selectedRoute, setSelectedRoute] = useState<string>();
   const [routeGeometry, setRouteGeometry] = useState<{ type: "LineString"; coordinates: number[][] } | null>(null);
@@ -35,25 +37,82 @@ export default function BusKarteApp() {
   const [streamState, setStreamState] = useState<"live" | "polling" | "offline">("offline");
   const [mobilePanel, setMobilePanel] = useState(false);
 
-  const applyPayload = useCallback((payload: Payload) => {
-    setVehicles(payload.vehicles || []);
-    setUpdatedAt(payload.updatedAt);
+  const vehicles = useMemo(() => {
+    const quality = (v: Vehicle) => v.accuracyType === "gps" ? 3 : v.accuracyType === "realtime" ? 2 : 1;
+    const byTrip = new Map<string, Vehicle>();
+    for (const vehicle of [...fastVehicles, ...realtimeVehicles]) {
+      const key = vehicle.tripId || vehicle.id;
+      const existing = byTrip.get(key);
+      if (!existing || quality(vehicle) > quality(existing)) byTrip.set(key, vehicle);
+    }
+    return [...byTrip.values()];
+  }, [fastVehicles, realtimeVehicles]);
+
+  const applyFastPayload = useCallback((payload: Payload) => {
+    setFastVehicles(payload.vehicles || []);
+    setUpdatedAt((current) => !current || new Date(payload.updatedAt) > new Date(current) ? payload.updatedAt : current);
+  }, []);
+
+  const applyRealtimePayload = useCallback((payload: Payload) => {
+    setRealtimeVehicles(payload.vehicles || []);
+    setUpdatedAt((current) => !current || new Date(payload.updatedAt) > new Date(current) ? payload.updatedAt : current);
+    setRealtimePending(false);
   }, []);
 
   useEffect(() => {
     fetch("/api/stops?limit=500").then((r) => r.json()).then((x) => setStops(x.stops || [])).catch(() => {});
-    let fallbackTimer: ReturnType<typeof setInterval> | undefined;
-    const startPolling = () => {
-      if (fallbackTimer) return;
-      setStreamState("polling");
-      const poll = () => fetch("/api/vehicles", { cache: "no-store" }).then((r) => r.json()).then(applyPayload).catch(() => setStreamState("offline"));
-      poll(); fallbackTimer = setInterval(poll, 10_000);
+
+    let cancelled = false;
+    let fastTimer: ReturnType<typeof setInterval> | undefined;
+    let realtimeTimer: ReturnType<typeof setInterval> | undefined;
+    let realtimeInFlight = false;
+
+    const loadFast = async () => {
+      try {
+        const response = await fetch("/api/vehicles/fast", { cache: "no-store" });
+        if (!response.ok) throw new Error("Fast vehicle endpoint failed");
+        const payload = await response.json();
+        if (!cancelled) {
+          applyFastPayload(payload);
+          setStreamState("polling");
+        }
+      } catch {
+        if (!cancelled && !fastVehicles.length && !realtimeVehicles.length) setStreamState("offline");
+      }
     };
-    const es = new EventSource("/api/live/vehicles");
-    es.addEventListener("vehicles", (event) => { setStreamState("live"); applyPayload(JSON.parse((event as MessageEvent).data)); });
-    es.onerror = () => { es.close(); startPolling(); };
-    return () => { es.close(); if (fallbackTimer) clearInterval(fallbackTimer); };
-  }, [applyPayload]);
+
+    const loadRealtime = async () => {
+      if (realtimeInFlight) return;
+      realtimeInFlight = true;
+      try {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), 55_000);
+        const response = await fetch("/api/vehicles/realtime", { cache: "no-store", signal: controller.signal });
+        window.clearTimeout(timer);
+        if (!response.ok) throw new Error("Realtime endpoint failed");
+        const payload = await response.json();
+        if (!cancelled) {
+          applyRealtimePayload(payload);
+          setStreamState("live");
+        }
+      } catch {
+        if (!cancelled) setRealtimePending(false);
+      } finally {
+        realtimeInFlight = false;
+      }
+    };
+
+    loadFast();
+    window.setTimeout(loadRealtime, 250);
+    fastTimer = setInterval(loadFast, 20_000);
+    realtimeTimer = setInterval(loadRealtime, 15_000);
+
+    return () => {
+      cancelled = true;
+      if (fastTimer) clearInterval(fastTimer);
+      if (realtimeTimer) clearInterval(realtimeTimer);
+    };
+  }, [applyFastPayload, applyRealtimePayload]);
 
   const selectedVehicle = useMemo(
     () => selected ? vehicles.find((v) => v.id === selected.id) || selected : undefined,
@@ -109,7 +168,7 @@ export default function BusKarteApp() {
     <main className="app-shell">
       <header className="topbar">
         <div className="brand"><span className="brand-icon">B</span><div><strong>BusKarte</strong><span>Flensburg & Schleswig</span></div></div>
-        <div className="live-cluster"><span className={`live-dot ${streamState}`} /><strong>{streamState === "offline" ? "OFFLINE" : hasGpsVehicles ? "LIVE GPS" : hasRealtimeVehicles ? "ECHTZEIT · PROGNOSE" : "AKTUELL · FAHRPLAN"}</strong><span>{ageLabel(updatedAt)}</span></div>
+        <div className="live-cluster"><span className={`live-dot ${streamState}`} /><strong>{streamState === "offline" ? "OFFLINE" : hasGpsVehicles ? "LIVE GPS" : hasRealtimeVehicles ? "ECHTZEIT · PROGNOSE" : realtimePending ? "FAHRPLAN · ECHTZEIT LÄDT" : "AKTUELL · FAHRPLAN"}</strong><span>{ageLabel(updatedAt)}</span></div>
         <nav><Link href="/status">Status</Link><Link href="/datenquellen">Datenquellen</Link></nav>
       </header>
 
