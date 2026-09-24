@@ -8,7 +8,7 @@ export default async function StatusPage() {
   return (
     <main className="info-page">
       <div className="info-shell">
-        <div className="info-nav"><Link href="/">← BusRadar</Link><span>Systemstatus</span></div>
+        <div className="info-nav"><Link href="/">← BusKarte</Link><span>Systemstatus</span></div>
         <h1>Daten- & Providerstatus</h1>
         <p className="muted">Hier siehst du, welche Quellen gerade tatsächlich verfügbar sind. Deaktivierte Quellen werden niemals durch erfundene Positionsdaten ersetzt.</p>
         <div className="status-grid">

@@ -4,7 +4,7 @@ import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 const data = JSON.parse(await fs.readFile("data/region.json", "utf8"));
 const ids = new Set(data.trips.map((t) => t.id));
 const url = process.env.GTFS_RT_URL || "https://realtime.gtfs.de/realtime-free.pb";
-const response = await fetch(url, { headers: { "user-agent": "BusRadar realtime compatibility check/0.1" } });
+const response = await fetch(url, { headers: { "user-agent": "BusKarte realtime compatibility check/0.1" } });
 if (!response.ok) throw new Error(`Realtime HTTP ${response.status}`);
 const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(await response.arrayBuffer()));
 let updates = 0;

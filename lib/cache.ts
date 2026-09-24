@@ -1,7 +1,7 @@
 type CacheEntry<T> = { value: T; expiresAt: number };
-const globalCache = globalThis as typeof globalThis & { __busradarCache?: Map<string, CacheEntry<unknown>> };
-const store = globalCache.__busradarCache ?? new Map<string, CacheEntry<unknown>>();
-globalCache.__busradarCache = store;
+const globalCache = globalThis as typeof globalThis & { __buskarteCache?: Map<string, CacheEntry<unknown>> };
+const store = globalCache.__buskarteCache ?? new Map<string, CacheEntry<unknown>>();
+globalCache.__buskarteCache = store;
 
 export async function cached<T>(key: string, ttlMs: number, factory: () => Promise<T>): Promise<T> {
   const existing = store.get(key) as CacheEntry<T> | undefined;

@@ -13,7 +13,7 @@ export class FlensburgLiveProvider implements TransitRealtimeProvider {
     const url = process.env.FLENSBURG_LIVE_API_URL;
     if (!url) return [];
     try {
-      const headers: HeadersInit = { accept: "application/json", "user-agent": "BusRadar/0.1" };
+      const headers: HeadersInit = { accept: "application/json", "user-agent": "BusKarte/0.1" };
       if (process.env.FLENSBURG_LIVE_API_KEY) headers.authorization = `Bearer ${process.env.FLENSBURG_LIVE_API_KEY}`;
       const response = await fetch(url, { cache: "no-store", headers, signal: AbortSignal.timeout(8_000) });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -60,7 +60,7 @@ export class FlensburgLiveProvider implements TransitRealtimeProvider {
   getLastUpdate() { return this.lastUpdate; }
   async getProviderStatus(): Promise<ProviderStatus> {
     if (!process.env.FLENSBURG_LIVE_API_URL) {
-      return { id: this.id, name: this.name, state: "disabled", detail: "Deaktiviert: Die Nutzungsbedingungen des öffentlichen Busradars untersagen automatisierten Datenabruf/App-Integration ohne ausdrückliche schriftliche Genehmigung. Nur einen separat freigegebenen Endpoint konfigurieren." };
+      return { id: this.id, name: this.name, state: "disabled", detail: "Deaktiviert: Die Nutzungsbedingungen der öffentlichen Aktiv-Bus-Livekarte untersagen automatisierten Datenabruf/App-Integration ohne ausdrückliche schriftliche Genehmigung. Nur einen separat freigegebenen Endpoint konfigurieren." };
     }
     try {
       const vehicles = await this.getVehicles();

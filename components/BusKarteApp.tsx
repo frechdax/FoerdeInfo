@@ -22,7 +22,7 @@ function cityMatch(v: Vehicle, area: Area) {
   return v.latitude <= 54.70 && v.latitude > 54.38;
 }
 
-export default function BusRadarApp() {
+export default function BusKarteApp() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string>();
   const [selected, setSelected] = useState<Vehicle>();
@@ -85,7 +85,7 @@ export default function BusRadarApp() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div className="brand"><span className="brand-icon">B</span><div><strong>BusRadar</strong><span>Flensburg & Schleswig</span></div></div>
+        <div className="brand"><span className="brand-icon">B</span><div><strong>BusKarte</strong><span>Flensburg & Schleswig</span></div></div>
         <div className="live-cluster"><span className={`live-dot ${streamState}`} /><strong>{streamState === "offline" ? "OFFLINE" : hasGpsVehicles ? "LIVE GPS" : "AKTUELL · SCHÄTZUNG"}</strong><span>{ageLabel(updatedAt)}</span></div>
         <nav><Link href="/status">Status</Link><Link href="/datenquellen">Datenquellen</Link></nav>
       </header>
@@ -99,7 +99,7 @@ export default function BusRadarApp() {
 
         <aside className={`sidebar ${mobilePanel ? "mobile-open" : ""}`}>
           <div className="mobile-grabber" onClick={() => setMobilePanel(false)}><span /></div>
-          <div className="sidebar-head"><div><span className="eyebrow">LIVE RADAR</span><h2>Busse unterwegs</h2></div><div className="count-badge">{filtered.length}</div></div>
+          <div className="sidebar-head"><div><span className="eyebrow">BUSKARTE</span><h2>Busse unterwegs</h2></div><div className="count-badge">{filtered.length}</div></div>
           <div className="segmented">
             {([['all','Alle'],['flensburg','Flensburg'],['schleswig','Schleswig'],['region','Region']] as const).map(([k,l]) => <button className={area===k?'active':''} key={k} onClick={() => setArea(k)}>{l}</button>)}
           </div>

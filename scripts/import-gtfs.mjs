@@ -16,7 +16,7 @@ function isTargetStopId(stopId) {
   return TARGET_STOP_PREFIXES.some((prefix) => String(stopId || "").startsWith(prefix));
 }
 const wanted = new Set(["agency.txt","routes.txt","trips.txt","stops.txt","stop_times.txt","shapes.txt","calendar.txt","calendar_dates.txt"]);
-const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), "busradar-gtfs-"));
+const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), "buskarte-gtfs-"));
 const zipPath = path.join(tmp, "feed.zip");
 
 function isBusRouteType(raw) {
@@ -29,7 +29,7 @@ async function downloadGtfs() {
   for (const candidate of [PRIMARY_URL, FALLBACK_URL].filter(Boolean)) {
     try {
       console.log(`Downloading ${candidate}`);
-      const res = await fetch(candidate, { headers: { "user-agent": "BusRadar GTFS importer/0.1" }, redirect: "follow" });
+      const res = await fetch(candidate, { headers: { "user-agent": "BusKarte GTFS importer/0.1" }, redirect: "follow" });
       const contentType = res.headers.get("content-type") || "";
       if (!res.ok || !res.body || contentType.includes("text/html")) throw new Error(`HTTP ${res.status}, content-type ${contentType}`);
       await pipeline(res.body, fs.createWriteStream(zipPath));
@@ -176,5 +176,5 @@ const out = {
 };
 await fsp.writeFile(path.join(ROOT, "data/region.json"), JSON.stringify(out));
 console.log(`Wrote data/region.json: ${routes.length} bus routes, ${trips.length} bus trips, ${stops.size} stops, ${Object.keys(shapes).length} shapes`);
-if (!Object.keys(shapes).length) console.warn("WARNING: No usable shapes.txt. BusRadar will not fabricate straight-line vehicle positions for trips without route geometry.");
+if (!Object.keys(shapes).length) console.warn("WARNING: No usable shapes.txt. BusKarte will not fabricate straight-line vehicle positions for trips without route geometry.");
 await fsp.rm(tmp, { recursive: true, force: true });

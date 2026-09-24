@@ -28,7 +28,7 @@ export class SiriEtProvider implements TransitRealtimeProvider {
       try {
         const headers: HeadersInit = {
           accept: "application/xml,text/xml",
-          "user-agent": "BusRadar/0.1",
+          "user-agent": "BusKarte/0.1",
         };
         if (process.env.SIRI_ET_SH_AUTHORIZATION) {
           headers.authorization = process.env.SIRI_ET_SH_AUTHORIZATION;

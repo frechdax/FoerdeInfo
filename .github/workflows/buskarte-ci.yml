@@ -1,9 +1,9 @@
-name: BusRadar CI
+name: BusKarte CI
 
 on:
   push:
     branches:
-      - busradar-preview
+      - buskarte-preview
     paths-ignore:
       - ".github/workflows/refresh-gtfs.yml"
   workflow_dispatch:

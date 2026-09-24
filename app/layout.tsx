@@ -3,7 +3,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BusRadar – Flensburg & Schleswig",
+  title: "BusKarte – Flensburg & Schleswig",
   description: "Busse in Flensburg & Schleswig live verfolgen",
 };
 

@@ -3,7 +3,7 @@ name: Refresh regional GTFS
 on:
   workflow_dispatch:
   push:
-    branches: [busradar-preview]
+    branches: [buskarte-preview]
     paths:
       - "scripts/import-gtfs.mjs"
   schedule:
@@ -38,6 +38,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/region.json
           git commit -m "chore: refresh regional NAH.SH GTFS"
-          git fetch origin busradar-preview
-          git rebase origin/busradar-preview
-          git push origin HEAD:busradar-preview
+          git fetch origin buskarte-preview
+          git rebase origin/buskarte-preview
+          git push origin HEAD:buskarte-preview

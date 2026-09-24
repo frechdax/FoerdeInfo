@@ -1,30 +1,57 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { GeolocateControl, type GeoJSONSource, Map as MapLibreMap, Marker, NavigationControl, Popup } from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
+import { GeolocateControl, type GeoJSONSource, Map as MapLibreMap, Marker, NavigationControl, Popup, type StyleSpecification } from "maplibre-gl";
 import type { StopPoint, Vehicle } from "@/lib/types";
 import { REGION } from "@/lib/region";
+
+const DEFAULT_MAP_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    osm: {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "© OpenStreetMap contributors",
+      maxzoom: 19,
+    },
+  },
+  layers: [{ id: "osm", type: "raster", source: "osm" }],
+};
 
 export default function RadarMap({ vehicles, stops, selected, routeGeometry, onSelect }: { vehicles: Vehicle[]; stops: StopPoint[]; selected?: Vehicle; routeGeometry: { type: "LineString"; coordinates: number[][] } | null; onSelect: (v: Vehicle) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
   const onSelectRef = useRef(onSelect);
+  const [mapError, setMapError] = useState<string>();
   onSelectRef.current = onSelect;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = new MapLibreMap({
-      container: containerRef.current,
-      style: process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/liberty",
-      center: REGION.center,
-      zoom: REGION.zoom,
-      maxBounds: [[8.3,54.05],[10.55,55.25]],
-      attributionControl: { compact: true },
-    });
+    let map: MapLibreMap;
+    try {
+      map = new MapLibreMap({
+        container: containerRef.current,
+        style: process.env.NEXT_PUBLIC_MAP_STYLE_URL || DEFAULT_MAP_STYLE,
+        center: REGION.center,
+        zoom: REGION.zoom,
+        maxBounds: [[8.3,54.05],[10.55,55.25]],
+        attributionControl: { compact: true },
+      });
+    } catch {
+      setMapError("Die Karte konnte auf diesem Gerät nicht initialisiert werden.");
+      return;
+    }
+
+    const loadTimeout = window.setTimeout(() => {
+      if (!map.loaded()) setMapError("Kartenmaterial konnte nicht geladen werden.");
+    }, 8000);
     map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
     map.addControl(new GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true, showAccuracyCircle: true }), "bottom-right");
     map.on("load", () => {
+      window.clearTimeout(loadTimeout);
+      setMapError(undefined);
       map.addSource("stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "stops", type: "circle", source: "stops", minzoom: 11.3, paint: { "circle-radius": ["interpolate",["linear"],["zoom"],11,2.5,15,5], "circle-color": "#ffffff", "circle-stroke-width": 1.5, "circle-stroke-color": "#244154" } });
       map.addSource("selected-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
@@ -67,7 +94,13 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
       });
     });
     mapRef.current = map;
-    return () => { markersRef.current.forEach((m) => m.remove()); markersRef.current.clear(); map.remove(); mapRef.current = null; };
+    return () => {
+      window.clearTimeout(loadTimeout);
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current.clear();
+      map.remove();
+      mapRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -138,5 +171,10 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
     if (map && selected) map.easeTo({ center:[selected.longitude,selected.latitude], zoom:Math.max(map.getZoom(),12.7), duration:800 });
   }, [selected]);
 
-  return <div className="map" ref={containerRef} />;
+  return (
+    <>
+      <div className="map" ref={containerRef} />
+      {mapError && <div className="map-error"><strong>Karte nicht verfügbar</strong><span>{mapError}</span></div>}
+    </>
+  );
 }

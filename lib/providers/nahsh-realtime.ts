@@ -19,7 +19,7 @@ export class NahSHRealtimeProvider implements TransitRealtimeProvider {
       try {
         const response = await fetch(url, {
           cache: "no-store",
-          headers: { "user-agent": "BusRadar/0.1" },
+          headers: { "user-agent": "BusKarte/0.1" },
           signal: AbortSignal.timeout(15_000),
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);

@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
-  if (process.env.BUSRADAR_ENABLE_SSE !== "true") {
+  if (process.env.BUSKARTE_ENABLE_SSE !== "true") {
     return new Response(JSON.stringify({ error: "SSE disabled; use /api/vehicles polling" }), { status: 503, headers: { "Content-Type": "application/json" } });
   }
   const encoder = new TextEncoder();

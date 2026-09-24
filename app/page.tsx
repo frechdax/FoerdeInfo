@@ -1,5 +1,5 @@
-import BusRadarApp from "@/components/BusRadarApp";
+import BusKarteApp from "@/components/BusKarteApp";
 
 export default function HomePage() {
-  return <BusRadarApp />;
+  return <BusKarteApp />;
 }
