@@ -12,4 +12,4 @@ source = source
   .replaceAll("new maplibregl.GeolocateControl(", "new GeolocateControl(")
   .replaceAll("new maplibregl.Popup(", "new Popup(")
   .replaceAll("new maplibregl.Marker(", "new Marker(");
-fs.writeFileSync(path, source);
+fs.writeFileSync(path, source);\n\nconst realtimePath = "lib/providers/nahsh-realtime.ts";\nlet realtime = fs.readFileSync(realtimePath, "utf8");\nrealtime = realtime.replace("tripId: tu.trip.tripId,", "tripId: tu.trip.tripId!,");\nfs.writeFileSync(realtimePath, realtime);
