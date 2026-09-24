@@ -658,13 +658,24 @@ async function loadBeaches(
     };
   });
 
-  const quellentalLight = beachTrafficLight(
-    "keine separate amtliche Einstufung",
-    beachWeatherScore,
-    uvIndex,
-    warningLevel,
-    gusts
-  );
+  const quellentalLight =
+    warningLevel >= 3 || beachWeatherScore < 42 || gusts >= 60
+      ? {
+          status: "red" as const,
+          label: "Rot",
+          summary: "Bedingungen aktuell ungünstig",
+        }
+      : warningLevel > 0 || beachWeatherScore < 72 || uvIndex >= 6 || gusts >= 42
+        ? {
+            status: "yellow" as const,
+            label: "Gelb",
+            summary: uvIndex >= 6 ? "Gute Bedingungen, aber UV-Schutz beachten" : "Mit Einschränkungen",
+          }
+        : {
+            status: "green" as const,
+            label: "Grün",
+            summary: "Gute Wetterbedingungen",
+          };
 
   return [
     ...officialBeaches,
