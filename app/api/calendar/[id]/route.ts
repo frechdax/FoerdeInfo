@@ -80,7 +80,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
-    `UID:${event.id}@gluecksburg-direkt.vercel.app`,
+    `UID:${event.id}@xn--glcksburg-direkt-kzb.de`,
     `DTSTAMP:${new Date()
       .toISOString()
       .replace(/[-:]/g, "")
