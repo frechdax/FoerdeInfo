@@ -8,7 +8,7 @@ const routeIds = new Set(data.routes.map((r) => r.id));
 const routeShortNames = new Map(data.routes.map((r) => [r.id, r.shortName]));
 
 const url = process.env.GTFS_RT_URL || "https://realtime.gtfs.de/realtime-free.pb";
-const response = await fetch(url, { headers: { "user-agent": "BusKarte realtime compatibility check/0.2" } });
+const response = await fetch(url, { headers: { "user-agent": "BusKarte realtime compatibility check/0.2" }, signal: AbortSignal.timeout(20000) });
 if (!response.ok) throw new Error(`Realtime HTTP ${response.status}`);
 const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(await response.arrayBuffer()));
 
