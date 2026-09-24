@@ -30,7 +30,7 @@ export default function BusKarteApp() {
   const [routeGeometry, setRouteGeometry] = useState<{ type: "LineString"; coordinates: number[][] } | null>(null);
   const [query, setQuery] = useState("");
   const [area, setArea] = useState<Area>("all");
-  const [accuracy, setAccuracy] = useState<"all" | "gps" | "realtime" | "estimated">("realtime");
+  const [accuracy, setAccuracy] = useState<"all" | "gps" | "realtime" | "estimated">("all");
   const [stops, setStops] = useState<StopPoint[]>([]);
   const [streamState, setStreamState] = useState<"live" | "polling" | "offline">("offline");
   const [mobilePanel, setMobilePanel] = useState(false);
