@@ -16,18 +16,10 @@ const qualityRank: Record<Vehicle["accuracyType"], number> = {
   estimated: 1,
 };
 
-export async function getVehicles(): Promise<Vehicle[]> {
-  const batches = await Promise.allSettled([
-    flensburg.getVehicles(),
-    realtime.getVehicles(),
-    siriEt.getVehicles(),
-    scheduleEstimate.getVehicles(),
-  ]);
-
-  const all = batches.flatMap((r) => r.status === "fulfilled" ? r.value : []);
+function mergeVehicles(groups: Vehicle[][]): Vehicle[] {
   const byTrip = new Map<string, Vehicle>();
 
-  for (const vehicle of all) {
+  for (const vehicle of groups.flat()) {
     const key = vehicle.tripId || vehicle.id;
     const existing = byTrip.get(key);
     if (!existing || qualityRank[vehicle.accuracyType] > qualityRank[existing.accuracyType]) {
@@ -36,6 +28,30 @@ export async function getVehicles(): Promise<Vehicle[]> {
   }
 
   return [...byTrip.values()];
+}
+
+export async function getFastVehicles(): Promise<Vehicle[]> {
+  const batches = await Promise.allSettled([
+    flensburg.getVehicles(),
+    scheduleEstimate.getVehicles(),
+  ]);
+  return mergeVehicles(batches.flatMap((r) => r.status === "fulfilled" ? [r.value] : []));
+}
+
+export async function getRealtimeVehicles(): Promise<Vehicle[]> {
+  const batches = await Promise.allSettled([
+    realtime.getVehicles(),
+    siriEt.getVehicles(),
+  ]);
+  return mergeVehicles(batches.flatMap((r) => r.status === "fulfilled" ? [r.value] : []));
+}
+
+export async function getVehicles(): Promise<Vehicle[]> {
+  const [fast, live] = await Promise.all([
+    getFastVehicles(),
+    getRealtimeVehicles(),
+  ]);
+  return mergeVehicles([fast, live]);
 }
 
 export async function getProviderStatuses(): Promise<ProviderStatus[]> {
