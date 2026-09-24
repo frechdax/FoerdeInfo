@@ -1,6 +1,7 @@
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { cached } from "@/lib/cache";
 import { estimateVehicle } from "@/lib/realtime/estimate";
+import { getRealtimeTripMapStats, resolveRealtimeTripId } from "@/lib/realtime/crosswalk";
 import type { ProviderStatus, ServiceAlertSnapshot, TransitRealtimeProvider, TripUpdateSnapshot, Vehicle } from "@/lib/types";
 
 const DEFAULT_URL = "https://realtime.gtfs.de/realtime-free.pb";
@@ -9,22 +10,27 @@ type Snapshot = { tripUpdates: TripUpdateSnapshot[]; alerts: ServiceAlertSnapsho
 
 export class NahSHRealtimeProvider implements TransitRealtimeProvider {
   readonly id = "nahsh-realtime";
-  readonly name = "GTFS.de Realtime (Schleswig-Holstein enthalten)";
+  readonly name = "GTFS.de Echtzeit · Schleswig-Holstein";
   private lastUpdate?: string;
   private lastError?: string;
 
   private async snapshot(): Promise<Snapshot> {
     const url = process.env.GTFS_RT_URL || DEFAULT_URL;
-    return cached("gtfs-rt", 9_000, async () => {
+    return cached("gtfs-rt", 8_000, async () => {
       try {
         const response = await fetch(url, {
           cache: "no-store",
-          headers: { "user-agent": "BusKarte/0.1" },
+          headers: { "user-agent": "BusKarte/0.2" },
           signal: AbortSignal.timeout(15_000),
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
         const bytes = new Uint8Array(await response.arrayBuffer());
         const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(bytes);
+        const feedTimestamp = feed.header.timestamp
+          ? new Date(Number(feed.header.timestamp) * 1000).toISOString()
+          : new Date().toISOString();
+
         const tripUpdates: TripUpdateSnapshot[] = [];
         const alerts: ServiceAlertSnapshot[] = [];
 
@@ -35,7 +41,7 @@ export class NahSHRealtimeProvider implements TransitRealtimeProvider {
               tripId: tu.trip.tripId!,
               routeId: tu.trip.routeId || undefined,
               startDate: tu.trip.startDate || undefined,
-              timestamp: tu.timestamp ? new Date(Number(tu.timestamp) * 1000).toISOString() : undefined,
+              timestamp: tu.timestamp ? new Date(Number(tu.timestamp) * 1000).toISOString() : feedTimestamp,
               delaySeconds: tu.delay != null ? Number(tu.delay) : undefined,
               stopUpdates: (tu.stopTimeUpdate || []).map((s) => ({
                 stopId: s.stopId || undefined,
@@ -47,17 +53,23 @@ export class NahSHRealtimeProvider implements TransitRealtimeProvider {
               })),
             });
           }
+
           if (entity.alert) {
             const text = (translation: unknown) => {
               const obj = translation as { translation?: Array<{ text?: string }> } | undefined;
               return obj?.translation?.map((x) => x.text).filter(Boolean).join(" · ");
             };
-            alerts.push({ id: entity.id, header: text(entity.alert.headerText), description: text(entity.alert.descriptionText) });
+            alerts.push({
+              id: entity.id,
+              header: text(entity.alert.headerText),
+              description: text(entity.alert.descriptionText),
+            });
           }
         }
-        this.lastUpdate = new Date().toISOString();
+
+        this.lastUpdate = feedTimestamp;
         this.lastError = undefined;
-        return { tripUpdates, alerts, fetchedAt: this.lastUpdate };
+        return { tripUpdates, alerts, fetchedAt: feedTimestamp };
       } catch (error) {
         this.lastError = error instanceof Error ? error.message : String(error);
         throw error;
@@ -65,41 +77,74 @@ export class NahSHRealtimeProvider implements TransitRealtimeProvider {
     });
   }
 
+  private mapUpdate(update: TripUpdateSnapshot): TripUpdateSnapshot | undefined {
+    const localTripId = resolveRealtimeTripId(update.tripId, update.startDate);
+    return localTripId ? { ...update, tripId: localTripId } : undefined;
+  }
+
   async getVehicles(): Promise<Vehicle[]> {
-    // The free GTFS.de realtime feed is paired with GTFS.de static IDs. Our primary
-    // static source is the official NAH.SH GTFS, and a live compatibility check found
-    // zero direct trip-id matches. Do not attach delays to the wrong journeys.
-    if (process.env.GTFS_RT_TRIP_IDS_COMPATIBLE !== "true") return [];
     const snapshot = await this.snapshot();
-    return snapshot.tripUpdates.map((u) => estimateVehicle(u)).filter((v): v is Vehicle => Boolean(v));
+    const now = new Date();
+    const vehicles: Vehicle[] = [];
+
+    for (const update of snapshot.tripUpdates) {
+      const mapped = this.mapUpdate(update);
+      if (!mapped) continue;
+      const vehicle = estimateVehicle(mapped, now);
+      if (!vehicle) continue;
+      vehicles.push({
+        ...vehicle,
+        id: `realtime:${mapped.tripId}`,
+        accuracyType: "realtime",
+        source: "GTFS.de Echtzeit-Prognose · NAH.SH Liniengeometrie",
+      });
+    }
+
+    return vehicles;
   }
 
   async getTripUpdates() {
-    if (process.env.GTFS_RT_ENABLE !== "true") return [];
-    return (await this.snapshot()).tripUpdates;
+    const snapshot = await this.snapshot();
+    return snapshot.tripUpdates
+      .map((update) => this.mapUpdate(update))
+      .filter((update): update is TripUpdateSnapshot => Boolean(update));
   }
 
   async getServiceAlerts() {
-    if (process.env.GTFS_RT_ENABLE !== "true") return [];
     return (await this.snapshot()).alerts;
   }
 
   getLastUpdate() { return this.lastUpdate; }
 
   async getProviderStatus(): Promise<ProviderStatus> {
-    if (process.env.GTFS_RT_TRIP_IDS_COMPATIBLE !== "true") {
+    const stats = getRealtimeTripMapStats();
+    if (!stats.matchedRealtimeTrips) {
       return {
         id: this.id,
         name: this.name,
         state: "degraded",
-        detail: "Öffentlicher Realtime-Feed vorhanden, aber seine Trip-IDs passen nicht zum offiziellen NAH.SH-GTFS (0 direkte Matches im Kompatibilitätstest). Daher keine falsche Zuordnung von Verspätungen oder Positionen.",
+        detail: "Realtime-Feed ist verfügbar, aber der Trip-Crosswalk wurde noch nicht erzeugt. GTFS-Refresh ausführen.",
       };
     }
+
     try {
-      const snap = await this.snapshot();
-      return { id: this.id, name: this.name, state: "online", lastUpdate: snap.fetchedAt, detail: `${snap.tripUpdates.length} TripUpdates · keine allgemeinen VehiclePositions im freien Feed` };
+      const snapshot = await this.snapshot();
+      const mappedNow = snapshot.tripUpdates.filter((u) => Boolean(resolveRealtimeTripId(u.tripId, u.startDate))).length;
+      return {
+        id: this.id,
+        name: this.name,
+        state: mappedNow ? "online" : "degraded",
+        lastUpdate: snapshot.fetchedAt,
+        detail: `${mappedNow} aktuelle Realtime-Fahrten in der Region zugeordnet · Crosswalk: ${stats.matchedRealtimeTrips}/${stats.regionalRealtimeTrips} regionale GTFS.de-Fahrten`,
+      };
     } catch {
-      return { id: this.id, name: this.name, state: "offline", lastUpdate: this.lastUpdate, detail: this.lastError || "Feed nicht erreichbar" };
+      return {
+        id: this.id,
+        name: this.name,
+        state: "offline",
+        lastUpdate: this.lastUpdate,
+        detail: this.lastError || "Realtime-Feed nicht erreichbar",
+      };
     }
   }
 }
