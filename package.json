@@ -6,8 +6,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && next dev",
-    "build": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && next build",
+    "dev": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && node preview-patch.mjs && next dev",
+    "build": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && node preview-patch.mjs && next build",
     "start": "next start"
   },
   "dependencies": {
