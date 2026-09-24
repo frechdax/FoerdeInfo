@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { track } from "@vercel/analytics";
+import { affiliateLinks } from "@/lib/affiliate";
 import styles from "./live.module.css";
 
 type Score = {
@@ -140,6 +142,29 @@ function beachTone(status: Beach["status"]) {
   return styles.beachRed;
 }
 
+function trackReferralClick(
+  label: string,
+  destination: string,
+  affiliate: boolean
+) {
+  if (typeof window === "undefined") return;
+
+  try {
+    const consent = JSON.parse(
+      localStorage.getItem("gluecksburg-direkt-consent-v1") || "null"
+    ) as { statistics?: boolean } | null;
+
+    if (consent?.statistics !== true) return;
+
+    track("Referral Click", {
+      label,
+      destination,
+      affiliate,
+      area: "live",
+    });
+  } catch {}
+}
+
 export default function LiveDashboard() {
   const [data, setData] = useState<LiveData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -149,6 +174,15 @@ export default function LiveDashboard() {
     data?.scores?.length
       ? data.scores.reduce((best, current) => (current.score > best.score ? current : best))
       : null;
+
+  const beachScore = data?.scores.find((item) => item.id === "beach")?.score ?? 0;
+  const walkScore = data?.scores.find((item) => item.id === "walk")?.score ?? 0;
+  const outdoorGood = beachScore >= 65 || walkScore >= 72;
+  const activityHref =
+    outdoorGood && affiliateLinks.activities.enabled
+      ? affiliateLinks.activities.url
+      : "/freizeit-gluecksburg";
+  const activityIsAffiliate = outdoorGood && affiliateLinks.activities.enabled;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -352,6 +386,107 @@ export default function LiveDashboard() {
                 Der Index kombiniert Temperatur, Regenrisiko, Wind, Böen, UV, Tageslicht und
                 amtliche Wetterwarnungen. Er ist eine Orientierung von GlücksburgDirekt und keine
                 amtliche Bewertung.
+              </p>
+            </section>
+
+            <section className={styles.referralSection}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className={styles.kicker}>Passend für heute</span>
+                  <h2>Von der Information direkt zur passenden Option</h2>
+                </div>
+                <span className={styles.updated}>situativ empfohlen</span>
+              </div>
+
+              <div className={styles.referralGrid}>
+                <a
+                  className={styles.referralCard}
+                  href={affiliateLinks.accommodation.url}
+                  target="_blank"
+                  rel="sponsored noreferrer"
+                  onClick={() =>
+                    trackReferralClick(
+                      "Unterkunft in Glücksburg",
+                      affiliateLinks.accommodation.provider,
+                      true
+                    )
+                  }
+                >
+                  <span className={styles.referralIcon} aria-hidden="true">🏨</span>
+                  <span className={styles.referralBadge}>Werbung · Affiliate-Link</span>
+                  <strong>Unterkunft in Glücksburg finden</strong>
+                  <p>Hotels, Ferienwohnungen und weitere Übernachtungsmöglichkeiten vergleichen.</p>
+                  <em>Unterkünfte ansehen ↗</em>
+                </a>
+
+                <a
+                  className={styles.referralCard}
+                  href={activityHref}
+                  {...(activityIsAffiliate
+                    ? { target: "_blank", rel: "sponsored noreferrer" }
+                    : {})}
+                  onClick={() =>
+                    trackReferralClick(
+                      outdoorGood ? "Aktivitäten bei gutem Wetter" : "Schietwetter Freizeit",
+                      activityIsAffiliate ? affiliateLinks.activities.provider : "GlücksburgDirekt",
+                      activityIsAffiliate
+                    )
+                  }
+                >
+                  <span className={styles.referralIcon} aria-hidden="true">
+                    {outdoorGood ? "🚤" : "☔"}
+                  </span>
+                  <span className={styles.referralBadge + " " + (!activityIsAffiliate ? styles.editorialBadge : "")}>
+                    {activityIsAffiliate ? "Werbung · Affiliate-Link" : "Redaktionell"}
+                  </span>
+                  <strong>
+                    {outdoorGood
+                      ? activityIsAffiliate
+                        ? "Erlebnisse rund um Flensburg & Förde"
+                        : "Freizeit & Förde entdecken"
+                      : "Schietwetter? Indoor & Freizeit"}
+                  </strong>
+                  <p>
+                    {outdoorGood
+                      ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
+                      : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind."}
+                  </p>
+                  <em>{activityIsAffiliate ? "Aktivitäten ansehen ↗" : "Freizeitideen öffnen →"}</em>
+                </a>
+
+                <a
+                  className={styles.referralCard}
+                  href="/heute-in-gluecksburg"
+                  onClick={() =>
+                    trackReferralClick("Heute in Glücksburg", "GlücksburgDirekt", false)
+                  }
+                >
+                  <span className={styles.referralIcon} aria-hidden="true">📅</span>
+                  <span className={styles.referralBadge + " " + styles.editorialBadge}>Redaktionell</span>
+                  <strong>Was ist heute in Glücksburg los?</strong>
+                  <p>Aktuelle Veranstaltungen und Termine mit dem Live-Check kombinieren.</p>
+                  <em>Heute ansehen →</em>
+                </a>
+
+                <a
+                  className={styles.referralCard}
+                  href="/partner"
+                  onClick={() =>
+                    trackReferralClick("Lokaler Partner werden", "GlücksburgDirekt", false)
+                  }
+                >
+                  <span className={styles.referralIcon} aria-hidden="true">🤝</span>
+                  <span className={styles.referralBadge + " " + styles.partnerBadge}>Für Betriebe</span>
+                  <strong>Lokaler Anbieter in Glücksburg?</strong>
+                  <p>Mit einem passenden Angebot auf GlücksburgDirekt sichtbar werden.</p>
+                  <em>Partner werden →</em>
+                </a>
+              </div>
+
+              <p className={styles.affiliateNote}>
+                Affiliate-Hinweis: Bei einer Buchung über entsprechend gekennzeichnete Links kann
+                GlücksburgDirekt eine Provision erhalten. Für dich entstehen dadurch keine
+                zusätzlichen Kosten. Redaktionelle Empfehlungen sind davon unabhängig.
               </p>
             </section>
 

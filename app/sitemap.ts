@@ -37,6 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/straende-gluecksburg`, lastModified, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/familie`, lastModified, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/rathaus`, lastModified, changeFrequency: "daily", priority: 0.8 },
+    { url: `${baseUrl}/partner`, lastModified, changeFrequency: "monthly", priority: 0.6 },
   ];
 
   const eventPages: MetadataRoute.Sitemap = (events ?? []).map((event) => ({

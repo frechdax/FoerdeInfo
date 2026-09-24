@@ -1,0 +1,21 @@
+:global(*){box-sizing:border-box}
+.page{min-height:100vh;background:#f3f7f6;color:#17343d;font-family:Arial,Helvetica,sans-serif}
+.shell{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:20px 0 48px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;color:#17343d;text-decoration:none;font-weight:800;line-height:1}
+.brand>span:last-child{display:grid;gap:2px}.brand strong{display:block;color:#13706e;font-size:.72rem;letter-spacing:.1em}
+.brandMark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#123f4b;color:#fff}
+.back{color:#176c73;text-decoration:none;font-size:.8rem;font-weight:800}
+.hero{padding:42px;border-radius:24px;background:linear-gradient(135deg,#123f4b,#176c73 62%,#2c8d88);color:#fff;box-shadow:0 16px 50px rgba(18,63,75,.14)}
+.eyebrow,.kicker{display:block;text-transform:uppercase;font-size:.7rem;letter-spacing:.1em;font-weight:900}.eyebrow{color:#afe5dd}.kicker{color:#267871}
+.hero h1{max-width:760px;margin:7px 0 13px;font-size:clamp(2.1rem,5vw,3.7rem);line-height:1;letter-spacing:-.05em}
+.hero p{max-width:760px;margin:0;color:#dcefed;line-height:1.65}
+.primaryButton,.secondaryButton{display:inline-flex;align-items:center;justify-content:center;margin-top:22px;padding:12px 16px;border-radius:12px;font-weight:900;text-decoration:none}
+.primaryButton{background:#fff;color:#174752}.secondaryButton{background:#176c73;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.card,.section{border:1px solid #dbe7e6;border-radius:18px;background:#fff;box-shadow:0 9px 28px rgba(18,63,75,.04)}
+.card{padding:20px}.card>span{font-size:1.45rem}.card h2{margin:14px 0 7px;font-size:1rem}
+.card p,.copy{margin:0;color:#63797e;font-size:.84rem;line-height:1.6}
+.section{margin-top:16px;padding:25px}.section h2{margin:5px 0 14px;font-size:1.35rem}
+.pills{display:flex;flex-wrap:wrap;gap:8px}.pills span{padding:8px 11px;border-radius:999px;background:#f0f7f5;color:#31575d;font-size:.76rem;font-weight:800}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.hero{padding:28px 22px}.section{padding:20px}}
