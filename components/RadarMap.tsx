@@ -171,8 +171,36 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
 
   useEffect(() => {
     const map = mapRef.current;
-    if (map && selected) map.easeTo({ center:[selected.longitude,selected.latitude], zoom:Math.max(map.getZoom(),12.7), duration:800 });
-  }, [selected]);
+    if (map && selected && !routeGeometry) {
+      map.easeTo({ center:[selected.longitude,selected.latitude], zoom:Math.max(map.getZoom(),12.7), duration:800 });
+    }
+  }, [selected, routeGeometry]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selected || !routeGeometry?.coordinates?.length) return;
+
+    let minLon = selected.longitude;
+    let maxLon = selected.longitude;
+    let minLat = selected.latitude;
+    let maxLat = selected.latitude;
+
+    for (const coordinate of routeGeometry.coordinates) {
+      const lon = Number(coordinate[0]);
+      const lat = Number(coordinate[1]);
+      if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
+      minLon = Math.min(minLon, lon);
+      maxLon = Math.max(maxLon, lon);
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+    }
+
+    map.fitBounds([[minLon, minLat], [maxLon, maxLat]], {
+      padding: { top: 80, right: 70, bottom: 80, left: 70 },
+      duration: 900,
+      maxZoom: 13.5,
+    });
+  }, [selected, routeGeometry]);
 
   return (
     <>
