@@ -1,0 +1,18 @@
+name: Test NAH.SH regional GTFS
+on:
+  push:
+    branches: [busradar-preview]
+
+jobs:
+  test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund --ignore-scripts
+      - name: Import NAH.SH open GTFS
+        run: GTFS_STATIC_URL=https://www.connect-info.net/opendata/gtfs/nah.sh/rjqfrkqhgu GTFS_STATIC_FALLBACK_URL= npm run gtfs:import
