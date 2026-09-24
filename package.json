@@ -1,26 +1,29 @@
 {
-  "name": "gluecksburg-direkt",
-  "version": "1.0.0",
+  "name": "busradar-preview",
+  "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "tar -xzf busradar-preview-src.tgz && next dev",
+    "build": "tar -xzf busradar-preview-src.tgz && node scripts/import-gtfs.mjs && next build",
     "start": "next start"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.116.0",
+    "gtfs-realtime-bindings": "2.2.0",
+    "maplibre-gl": "6.11.1",
     "next": "16.3.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "@vercel/analytics": "2.0.1"
+    "fast-xml-parser": "5.11.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.9.0"
-  },
-  "engines": {
-    "node": ">=22"
+    "csv-parse": "6.1.0",
+    "typescript": "^5.9.0",
+    "unzipper": "0.12.3"
   }
 }
