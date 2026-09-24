@@ -82,7 +82,13 @@ export default function LiveDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const bestScore = data?.scores.reduce(
+    (best, current) => current.score > best.score ? current : best,
+    data.scores[0]
+  );
+
   const load = useCallback(async () => {
+    setLoading(true);
     setError("");
     try {
       const response = await fetch("/api/live", { cache: "no-store" });
@@ -126,6 +132,29 @@ export default function LiveDashboard() {
             {loading ? "Wird geladen" : "Live-Daten"}
           </div>
         </section>
+
+        {data && bestScore ? (
+          <section className={styles.nowSummary} aria-label="Glücksburg jetzt Zusammenfassung">
+            <div className={styles.summaryLead}>
+              <span className={styles.summaryIcon} aria-hidden="true">{bestScore.icon}</span>
+              <span>
+                <small>Beste Option gerade</small>
+                <strong>{bestScore.label} · {bestScore.score}/100</strong>
+              </span>
+            </div>
+            <div className={styles.summaryFacts}>
+              <span>🌧️ 3 h: <strong>{Math.round(data.weather.rainProbability3h)} %</strong></span>
+              <span>💨 Wind: <strong>{Math.round(data.weather.windSpeed)} km/h</strong></span>
+              <span>
+                {data.warnings.length ? "⚠️" : "✓"} Warnungen:{" "}
+                <strong>{data.warnings.length ? data.warnings.length : "keine"}</strong>
+              </span>
+              <span>
+                🌊 Pegel: <strong>{data.pegel ? data.pegel.trend : "—"}</strong>
+              </span>
+            </div>
+          </section>
+        ) : null}
 
         {error ? (
           <section className={styles.errorBox}>
