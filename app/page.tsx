@@ -937,35 +937,47 @@ export default function HomePage() {
             </span>
           </button>
 
-          <div
-            className="header-weather"
-            aria-label={
-              weather && currentWeather
-                ? `Wetter in Glücksburg: ${currentWeather.label}, ${Math.round(weather.temperature)} Grad, Wind ${Math.round(weather.windSpeed)} Kilometer pro Stunde aus ${windDirectionLabel(weather.windDirection)}`
-                : "Wetter in Glücksburg wird geladen"
-            }
-            title={
-              weather && currentWeather
-                ? `${currentWeather.label} · ${Math.round(weather.temperature)}°C · ${Math.round(weather.min)}° / ${Math.round(weather.max)}° · Wind ${Math.round(weather.windSpeed)} km/h aus ${windDirectionLabel(weather.windDirection)}`
-                : "Wetter wird geladen"
-            }
-          >
-            <span className="header-weather-icon" aria-hidden="true">
-              {currentWeather?.icon || "🌤️"}
-            </span>
-            {weather ? (
-              <span className="header-weather-copy">
-                <span className="header-weather-topline">
-                  <strong>{Math.round(weather.temperature)}°</strong>
-                  <span className="header-weather-label">{currentWeather?.label || "Wetter"}</span>
-                </span>
-                <span className="header-weather-wind">
-                  {Math.round(weather.windSpeed)} km/h · {windDirectionLabel(weather.windDirection)}
-                </span>
+          <div className="header-live-cluster">
+            <div
+              className="header-weather"
+              aria-label={
+                weather && currentWeather
+                  ? `Wetter in Glücksburg: ${currentWeather.label}, ${Math.round(weather.temperature)} Grad, Wind ${Math.round(weather.windSpeed)} Kilometer pro Stunde aus ${windDirectionLabel(weather.windDirection)}`
+                  : "Wetter in Glücksburg wird geladen"
+              }
+              title={
+                weather && currentWeather
+                  ? `${currentWeather.label} · ${Math.round(weather.temperature)}°C · ${Math.round(weather.min)}° / ${Math.round(weather.max)}° · Wind ${Math.round(weather.windSpeed)} km/h aus ${windDirectionLabel(weather.windDirection)}`
+                  : "Wetter wird geladen"
+              }
+            >
+              <span className="header-weather-icon" aria-hidden="true">
+                {currentWeather?.icon || "🌤️"}
               </span>
-            ) : (
-              <span className="header-weather-label">…</span>
-            )}
+              {weather ? (
+                <span className="header-weather-copy">
+                  <span className="header-weather-topline">
+                    <strong>{Math.round(weather.temperature)}°</strong>
+                    <span className="header-weather-label">{currentWeather?.label || "Wetter"}</span>
+                  </span>
+                  <span className="header-weather-wind">
+                    {Math.round(weather.windSpeed)} km/h · {windDirectionLabel(weather.windDirection)}
+                  </span>
+                </span>
+              ) : (
+                <span className="header-weather-label">…</span>
+              )}
+            </div>
+
+            <a
+              className="header-live-button"
+              href="/live"
+              aria-label="Glücksburg Jetzt – Live-Daten öffnen"
+              title="Glücksburg Jetzt öffnen"
+            >
+              <span className="header-live-led" aria-hidden="true" />
+              <span>LIVE</span>
+            </a>
           </div>
         </header>
 
