@@ -10,7 +10,11 @@ const ROOT = process.cwd();
 const PRIMARY_URL = process.env.GTFS_STATIC_URL || "https://www.connect-info.net/opendata/gtfs/nah.sh/rjqfrkqhgu";
 const FALLBACK_URL = process.env.GTFS_STATIC_FALLBACK_URL || "https://download.gtfs.de/germany/nv_free/latest.zip";
 let URL = PRIMARY_URL;
-const B = { minLon: 8.72, minLat: 54.28, maxLon: 10.08, maxLat: 55.02 };
+const TARGET_STOP_PREFIXES = ["de:01001:", "de:01059:"]; // Flensburg + Kreis Schleswig-Flensburg
+
+function isTargetStopId(stopId) {
+  return TARGET_STOP_PREFIXES.some((prefix) => String(stopId || "").startsWith(prefix));
+}
 const wanted = new Set(["agency.txt","routes.txt","trips.txt","stops.txt","stop_times.txt","shapes.txt","calendar.txt","calendar_dates.txt"]);
 const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), "busradar-gtfs-"));
 const zipPath = path.join(tmp, "feed.zip");
@@ -68,7 +72,7 @@ async function rows(file, fn) {
 const stops = new Map();
 await rows("stops.txt", (r) => {
   const lat = Number(r.stop_lat), lon = Number(r.stop_lon);
-  if (Number.isFinite(lat) && Number.isFinite(lon) && lon >= B.minLon && lon <= B.maxLon && lat >= B.minLat && lat <= B.maxLat) {
+  if (Number.isFinite(lat) && Number.isFinite(lon) && isTargetStopId(r.stop_id)) {
     stops.set(r.stop_id, { id: r.stop_id, name: r.stop_name, lat, lon });
   }
 });
