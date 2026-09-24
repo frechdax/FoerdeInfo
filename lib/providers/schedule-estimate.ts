@@ -34,7 +34,7 @@ function interpolatePath(points: [number, number][], ratio: number): [number, nu
   return points[points.length - 1];
 }
 
-function segmentPath(shape: [number, number][], from: [number, number], to: [number, number]) {
+function segmentPath(shape: [number, number][], from: [number, number], to: [number, number]): [number, number][] | undefined {
   const nearest = (point: [number, number]) => {
     let bestIndex = 0;
     let bestDistance = Number.POSITIVE_INFINITY;
@@ -47,10 +47,14 @@ function segmentPath(shape: [number, number][], from: [number, number], to: [num
     }
     return bestIndex;
   };
+
   const a = nearest(from);
   const b = nearest(to);
   const part = a <= b ? shape.slice(a, b + 1) : shape.slice(b, a + 1).reverse();
-  return part.length >= 2 ? part : [from, to];
+
+  // Never fabricate a straight connection when the route shape cannot
+  // resolve a usable segment between two stops.
+  return part.length >= 2 ? part : undefined;
 }
 
 function colorFor(value?: string) {
@@ -105,6 +109,8 @@ export class ScheduleEstimateProvider implements TransitRealtimeProvider {
 
           const ratio = arrival <= departure ? 0 : (clock.currentSeconds - departure) / (arrival - departure);
           const path = segmentPath(shape, [aStop.lon, aStop.lat], [bStop.lon, bStop.lat]);
+          if (!path) continue;
+
           const [longitude, latitude] = interpolatePath(path, ratio);
           const route = getRoute(trip.routeId);
 
@@ -125,6 +131,7 @@ export class ScheduleEstimateProvider implements TransitRealtimeProvider {
             source: "NAH.SH GTFS Fahrplan · ohne Echtzeitkorrektur",
             color: colorFor(route?.color),
           });
+
           seen.add(trip.id);
           break;
         }
