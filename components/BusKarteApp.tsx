@@ -7,6 +7,8 @@ import type { StopPoint, Vehicle } from "@/lib/types";
 
 type Payload = { updatedAt: string; vehicles: Vehicle[] };
 type Area = "all" | "flensburg" | "schleswig" | "region";
+type RouteEndpoint = { id: string; name: string; latitude: number; longitude: number; departure?: string; arrival?: string };
+type RouteInfo = { start?: RouteEndpoint | null; end?: RouteEndpoint | null };
 
 function ageLabel(timestamp?: string) {
   if (!timestamp) return "–";
@@ -30,6 +32,8 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
   const [selected, setSelected] = useState<Vehicle>();
   const [selectedRoute, setSelectedRoute] = useState<string>();
   const [routeGeometry, setRouteGeometry] = useState<{ type: "LineString"; coordinates: number[][] } | null>(null);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo>({});
+  const [routeFocus, setRouteFocus] = useState(false);
   const [query, setQuery] = useState("");
   const [area, setArea] = useState<Area>("all");
   const [accuracy, setAccuracy] = useState<"all" | "gps" | "realtime" | "estimated">("all");
@@ -120,14 +124,17 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
   );
 
   useEffect(() => {
-    if (!selectedRoute) { setRouteGeometry(null); return; }
+    if (!selectedRoute) { setRouteGeometry(null); setRouteInfo({}); return; }
     const tripQuery = selectedVehicle?.routeId === selectedRoute && selectedVehicle.tripId
       ? `?tripId=${encodeURIComponent(selectedVehicle.tripId)}`
       : "";
     fetch(`/api/routes/${encodeURIComponent(selectedRoute)}/shape${tripQuery}`)
       .then((r) => r.json())
-      .then((x) => setRouteGeometry(x.geometry || null))
-      .catch(() => setRouteGeometry(null));
+      .then((x) => {
+        setRouteGeometry(x.geometry || null);
+        setRouteInfo({ start: x.start || null, end: x.end || null });
+      })
+      .catch(() => { setRouteGeometry(null); setRouteInfo({}); });
   }, [selectedRoute, selectedVehicle]);
 
   const filtered = useMemo(() => {
@@ -152,16 +159,20 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
 
   const mapVehicles = selectedVehicle ? [selectedVehicle] : filtered;
 
-  const chooseVehicle = (v: Vehicle) => {
+  const chooseVehicle = (v: Vehicle, focusRoute = false) => {
     setSelected(v);
     setSelectedRoute(v.routeId);
-    setMobilePanel(true);
+    setRouteFocus(focusRoute);
+    setMobilePanel(!focusRoute);
   };
 
   const clearVehicle = () => {
     setSelected(undefined);
     setSelectedRoute(undefined);
     setRouteGeometry(null);
+    setRouteInfo({});
+    setRouteFocus(false);
+    setMobilePanel(false);
   };
 
   return (
@@ -172,14 +183,35 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
         <nav><Link href="/status">Status</Link><Link href="/datenquellen">Datenquellen</Link></nav>
       </header>
 
-      <section className="workspace">
+      <section className={`workspace ${routeFocus && selectedVehicle ? "route-focus" : ""}`}>
         <div className="map-wrap">
-          <RadarMap vehicles={mapVehicles} stops={stops} selected={selectedVehicle} routeGeometry={routeGeometry} onSelect={chooseVehicle} />
-          <div className="map-title"><h1>Busse in Flensburg & Schleswig <span>{hasGpsVehicles ? "live verfolgen" : hasRealtimeVehicles ? "mit Echtzeit-Prognosen" : "nach Fahrplan geschätzt"}</span></h1></div>
-          <button className="mobile-sheet-button" onClick={() => setMobilePanel(true)}>Busse unterwegs <strong>{filtered.length}</strong></button>
+          <RadarMap
+            vehicles={mapVehicles}
+            stops={stops}
+            selected={selectedVehicle}
+            routeGeometry={routeGeometry}
+            routeStart={routeInfo.start}
+            routeEnd={routeInfo.end}
+            onSelect={(v) => chooseVehicle(v, true)}
+          />
+          {!routeFocus && <div className="map-title"><h1>Busse in Flensburg & Schleswig <span>{hasGpsVehicles ? "live verfolgen" : hasRealtimeVehicles ? "mit Echtzeit-Prognosen" : "nach Fahrplan geschätzt"}</span></h1></div>}
+          {routeFocus && selectedVehicle && <section className="route-focus-card">
+            <button className="route-focus-back" onClick={clearVehicle}>← Alle Busse</button>
+            <div className="route-focus-heading">
+              <span className="route-focus-line" style={{ background: selectedVehicle.color || "#173dff" }}>{selectedVehicle.line}</span>
+              <div><small>Streckenverlauf</small><strong>{selectedVehicle.destination || routeInfo.end?.name || "Ziel"}</strong></div>
+            </div>
+            <div className="route-focus-journey">
+              <div><small>Start</small><strong>{routeInfo.start?.name || "Start wird geladen …"}</strong></div>
+              <span>→</span>
+              <div><small>Ziel</small><strong>{routeInfo.end?.name || selectedVehicle.destination || "Ziel wird geladen …"}</strong></div>
+            </div>
+            <div className="route-focus-live"><span className={`route-quality-dot ${selectedVehicle.accuracyType}`} /><span>{selectedVehicle.nextStop ? `Nächster Halt: ${selectedVehicle.nextStop}` : "Aktuelle Position"}</span></div>
+          </section>}
+          {!routeFocus && <button className="mobile-sheet-button" onClick={() => setMobilePanel(true)}>Busse unterwegs <strong>{filtered.length}</strong></button>}
         </div>
 
-        <aside className={`sidebar ${mobilePanel ? "mobile-open" : ""}`}>
+        {!routeFocus && <aside className={`sidebar ${mobilePanel ? "mobile-open" : ""}`}>
           <div className="mobile-grabber" onClick={() => setMobilePanel(false)}><span /></div>
           <div className="sidebar-head"><div><span className="eyebrow">BUSKARTE</span><h2>Busse unterwegs</h2></div><div className="count-badge">{filtered.length}</div></div>
           <div className="segmented">
@@ -199,7 +231,7 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
             {visibleVehicles.length ? visibleVehicles.map((v) => <button
               key={v.id}
               className={selectedVehicle?.id === v.id ? 'selected' : ''}
-              onClick={() => chooseVehicle(v)}
+              onClick={() => chooseVehicle(v, false)}
               aria-label={`Bus Linie ${v.line} Richtung ${v.destination || 'unbekannt'} auswählen`}
             >
               <span className="route-chip" style={{ background: v.color || '#173dff' }}>{v.line}</span>
@@ -211,7 +243,7 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
             </button>) : <div className="empty"><div className="empty-icon">⌁</div><strong>Derzeit keine Buspositionen</strong><p>Aktuell ist laut Fahrplandaten keine darstellbare Fahrt mit Liniengeometrie aktiv oder die Datenquelle ist vorübergehend nicht verfügbar.</p><Link href="/status">Provider prüfen</Link></div>}
           </div>
           <footer><span>Keine Fake-Daten</span><Link href="/datenquellen">Quellen & Lizenzen</Link></footer>
-        </aside>
+        </aside>}
       </section>
     </main>
   );
