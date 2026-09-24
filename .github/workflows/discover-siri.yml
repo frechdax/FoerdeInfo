@@ -14,29 +14,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Inspect public Mobilithek offer module
+      - name: Inspect Mobilithek public offer service
         shell: bash
         run: |
           node <<'NODE'
-          const base = "https://mobilithek.info/assets/";
-          const files = ["MarketplaceOffer-Bv_dZ273.js"];
-          for (const file of files) {
-            const url = base + file;
-            const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.4" } });
+          for (const file of ["OfferService-CGwN8qO2.js","RequestUtils-BYX7BqyI.js"]) {
+            const url = "https://mobilithek.info/assets/" + file;
+            const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.5" } });
             const js = await res.text();
-            console.log("MODULE", url, "STATUS", res.status, "LEN", js.length);
-            for (const needle of ["accessURL","accessUrl","accessUrls","offerId","getOffer","marketplace","subscription","resource","download","axios","/api/"]) {
-              let at=-1, count=0;
-              while ((at=js.indexOf(needle,at+1))>=0 && count<20) {
-                console.log("CONTEXT", needle, at, js.slice(Math.max(0,at-500),Math.min(js.length,at+1000)).replace(/\s+/g," "));
-                count++;
-              }
-            }
-            const rel=[...js.matchAll(/["'`](\/[A-Za-z0-9_.?&=/:{}-]{4,})["'`]/g)].map(m=>m[1]);
-            for(const v of [...new Set(rel)].filter(x=>/offer|resource|subscription|access|marketplace|download|api/i.test(x)).slice(0,250)) console.log("REL",v);
-            const full=[...js.matchAll(/https?:\\?\/\\?\/[^"'<>\\s)]+/g)].map(m=>m[0].replaceAll("\\/","/"));
-            for(const v of [...new Set(full)].slice(0,250)) console.log("FULL",v);
-            const imports=[...js.matchAll(/\.\/([A-Za-z0-9_.-]+\.js)/g)].map(m=>m[1]);
-            console.log("IMPORTS", [...new Set(imports)].join(" "));
+            console.log("\nMODULE", file, "STATUS", res.status, "LEN", js.length);
+            console.log(js.slice(0, 20000).replace(/\s+/g, " "));
+            const strings=[...js.matchAll(/["'`]([^"'`]{3,300})["'`]/g)].map(m=>m[1]);
+            for(const s of [...new Set(strings)].filter(s=>/offer|publication|marketplace|resource|content|access|subscription|api|download/i.test(s)).slice(0,250)) console.log("STRING",s);
           }
           NODE
