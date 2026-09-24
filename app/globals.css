@@ -2825,3 +2825,88 @@ footer span:last-child{margin-left:auto}
 }
 
 /* Redeploy trigger: emergency pharmacy compact card */
+
+
+/* Wetter + Glücksburg Jetzt Live-Zugang */
+.header-live-cluster{
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.header-live-cluster .header-weather{
+  margin-left:0;
+}
+.header-live-button{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:7px 12px;
+  border:1px solid #d9e5e7;
+  border-radius:999px;
+  background:#fff;
+  color:#173d47;
+  box-shadow:0 4px 14px rgba(16,46,57,.07);
+  font-size:.72rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-decoration:none;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.header-live-button:hover{
+  transform:translateY(-1px);
+  border-color:#c1d8db;
+  box-shadow:0 7px 18px rgba(16,46,57,.11);
+}
+.header-live-led{
+  width:8px;
+  height:8px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:#e33434;
+  box-shadow:0 0 0 4px rgba(227,52,52,.12),0 0 10px rgba(227,52,52,.52);
+  animation:livePulse 1.8s ease-in-out infinite;
+}
+@keyframes livePulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.62;transform:scale(.86)}
+}
+@media (max-width:850px){
+  .header-live-cluster{
+    position:absolute;
+    right:14px;
+    margin-left:0;
+    gap:6px;
+  }
+  .header-live-cluster .header-weather{
+    position:static;
+    right:auto;
+  }
+  .header-live-button{
+    min-height:38px;
+    padding:6px 9px;
+    font-size:.66rem;
+  }
+  .header-live-led{
+    width:7px;
+    height:7px;
+    box-shadow:0 0 0 3px rgba(227,52,52,.12),0 0 8px rgba(227,52,52,.45);
+  }
+}
+@media (max-width:430px){
+  .header-live-cluster{
+    right:8px;
+    gap:5px;
+  }
+  .header-live-button{
+    padding:5px 8px;
+    min-height:36px;
+    letter-spacing:.06em;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .header-live-led{animation:none!important}
+}
