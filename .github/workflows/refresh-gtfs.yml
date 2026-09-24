@@ -6,6 +6,7 @@ on:
     branches: [buskarte-preview]
     paths:
       - "scripts/import-gtfs.mjs"
+      - "scripts/import-realtime-map.mjs"
   schedule:
     - cron: "17 3 * * *"
 
@@ -15,7 +16,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,18 +27,20 @@ jobs:
       - run: npm install --no-audit --no-fund --ignore-scripts
       - name: Import official NAH.SH regional GTFS
         run: npm run gtfs:import
-      - name: Check realtime trip-id compatibility
+      - name: Build GTFS.de → NAH.SH realtime trip crosswalk
+        run: npm run realtime-map:import
+      - name: Check current realtime coverage
         run: npm run realtime:check
-      - name: Commit refreshed regional feed
+      - name: Commit refreshed regional feeds
         run: |
-          if git diff --quiet -- data/region.json; then
+          if git diff --quiet -- data/region.json data/realtime-trip-map.json; then
             echo "No GTFS changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/region.json
-          git commit -m "chore: refresh regional NAH.SH GTFS"
+          git add data/region.json data/realtime-trip-map.json
+          git commit -m "chore: refresh BusKarte GTFS + realtime crosswalk"
           git fetch origin buskarte-preview
           git rebase origin/buskarte-preview
           git push origin HEAD:buskarte-preview
