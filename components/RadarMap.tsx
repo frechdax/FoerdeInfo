@@ -21,11 +21,12 @@ const DEFAULT_MAP_STYLE: StyleSpecification = {
   layers: [{ id: "osm", type: "raster", source: "osm" }],
 };
 
-export default function RadarMap({ vehicles, stops, selected, routeGeometry, routeStart, routeEnd, onSelect }: {
+export default function RadarMap({ vehicles, stops, selected, routeGeometry, routeColor, routeStart, routeEnd, onSelect }: {
   vehicles: Vehicle[];
   stops: StopPoint[];
   selected?: Vehicle;
   routeGeometry: { type: "LineString"; coordinates: number[][] } | null;
+  routeColor?: string;
   routeStart?: RouteEndpoint | null;
   routeEnd?: RouteEndpoint | null;
   onSelect: (v: Vehicle) => void;
@@ -66,8 +67,20 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, rou
       map.addSource("stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "stops", type: "circle", source: "stops", minzoom: 11.3, paint: { "circle-radius": ["interpolate",["linear"],["zoom"],11,2.5,15,5], "circle-color": "#ffffff", "circle-stroke-width": 1.5, "circle-stroke-color": "#244154" } });
       map.addSource("selected-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      map.addLayer({ id: "selected-route-halo", type: "line", source: "selected-route", paint: { "line-color": "#ffffff", "line-width": 9, "line-opacity": .85 } });
-      map.addLayer({ id: "selected-route", type: "line", source: "selected-route", paint: { "line-color": "#153df3", "line-width": 5 } });
+      map.addLayer({
+        id: "selected-route-halo",
+        type: "line",
+        source: "selected-route",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#ffffff", "line-width": 13, "line-opacity": .96 },
+      });
+      map.addLayer({
+        id: "selected-route",
+        type: "line",
+        source: "selected-route",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#173dff", "line-width": 7, "line-opacity": 1 },
+      });
       map.on("mouseenter", "stops", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "stops", () => { map.getCanvas().style.cursor = ""; });
       map.on("click", "stops", async (event) => {
@@ -130,10 +143,18 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, rou
     const map = mapRef.current; if (!map) return;
     const update = () => {
       const source = map.getSource("selected-route") as GeoJSONSource | undefined;
-      source?.setData(routeGeometry ? { type:"Feature", properties:{}, geometry: routeGeometry } : { type:"FeatureCollection", features:[] });
+      source?.setData(routeGeometry ? {
+        type:"Feature",
+        properties:{ routeColor: routeColor || "#173dff" },
+        geometry: routeGeometry,
+      } : { type:"FeatureCollection", features:[] });
+
+      if (map.getLayer("selected-route")) {
+        map.setPaintProperty("selected-route", "line-color", routeColor || "#173dff");
+      }
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
-  }, [routeGeometry]);
+  }, [routeGeometry, routeColor]);
 
   useEffect(() => {
     const map = mapRef.current;
