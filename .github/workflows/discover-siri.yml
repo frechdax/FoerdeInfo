@@ -14,35 +14,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Query Mobilithek unrestricted offer metadata
+      - name: Test Mobilithek public no-auth SIRI package
         shell: bash
         run: |
           node <<'NODE'
-          const offer = "832254079439458304";
+          const publicationId = "832254079439458304";
           const urls = [
-            `https://mobilithek.info/mdp-api/mdp-msa-metadata/v2/offers/unrestricted/${offer}`,
-            `https://mobilithek.info/mdp-api/mdp-msa-metadata/v2/offers/${offer}`,
-            `https://mobilithek.info/mdp-api/mdp-msa-metadata/v2/offers/essentials/${offer}`
+            `https://mobilithek.info/mdp-api/mdp-conn-server/v1/publication/${publicationId}/file/noauth`,
+            `https://mobilithek.info/mdp-api/mdp-conn-server/v1/publication/${publicationId}/file/access`
           ];
           for (const url of urls) {
             try {
-              const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.7", accept: "application/json" } });
-              const body = await res.text();
-              console.log("\nENDPOINT", url, "STATUS", res.status, "TYPE", res.headers.get("content-type"), "LEN", body.length);
-              console.log(body.slice(0, 30000));
-              try {
-                const json = JSON.parse(body);
-                const walk=(value,path="root")=>{
-                  if (value == null) return;
-                  if (typeof value === "string") {
-                    if (/https?:\/\//i.test(value) || /access|endpoint|url|siri|xml|publication|content/i.test(path+" "+value)) console.log("FIELD",path,JSON.stringify(value));
-                    return;
-                  }
-                  if (Array.isArray(value)) return value.forEach((v,i)=>walk(v,`${path}[${i}]`));
-                  if (typeof value === "object") for(const [k,v] of Object.entries(value)) walk(v,`${path}.${k}`);
-                };
-                walk(json);
-              } catch {}
+              const res = await fetch(url, { redirect:"follow", headers:{ "user-agent":"BusRadar SIRI probe/0.8", accept:"application/xml,text/xml,application/octet-stream,*/*" } });
+              const buf = new Uint8Array(await res.arrayBuffer());
+              console.log("\nENDPOINT", url, "STATUS", res.status, "FINAL", res.url);
+              console.log("TYPE", res.headers.get("content-type"), "DISPOSITION", res.headers.get("content-disposition"), "LEN", buf.byteLength);
+              const sample = new TextDecoder().decode(buf.slice(0, 4000));
+              console.log("SAMPLE", sample.replace(/\s+/g," ").slice(0,4000));
             } catch(error) {
               console.log("ERROR", url, error?.message || String(error));
             }
