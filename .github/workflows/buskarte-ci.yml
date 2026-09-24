@@ -45,8 +45,8 @@ jobs:
           fetch(url).then(async r=>{
             const j=await r.json();
             const n=j?.geometry?.coordinates?.length||0;
-            console.log("Selected bus route test:", {line:v.line,routeId:v.routeId,tripId:v.tripId,coordinates:n,status:r.status});
-            if(!r.ok||n<2) process.exit(3);
+            console.log("Selected bus route test:", {line:v.line,routeId:v.routeId,tripId:v.tripId,coordinates:n,start:j?.start?.name,end:j?.end?.name,status:r.status});
+            if(!r.ok||n<2||!j?.start?.name||!j?.end?.name) process.exit(3);
           }).catch(e=>{console.error(e);process.exit(4)});
           NODE
           LEGACY_CAMEL='Bus''Radar'
