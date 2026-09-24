@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "tar -xzf busradar-preview-src.tgz && next dev",
-    "build": "tar -xzf busradar-preview-src.tgz && node scripts/import-gtfs.mjs && next build",
+    "build": "tar -xzf busradar-preview-src.tgz && next build",
     "start": "next start"
   },
   "dependencies": {
