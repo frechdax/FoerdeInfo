@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 22
       - name: Rebuild BusRadar source
-        run: cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz
+        run: cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && node preview-patch.mjs
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build
