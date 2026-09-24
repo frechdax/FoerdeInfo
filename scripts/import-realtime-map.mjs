@@ -37,7 +37,7 @@ function download(url, destination, redirects = 0) {
   if (redirects > 5) return Promise.reject(new Error("Too many redirects"));
   return new Promise((resolve, reject) => {
     const transport = url.startsWith("https:") ? https : http;
-    const request = transport.get(url, { headers: { "user-agent": "BusKarte realtime crosswalk/0.1" } }, async (response) => {
+    const request = transport.get(url, { headers: { "user-agent": "BusKarte realtime crosswalk/0.2" } }, async (response) => {
       const status = response.statusCode || 0;
       if (status >= 300 && status < 400 && response.headers.location) {
         response.resume();
