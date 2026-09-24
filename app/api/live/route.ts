@@ -277,17 +277,46 @@ function identifierCandidates(row: CsvRow) {
     .filter(([key, value]) => {
       if (!value) return false;
       const normalized = normalizeKey(key);
-      return /(id|code|kennung|nummer|nr)/.test(normalized) &&
-        /(bade|gewaesser|mess|stelle|eu|id|code)/.test(normalized);
+      return /(id|code|kennung|nummer|nr)/.test(normalized);
     })
     .map(([, value]) => value)
     .filter((value, index, values) => values.indexOf(value) === index);
 }
 
+function normalizeValue(value: string) {
+  return value
+    .toLocaleLowerCase("de")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]/g, "");
+}
+
 function relatedRows(master: CsvRow, rows: CsvRow[]) {
   const ids = identifierCandidates(master);
-  if (!ids.length) return [] as CsvRow[];
-  return rows.filter((row) => ids.some((id) => Object.values(row).includes(id)));
+  const direct = rows.filter((row) => ids.some((id) => Object.values(row).includes(id)));
+  if (direct.length) return direct;
+
+  const masterValues = new Set(
+    Object.values(master)
+      .map(normalizeValue)
+      .filter((value) => value.length >= 4 && !/^(ostsee|gluecksburg|schleswigholstein)$/.test(value))
+  );
+
+  const scored = rows
+    .map((row) => ({
+      row,
+      score: Object.values(row)
+        .map(normalizeValue)
+        .filter((value) => value.length >= 4)
+        .reduce((sum, value) => sum + (masterValues.has(value) ? 1 : 0), 0),
+    }))
+    .filter((entry) => entry.score > 0);
+
+  if (!scored.length) return [] as CsvRow[];
+  const bestScore = Math.max(...scored.map((entry) => entry.score));
+  return scored.filter((entry) => entry.score === bestScore).map((entry) => entry.row);
 }
 
 function beachDisplayName(row: CsvRow) {
@@ -671,7 +700,7 @@ export async function GET() {
           return (await response.json()) as PegelMeasurement;
         }
       ),
-      fetch(pegelBase + "/measurements.json?start=P6H", { next: { revalidate: 300 } }).then(
+      fetch(pegelBase + "/measurements.json?start=PT6H", { next: { revalidate: 300 } }).then(
         async (response) => {
           if (!response.ok) throw new Error("PEGELONLINE history unavailable");
           return (await response.json()) as PegelMeasurement[];
