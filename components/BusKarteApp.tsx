@@ -22,10 +22,10 @@ function cityMatch(v: Vehicle, area: Area) {
   return v.latitude <= 54.70 && v.latitude > 54.38;
 }
 
-export default function BusKarteApp() {
-  const [fastVehicles, setFastVehicles] = useState<Vehicle[]>([]);
+export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: { initialVehicles?: Vehicle[]; initialUpdatedAt?: string }) {
+  const [fastVehicles, setFastVehicles] = useState<Vehicle[]>(initialVehicles);
   const [realtimeVehicles, setRealtimeVehicles] = useState<Vehicle[]>([]);
-  const [updatedAt, setUpdatedAt] = useState<string>();
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>(initialUpdatedAt);
   const [realtimePending, setRealtimePending] = useState(true);
   const [selected, setSelected] = useState<Vehicle>();
   const [selectedRoute, setSelectedRoute] = useState<string>();
@@ -34,7 +34,7 @@ export default function BusKarteApp() {
   const [area, setArea] = useState<Area>("all");
   const [accuracy, setAccuracy] = useState<"all" | "gps" | "realtime" | "estimated">("all");
   const [stops, setStops] = useState<StopPoint[]>([]);
-  const [streamState, setStreamState] = useState<"live" | "polling" | "offline">("offline");
+  const [streamState, setStreamState] = useState<"live" | "polling" | "offline">(initialVehicles.length ? "polling" : "offline");
   const [mobilePanel, setMobilePanel] = useState(false);
 
   const vehicles = useMemo(() => {
