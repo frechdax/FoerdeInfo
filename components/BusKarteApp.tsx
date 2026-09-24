@@ -190,6 +190,7 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
             stops={stops}
             selected={selectedVehicle}
             routeGeometry={routeGeometry}
+            routeColor={selectedVehicle?.color || "#173dff"}
             routeStart={routeInfo.start}
             routeEnd={routeInfo.end}
             onSelect={(v) => chooseVehicle(v, true)}
@@ -206,7 +207,11 @@ export default function BusKarteApp({ initialVehicles = [], initialUpdatedAt }: 
               <span>→</span>
               <div><small>Ziel</small><strong>{routeInfo.end?.name || selectedVehicle.destination || "Ziel wird geladen …"}</strong></div>
             </div>
-            <div className="route-focus-live"><span className={`route-quality-dot ${selectedVehicle.accuracyType}`} /><span>{selectedVehicle.nextStop ? `Nächster Halt: ${selectedVehicle.nextStop}` : "Aktuelle Position"}</span></div>
+            <div className="route-focus-live">
+              <span className={`route-quality-dot ${selectedVehicle.accuracyType}`} />
+              <span>{selectedVehicle.nextStop ? `Nächster Halt: ${selectedVehicle.nextStop}` : "Aktuelle Position"}</span>
+              {routeGeometry && <strong className="route-visible-note">Linie auf Karte</strong>}
+            </div>
           </section>}
           {!routeFocus && <button className="mobile-sheet-button" onClick={() => setMobilePanel(true)}>Busse unterwegs <strong>{filtered.length}</strong></button>}
         </div>
