@@ -14,21 +14,37 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Inspect Mobilithek public API base
+      - name: Query Mobilithek unrestricted offer metadata
         shell: bash
         run: |
           node <<'NODE'
-          const url = "https://mobilithek.info/assets/index-ChSLynr4.js";
-          const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.6" } });
-          const js = await res.text();
-          console.log("INDEX", res.status, "LEN", js.length);
-          for (const needle of ["getAPIUrl","METADATA","CONNECTION","apiUrl","metadata-service","connection-service","api-gateway","VITE_","/v2/","/v1/"]) {
-            let pos = -1, count = 0;
-            while ((pos = js.indexOf(needle, pos + 1)) >= 0 && count < 25) {
-              console.log("CONTEXT", needle, pos, js.slice(Math.max(0,pos-1200),Math.min(js.length,pos+1800)).replace(/\s+/g," "));
-              count++;
+          const offer = "832254079439458304";
+          const urls = [
+            `https://mobilithek.info/mdp-api/mdp-msa-metadata/v2/offers/unrestricted/${offer}`,
+            `https://mobilithek.info/mdp-api/mdp-msa-metadata/v2/offers/${offer}`,
+            `https://mobilithek.info/mdp-api/mdp-msa-metadata/v2/offers/essentials/${offer}`
+          ];
+          for (const url of urls) {
+            try {
+              const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.7", accept: "application/json" } });
+              const body = await res.text();
+              console.log("\nENDPOINT", url, "STATUS", res.status, "TYPE", res.headers.get("content-type"), "LEN", body.length);
+              console.log(body.slice(0, 30000));
+              try {
+                const json = JSON.parse(body);
+                const walk=(value,path="root")=>{
+                  if (value == null) return;
+                  if (typeof value === "string") {
+                    if (/https?:\/\//i.test(value) || /access|endpoint|url|siri|xml|publication|content/i.test(path+" "+value)) console.log("FIELD",path,JSON.stringify(value));
+                    return;
+                  }
+                  if (Array.isArray(value)) return value.forEach((v,i)=>walk(v,`${path}[${i}]`));
+                  if (typeof value === "object") for(const [k,v] of Object.entries(value)) walk(v,`${path}.${k}`);
+                };
+                walk(json);
+              } catch {}
+            } catch(error) {
+              console.log("ERROR", url, error?.message || String(error));
             }
           }
-          const urls=[...js.matchAll(/https?:\\?\/\\?\/[^"'<>\\s)]+/g)].map(m=>m[0].replaceAll("\\/","/"));
-          for(const u of [...new Set(urls)].filter(u=>/mobilithek|mdm|metadata|connection|api/i.test(u)).slice(0,200)) console.log("URL",u);
           NODE
