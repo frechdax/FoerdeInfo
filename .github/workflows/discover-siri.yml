@@ -14,26 +14,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Inspect public Mobilithek app configuration
+      - name: Inspect public Mobilithek offer module
         shell: bash
         run: |
           node <<'NODE'
-          const html = await (await fetch("https://mobilithek.info/offers/832254079439458304", { headers: { "user-agent": "BusRadar resource discovery/0.3" } })).text();
-          const src = html.match(/<script[^>]+src=["']([^"']+)/i)?.[1];
-          if (!src) throw new Error("No app bundle found");
-          const scriptUrl = new URL(src, "https://mobilithek.info").href;
-          const js = await (await fetch(scriptUrl, { headers: { "user-agent": "BusRadar resource discovery/0.3" } })).text();
-          console.log("BUNDLE", scriptUrl, "LEN", js.length);
-
-          for (const needle of ["accessURL","accessUrl","accessUrls","offerId","/offers","graphql","apiUrl","baseURL","backend","resourceUrl","downloadUrl"]) {
-            let at = -1;
-            let count = 0;
-            while ((at = js.indexOf(needle, at + 1)) >= 0 && count < 12) {
-              console.log("CONTEXT", needle, at, js.slice(Math.max(0, at - 450), Math.min(js.length, at + 700)).replace(/\s+/g, " "));
-              count++;
+          const base = "https://mobilithek.info/assets/";
+          const files = ["MarketplaceOffer-Bv_dZ273.js"];
+          for (const file of files) {
+            const url = base + file;
+            const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.4" } });
+            const js = await res.text();
+            console.log("MODULE", url, "STATUS", res.status, "LEN", js.length);
+            for (const needle of ["accessURL","accessUrl","accessUrls","offerId","getOffer","marketplace","subscription","resource","download","axios","/api/"]) {
+              let at=-1, count=0;
+              while ((at=js.indexOf(needle,at+1))>=0 && count<20) {
+                console.log("CONTEXT", needle, at, js.slice(Math.max(0,at-500),Math.min(js.length,at+1000)).replace(/\s+/g," "));
+                count++;
+              }
             }
+            const rel=[...js.matchAll(/["'`](\/[A-Za-z0-9_.?&=/:{}-]{4,})["'`]/g)].map(m=>m[1]);
+            for(const v of [...new Set(rel)].filter(x=>/offer|resource|subscription|access|marketplace|download|api/i.test(x)).slice(0,250)) console.log("REL",v);
+            const full=[...js.matchAll(/https?:\\?\/\\?\/[^"'<>\\s)]+/g)].map(m=>m[0].replaceAll("\\/","/"));
+            for(const v of [...new Set(full)].slice(0,250)) console.log("FULL",v);
+            const imports=[...js.matchAll(/\.\/([A-Za-z0-9_.-]+\.js)/g)].map(m=>m[1]);
+            console.log("IMPORTS", [...new Set(imports)].join(" "));
           }
-
-          const urls = [...js.matchAll(/https?:\\?\/\\?\/[^"'<>\\s)]+/g)].map(m => m[0].replaceAll("\\/", "/"));
-          for (const url of [...new Set(urls)].filter(u => /mobilithek|api|offer|resource|download|siri/i.test(u)).slice(0, 200)) console.log("FULLURL", url);
           NODE
