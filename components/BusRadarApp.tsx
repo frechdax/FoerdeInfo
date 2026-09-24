@@ -68,6 +68,8 @@ export default function BusRadarApp() {
       .filter((v) => !q || [v.line, v.destination, v.operator, v.nextStop].filter(Boolean).some((x) => String(x).toLowerCase().includes(q)));
   }, [vehicles, query, area, accuracy]);
 
+  const hasGpsVehicles = useMemo(() => vehicles.some((v) => v.accuracyType === "gps"), [vehicles]);
+
   const groups = useMemo(() => {
     const map = new Map<string, { routeId: string; line: string; destination?: string; color?: string; count: number; gps: number }>();
     filtered.forEach((v) => {
@@ -84,14 +86,14 @@ export default function BusRadarApp() {
     <main className="app-shell">
       <header className="topbar">
         <div className="brand"><span className="brand-icon">B</span><div><strong>BusRadar</strong><span>Flensburg & Schleswig</span></div></div>
-        <div className="live-cluster"><span className={`live-dot ${streamState}`} /><strong>{streamState === "live" ? "LIVE" : streamState === "polling" ? "LIVE · Polling" : "OFFLINE"}</strong><span>{ageLabel(updatedAt)}</span></div>
+        <div className="live-cluster"><span className={`live-dot ${streamState}`} /><strong>{streamState === "offline" ? "OFFLINE" : hasGpsVehicles ? "LIVE GPS" : "AKTUELL · SCHÄTZUNG"}</strong><span>{ageLabel(updatedAt)}</span></div>
         <nav><Link href="/status">Status</Link><Link href="/datenquellen">Datenquellen</Link></nav>
       </header>
 
       <section className="workspace">
         <div className="map-wrap">
           <RadarMap vehicles={filtered} stops={stops} selected={selected} routeGeometry={routeGeometry} onSelect={chooseVehicle} />
-          <div className="map-title"><h1>Busse in Flensburg & Schleswig <span>live verfolgen</span></h1></div>
+          <div className="map-title"><h1>Busse in Flensburg & Schleswig <span>{hasGpsVehicles ? "live verfolgen" : "aktuell geschätzt"}</span></h1></div>
           <button className="mobile-sheet-button" onClick={() => setMobilePanel(true)}>Busse unterwegs <strong>{filtered.length}</strong></button>
         </div>
 
@@ -107,13 +109,13 @@ export default function BusRadarApp() {
           {selected && <section className="vehicle-detail">
             <button className="detail-close" onClick={() => { setSelected(undefined); setSelectedRoute(undefined); }}>×</button>
             <div className="detail-line"><span style={{ background: selected.color || '#173dff' }}>{selected.line}</span><div><small>Richtung</small><strong>{selected.destination || "Ziel unbekannt"}</strong></div></div>
-            <dl><div><dt>Betreiber</dt><dd>{selected.operator}</dd></div><div><dt>Nächste Haltestelle</dt><dd>{selected.nextStop || "–"}</dd></div><div><dt>Verspätung</dt><dd>{selected.delaySeconds == null ? "–" : `${selected.delaySeconds >= 0 ? '+' : ''}${Math.round(selected.delaySeconds/60)} Min.`}</dd></div><div><dt>Position</dt><dd className={selected.accuracyType}>{selected.accuracyType === 'gps' ? '● Live GPS' : '◐ Geschätzt'}</dd></div><div><dt>Aktualisiert</dt><dd>{ageLabel(selected.timestamp)}</dd></div></dl>
+            <dl><div><dt>Betreiber</dt><dd>{selected.operator}</dd></div><div><dt>Nächste Haltestelle</dt><dd>{selected.nextStop || "–"}</dd></div><div><dt>Verspätung</dt><dd>{selected.delaySeconds == null ? "–" : `${selected.delaySeconds >= 0 ? '+' : ''}${Math.round(selected.delaySeconds/60)} Min.`}</dd></div><div><dt>Position</dt><dd className={selected.accuracyType}>{selected.accuracyType === 'gps' ? '● Live GPS' : '◐ Geschätzt'}</dd></div><div><dt>Aktualisiert</dt><dd>{ageLabel(selected.timestamp)}</dd></div><div><dt>Datenbasis</dt><dd>{selected.source}</dd></div></dl>
           </section>}
 
           <div className="line-list">
             {groups.length ? groups.map((g) => <button key={g.routeId} className={selectedRoute===g.routeId?'selected':''} onClick={() => setSelectedRoute(selectedRoute===g.routeId ? undefined : g.routeId)}>
               <span className="route-chip" style={{ background: g.color || '#173dff' }}>{g.line}</span><span className="route-copy"><strong>{g.destination || 'Linie aktiv'}</strong><small>{g.count} {g.count===1?'Bus':'Busse'} · {g.gps ? `${g.gps} GPS` : 'geschätzt'}</small></span><span className="chevron">›</span>
-            </button>) : <div className="empty"><div className="empty-icon">⌁</div><strong>Derzeit keine Buspositionen</strong><p>Realtime ist angebunden. Für Positionsmarker braucht BusRadar importierte GTFS-Fahrten oder einen freigegebenen GPS-Feed.</p><Link href="/status">Provider prüfen</Link></div>}
+            </button>) : <div className="empty"><div className="empty-icon">⌁</div><strong>Derzeit keine Buspositionen</strong><p>Aktuell ist laut Fahrplandaten keine darstellbare Fahrt mit Liniengeometrie aktiv oder die Datenquelle ist vorübergehend nicht verfügbar.</p><Link href="/status">Provider prüfen</Link></div>}
           </div>
           <footer><span>Keine Fake-Daten</span><Link href="/datenquellen">Quellen & Lizenzen</Link></footer>
         </aside>
