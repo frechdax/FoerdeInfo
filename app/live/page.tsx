@@ -12,5 +12,3 @@ export const metadata: Metadata = {
 export default function LivePage() {
   return <LiveDashboard />;
 }
-
-// production-deploy-2026-09-24
