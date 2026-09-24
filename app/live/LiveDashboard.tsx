@@ -12,6 +12,45 @@ type Score = {
   tone: "good" | "mixed" | "poor";
 };
 
+type BestTime = {
+  id: string;
+  label: string;
+  icon: string;
+  start: string | null;
+  end: string | null;
+  score: number | null;
+  rainProbability: number | null;
+  windSpeed: number | null;
+  uvIndex: number | null;
+  verdict: string;
+};
+
+type Beach = {
+  id: string;
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+  quality: string;
+  qualityPeriod: string | null;
+  waterTemperature: number | null;
+  lastSampleAt: string | null;
+  remark: string | null;
+  status: "green" | "yellow" | "red";
+  statusLabel: string;
+  summary: string;
+  weatherScore: number;
+  uvIndex: number;
+};
+
+type ChangeItem = {
+  id: string;
+  title: string;
+  publishedAt: string | null;
+  sourceUrl: string;
+  sourceType: string;
+  category: string;
+};
+
 type LiveData = {
   generatedAt: string;
   location: { name: string };
@@ -24,9 +63,14 @@ type LiveData = {
     windGusts: number;
     windDirection: number;
     rainProbability3h: number;
+    uvIndex: number;
     observedAt: string | null;
   };
   scores: Score[];
+  bestTimes: BestTime[];
+  beaches: Beach[];
+  changes: ChangeItem[];
+  planningSourceUrl: string;
   pegel: null | {
     station: string;
     value: number;
@@ -59,6 +103,19 @@ function formatTime(value: string | number | null | undefined) {
   }).format(date);
 }
 
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  if (/^\d{1,2}\.\d{1,2}\.\d{4}/.test(value)) return value.split(" ")[0];
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("de-DE", {
+    timeZone: "Europe/Berlin",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
 function windDirection(degrees: number) {
   const labels = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"];
   return labels[Math.round(degrees / 45) % 8];
@@ -77,15 +134,21 @@ function pegelStateLabel(state: string | null) {
   return "ohne Einstufung";
 }
 
+function beachTone(status: Beach["status"]) {
+  if (status === "green") return styles.beachGreen;
+  if (status === "yellow") return styles.beachYellow;
+  return styles.beachRed;
+}
+
 export default function LiveDashboard() {
   const [data, setData] = useState<LiveData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const bestScore = data?.scores.reduce(
-    (best, current) => current.score > best.score ? current : best,
-    data.scores[0]
-  );
+  const bestScore =
+    data?.scores?.length
+      ? data.scores.reduce((best, current) => (current.score > best.score ? current : best))
+      : null;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -123,8 +186,8 @@ export default function LiveDashboard() {
             <span className={styles.eyebrow}>Live · automatisch aktualisiert</span>
             <h1>Glücksburg Jetzt</h1>
             <p>
-              Öffentliche Daten verständlich zusammengefasst: Was lohnt sich gerade draußen,
-              wie entwickelt sich der Fördepegel und gibt es amtliche Warnungen?
+              Öffentliche Daten verständlich zusammengefasst: Wetter, beste Zeit für draußen,
+              Strandbedingungen, Fördepegel, amtliche Warnungen und lokale Veränderungen.
             </p>
           </div>
           <div className={styles.liveBadge}>
@@ -145,6 +208,7 @@ export default function LiveDashboard() {
             <div className={styles.summaryFacts}>
               <span>🌧️ 3 h: <strong>{Math.round(data.weather.rainProbability3h)} %</strong></span>
               <span>💨 Wind: <strong>{Math.round(data.weather.windSpeed)} km/h</strong></span>
+              <span>☀️ UV: <strong>{data.weather.uvIndex.toFixed(1)}</strong></span>
               <span>
                 {data.warnings.length ? "⚠️" : "✓"} Warnungen:{" "}
                 <strong>{data.warnings.length ? data.warnings.length : "keine"}</strong>
@@ -187,6 +251,7 @@ export default function LiveDashboard() {
                   </span>
                   <span>Böen {Math.round(data.weather.windGusts)} km/h</span>
                   <span>Regenrisiko 3 h: {Math.round(data.weather.rainProbability3h)} %</span>
+                  <span>UV-Index: {data.weather.uvIndex.toFixed(1)}</span>
                 </div>
               </article>
 
@@ -208,7 +273,9 @@ export default function LiveDashboard() {
                       <span>
                         {data.pegel.trendCm2h === null
                           ? "Trend wird ermittelt"
-                          : `${data.pegel.trendCm2h > 0 ? "+" : ""}${data.pegel.trendCm2h} cm in ca. 2 h`}
+                          : (data.pegel.trendCm2h > 0 ? "+" : "") +
+                            data.pegel.trendCm2h +
+                            " cm in ca. 2 h"}
                       </span>
                     </div>
                     <small className={styles.muted}>
@@ -271,20 +338,182 @@ export default function LiveDashboard() {
                       <span className={styles.scoreNumber}>{item.score}<small>/100</small></span>
                     </div>
                     <h3>{item.label}</h3>
-                    <span className={`${styles.verdict} ${styles[item.tone]}`}>
+                    <span className={styles.verdict + " " + styles[item.tone]}>
                       {item.verdict}
                     </span>
                     <div className={styles.bar} aria-hidden="true">
-                      <span style={{ width: `${item.score}%` }} />
+                      <span style={{ width: item.score + "%" }} />
                     </div>
                   </article>
                 ))}
               </div>
 
               <p className={styles.explainer}>
-                Der Index kombiniert Temperatur, Regenrisiko, Wind und Böen. Er ist eine
-                Orientierung von GlücksburgDirekt und keine amtliche Bewertung.
+                Der Index kombiniert Temperatur, Regenrisiko, Wind, Böen, UV, Tageslicht und
+                amtliche Wetterwarnungen. Er ist eine Orientierung von GlücksburgDirekt und keine
+                amtliche Bewertung.
               </p>
+            </section>
+
+            <section className={styles.featureSection}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className={styles.kicker}>Beste Zeit heute</span>
+                  <h2>Wann lohnt es sich am meisten?</h2>
+                </div>
+                <span className={styles.updated}>2-Stunden-Fenster · heute</span>
+              </div>
+
+              <div className={styles.bestTimeGrid}>
+                {data.bestTimes.map((item) => (
+                  <article className={styles.bestTimeCard} key={item.id}>
+                    <div className={styles.bestTimeTop}>
+                      <span className={styles.scoreIcon}>{item.icon}</span>
+                      {item.score !== null ? (
+                        <span className={styles.bestTimeScore}>{item.score}/100</span>
+                      ) : null}
+                    </div>
+                    <h3>{item.label}</h3>
+                    {item.start && item.end ? (
+                      <>
+                        <strong className={styles.timeWindow}>{item.start}–{item.end} Uhr</strong>
+                        <span className={styles.bestTimeVerdict}>{item.verdict}</span>
+                        <div className={styles.bestTimeMeta}>
+                          <span>🌧️ {item.rainProbability ?? 0}%</span>
+                          <span>💨 {item.windSpeed ?? 0} km/h</span>
+                          <span>☀️ UV {item.uvIndex ?? 0}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className={styles.muted}>Für heute ist kein sinnvoller Zeitraum mehr verfügbar.</p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.featureSection}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className={styles.kicker}>Strand-Ampel</span>
+                  <h2>Holnis & Sandwig auf einen Blick</h2>
+                </div>
+                <span className={styles.updated}>Wetter + UV + amtliche Badegewässerdaten</span>
+              </div>
+
+              {data.beaches.length ? (
+                <div className={styles.beachGrid}>
+                  {data.beaches.map((beach) => (
+                    <article className={styles.beachCard} key={beach.id}>
+                      <div className={styles.beachHead}>
+                        <div>
+                          <span className={styles.beachPlace}>🏖️ Badestelle</span>
+                          <h3>{beach.name}</h3>
+                        </div>
+                        <span className={styles.trafficLight + " " + beachTone(beach.status)}>
+                          <i aria-hidden="true" />
+                          {beach.statusLabel}
+                        </span>
+                      </div>
+
+                      <strong className={styles.beachSummary}>{beach.summary}</strong>
+
+                      <div className={styles.beachFacts}>
+                        <span>
+                          Amtliche Qualität
+                          <strong>{beach.quality}</strong>
+                        </span>
+                        <span>
+                          Wetter-Index
+                          <strong>{beach.weatherScore}/100</strong>
+                        </span>
+                        <span>
+                          UV
+                          <strong>{beach.uvIndex.toFixed(1)}</strong>
+                        </span>
+                        <span>
+                          Wassertemperatur
+                          <strong>
+                            {beach.waterTemperature === null ? "—" : beach.waterTemperature.toFixed(1) + " °C"}
+                          </strong>
+                        </span>
+                      </div>
+
+                      <small className={styles.beachFoot}>
+                        {beach.lastSampleAt
+                          ? "Letzte veröffentlichte Probe: " + formatDate(beach.lastSampleAt)
+                          : "Kein aktuelles Probedatum geladen"}
+                        {beach.qualityPeriod ? " · Einstufung " + beach.qualityPeriod : ""}
+                      </small>
+                      {beach.remark ? <p className={styles.beachRemark}>{beach.remark}</p> : null}
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.dataEmpty}>
+                  <strong>Amtliche Stranddaten konnten gerade nicht geladen werden.</strong>
+                  <span>Wetter und die übrigen Live-Bereiche funktionieren unabhängig davon weiter.</span>
+                </div>
+              )}
+
+              <p className={styles.explainer}>
+                Die Ampelfarbe ist eine GlücksburgDirekt-Zusammenfassung aus Wetterbedingungen,
+                UV, DWD-Warnungen und der veröffentlichten Badegewässer-Einstufung. Aktuelle
+                Sperrungen, Warnschilder und Hinweise der Behörden vor Ort haben immer Vorrang.
+              </p>
+            </section>
+
+            <section className={styles.featureSection}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className={styles.kicker}>Baustellen & Veränderungen</span>
+                  <h2>Was verändert sich in Glücksburg?</h2>
+                </div>
+                <a
+                  className={styles.sourceLink}
+                  href={data.planningSourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Bauleitpläne im DANord ↗
+                </a>
+              </div>
+
+              {data.changes.length ? (
+                <div className={styles.changeList}>
+                  {data.changes.map((item) => (
+                    <a
+                      className={styles.changeRow}
+                      href={item.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      key={item.id}
+                    >
+                      <span className={styles.changeIcon} aria-hidden="true">
+                        {item.category === "Bauleitplanung"
+                          ? "🏗️"
+                          : item.category === "Straße & Verkehr"
+                            ? "🚧"
+                            : "🏘️"}
+                      </span>
+                      <span className={styles.changeCopy}>
+                        <small>{item.category} · {formatDate(item.publishedAt)}</small>
+                        <strong>{item.title}</strong>
+                        <em>{item.sourceType}</em>
+                      </span>
+                      <span className={styles.changeArrow} aria-hidden="true">↗</span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.dataEmpty}>
+                  <strong>Keine neuen passenden Meldungen gefunden.</strong>
+                  <span>
+                    Die amtlichen Bekanntmachungen werden automatisch nach Bauleitplanung,
+                    Baustellen, Straßensperrungen und Entwicklungsvorhaben gefiltert.
+                  </span>
+                </div>
+              )}
             </section>
 
             <section className={styles.sourceSection}>
@@ -304,7 +533,8 @@ export default function LiveDashboard() {
               <p className={styles.sourceNote}>
                 PEGELONLINE stellt ungeprüfte Rohdaten der Wasserstraßen- und
                 Schifffahrtsverwaltung bereit. Wetterwarnungen stammen aus dem
-                Open-Data-Angebot des Deutschen Wetterdienstes.
+                Open-Data-Angebot des Deutschen Wetterdienstes. Die Badegewässerdaten stammen
+                aus dem Open-Data-Angebot des Landes Schleswig-Holstein.
               </p>
             </section>
           </>
