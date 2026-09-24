@@ -6,8 +6,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "tar -xzf busradar-preview-src.tgz && next dev",
-    "build": "tar -xzf busradar-preview-src.tgz && next build",
+    "dev": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && next dev",
+    "build": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && next build",
     "start": "next start"
   },
   "dependencies": {
