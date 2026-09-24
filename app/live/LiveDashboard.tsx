@@ -272,7 +272,7 @@ export default function LiveDashboard() {
                       <strong>{trendSymbol(data.pegel.trend)} {data.pegel.trend}</strong>
                       <span>
                         {data.pegel.trendCm2h === null
-                          ? "Trend wird ermittelt"
+                          ? "Trend aktuell nicht verfügbar"
                           : (data.pegel.trendCm2h > 0 ? "+" : "") +
                             data.pegel.trendCm2h +
                             " cm in ca. 2 h"}

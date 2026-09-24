@@ -87,45 +87,73 @@ function activityScore(
   precipitation: number,
   uv: number,
   isDay: boolean,
-  warningLevel: number
+  warningLevel: number,
+  recentRainMm: number
 ) {
-  const wetPenalty = rainProbability * 0.48 + Math.min(30, precipitation * 12);
+  const surfaceWetPenalty = Math.min(30, recentRainMm * 14);
+  const wetPenalty =
+    rainProbability * 0.48 + Math.min(30, precipitation * 12) + surfaceWetPenalty;
   const gustPenalty = Math.max(0, gusts - 35) * 0.7;
-  const warningPenalty = warningLevel >= 3 ? 35 : warningLevel === 2 ? 18 : warningLevel === 1 ? 8 : 0;
-  const darkPenalty = isDay ? 0 : activity === "walk" ? 18 : 38;
+  const warningPenalty =
+    warningLevel >= 3 ? 35 : warningLevel === 2 ? 18 : warningLevel === 1 ? 8 : 0;
 
   if (activity === "beach") {
-    return clamp(
+    const base = clamp(
       100 - wetPenalty - Math.max(0, wind - 24) * 0.75 - gustPenalty -
-      temperaturePenalty(temp, 23, 7) - Math.max(0, uv - 7) * 2 - warningPenalty - darkPenalty
+      temperaturePenalty(temp, 23, 7) - Math.max(0, uv - 7) * 2 - warningPenalty
     );
+    if (!isDay) return Math.min(base, 15);
+    if (recentRainMm >= 0.3) return Math.min(base, 45);
+    return base;
   }
 
   if (activity === "walk") {
-    return clamp(
+    const base = clamp(
       100 - wetPenalty * 0.8 - Math.max(0, wind - 28) * 0.6 - gustPenalty * 0.7 -
-      temperaturePenalty(temp, 16, 10) - Math.max(0, uv - 8) * 1.5 - warningPenalty - darkPenalty
+      temperaturePenalty(temp, 16, 10) - Math.max(0, uv - 8) * 1.5 - warningPenalty
     );
+    return isDay ? base : Math.min(base, 60);
   }
 
   if (activity === "bike") {
-    return clamp(
+    const base = clamp(
       100 - wetPenalty - Math.max(0, wind - 18) * 1.25 - gustPenalty * 1.1 -
-      temperaturePenalty(temp, 17, 9) - warningPenalty - darkPenalty
+      temperaturePenalty(temp, 17, 9) - warningPenalty
     );
+    return isDay ? base : Math.min(base, 35);
   }
 
   if (activity === "playground") {
-    return clamp(
+    const base = clamp(
       100 - wetPenalty - Math.max(0, wind - 24) * 0.8 - gustPenalty * 0.8 -
-      temperaturePenalty(temp, 18, 8) - Math.max(0, uv - 6) * 4 - warningPenalty - (isDay ? 0 : 55)
+      temperaturePenalty(temp, 18, 8) - Math.max(0, uv - 6) * 4 - warningPenalty
     );
+    if (!isDay) return Math.min(base, 5);
+    if (recentRainMm >= 0.3) return Math.min(base, 35);
+    return base;
   }
 
-  return clamp(
+  const base = clamp(
     100 - wetPenalty - Math.max(0, wind - 22) * 0.8 - gustPenalty -
-    temperaturePenalty(temp, 18, 8) - warningPenalty - darkPenalty
+    temperaturePenalty(temp, 18, 8) - warningPenalty
   );
+  return isDay ? base : Math.min(base, 45);
+}
+
+function activityVerdict(
+  activity: ActivityId,
+  score: number,
+  isDay: boolean,
+  recentRainMm: number
+) {
+  if (!isDay && activity === "beach") return "Für heute zu spät";
+  if (!isDay && activity === "playground") return "Für heute zu spät";
+  if (!isDay && activity === "bike") return "Nur mit guter Beleuchtung";
+  if (!isDay && activity === "walk") return "Okay, aber dunkel";
+  if (!isDay && activity === "outside") return "Abend / dunkel";
+  if (recentRainMm >= 0.3 && activity === "playground") return "Flächen wahrscheinlich nass";
+  if (recentRainMm >= 0.3 && activity === "beach") return "Nass und eher ungemütlich";
+  return scoreLabel(score);
 }
 
 function activityMeta(id: ActivityId) {
@@ -216,12 +244,69 @@ function parseGermanDate(value?: string) {
   );
 }
 
+function normalizeKey(value: string) {
+  return value
+    .toLocaleLowerCase("de")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function fieldByKey(row: CsvRow | undefined, patterns: RegExp[]) {
+  if (!row) return "";
+  for (const [key, value] of Object.entries(row)) {
+    const normalized = normalizeKey(key);
+    if (value && patterns.some((pattern) => pattern.test(normalized))) return value;
+  }
+  return "";
+}
+
+function valueMatching(row: CsvRow | undefined, pattern: RegExp) {
+  if (!row) return "";
+  return Object.values(row).find((value) => pattern.test(value)) || "";
+}
+
+function rowDateValue(row: CsvRow) {
+  return Object.values(row).reduce((latest, value) => Math.max(latest, parseGermanDate(value)), 0);
+}
+
+function identifierCandidates(row: CsvRow) {
+  return Object.entries(row)
+    .filter(([key, value]) => {
+      if (!value) return false;
+      const normalized = normalizeKey(key);
+      return /(id|code|kennung|nummer|nr)/.test(normalized) &&
+        /(bade|gewaesser|mess|stelle|eu|id|code)/.test(normalized);
+    })
+    .map(([, value]) => value)
+    .filter((value, index, values) => values.indexOf(value) === index);
+}
+
+function relatedRows(master: CsvRow, rows: CsvRow[]) {
+  const ids = identifierCandidates(master);
+  if (!ids.length) return [] as CsvRow[];
+  return rows.filter((row) => ids.some((id) => Object.values(row).includes(id)));
+}
+
 function beachDisplayName(row: CsvRow) {
+  const all = Object.values(row).join(" ");
+  if (/holnis\s*drei/i.test(all)) return "Holnis Drei";
+  if (/sandwig/i.test(all) || /gl(?:ü|ue)cksburg\s*strand/i.test(all)) {
+    return "Sandwig – Glücksburg Strand";
+  }
+
   return (
-    row.ALLGEMEIN_GEBRAEUCHL_NAME ||
-    row.KURZNAME ||
-    row.BADEGEWAESSERNAME ||
-    row.MESSSTELLENNAME ||
+    fieldByKey(row, [
+      /allgemeingebraeuchl.*name/,
+      /kurzname/,
+      /badegewaesser.*name/,
+      /messstellen.*name/,
+      /bezeichnung/,
+      /name/,
+    ]) ||
+    valueMatching(row, /(strand|holnis|badestelle)/i) ||
     "Badestelle"
   );
 }
@@ -290,10 +375,17 @@ function buildBestTimes(
   const gusts = hourly.wind_gusts_10m || [];
   const uv = hourly.uv_index || [];
   const isDay = hourly.is_day || [];
-  const currentDate = (currentTime || times[0] || "").slice(0, 10);
-  const currentHour = (currentTime || times[0] || "").slice(0, 13);
+  const currentMoment = currentTime || times[0] || "";
+  const currentDate = currentMoment.slice(0, 10);
 
   const activities: ActivityId[] = ["beach", "walk", "bike", "playground"];
+  const minScore: Record<ActivityId, number> = {
+    outside: 50,
+    beach: 60,
+    walk: 55,
+    bike: 55,
+    playground: 60,
+  };
 
   return activities.map((activity) => {
     let best:
@@ -308,8 +400,27 @@ function buildBestTimes(
       | null = null;
 
     for (let i = 0; i < times.length - 1; i += 1) {
-      if (times[i].slice(0, 10) !== currentDate || times[i].slice(0, 13) < currentHour) continue;
+      if (times[i].slice(0, 10) !== currentDate) continue;
+      if (times[i] <= currentMoment) continue;
       if (times[i + 1].slice(0, 10) !== currentDate) continue;
+
+      const hour = Number(times[i].slice(11, 13));
+      const dayA = Number(isDay[i] ?? 0) === 1;
+      const dayB = Number(isDay[i + 1] ?? 0) === 1;
+
+      // "Beste Zeit" soll ein wirklich sinnvoll nutzbares Zeitfenster sein.
+      if (!dayA || !dayB) continue;
+      if (activity === "playground" && (hour < 8 || hour >= 19)) continue;
+      if (activity === "beach" && (hour < 9 || hour >= 20)) continue;
+      if (activity === "bike" && (hour < 7 || hour >= 20)) continue;
+      if (activity === "walk" && (hour < 6 || hour >= 21)) continue;
+
+      const recentRainA = precipitation
+        .slice(Math.max(0, i - 2), i + 1)
+        .reduce((sum, value) => sum + Number(value || 0), 0);
+      const recentRainB = precipitation
+        .slice(Math.max(0, i - 1), i + 2)
+        .reduce((sum, value) => sum + Number(value || 0), 0);
 
       const scoreA = activityScore(
         activity,
@@ -319,8 +430,9 @@ function buildBestTimes(
         Number(rainProb[i] || 0),
         Number(precipitation[i] || 0),
         Number(uv[i] || 0),
-        Number(isDay[i] ?? 1) === 1,
-        warningLevel
+        dayA,
+        warningLevel,
+        recentRainA
       );
       const scoreB = activityScore(
         activity,
@@ -330,19 +442,21 @@ function buildBestTimes(
         Number(rainProb[i + 1] || 0),
         Number(precipitation[i + 1] || 0),
         Number(uv[i + 1] || 0),
-        Number(isDay[i + 1] ?? 1) === 1,
-        warningLevel
+        dayB,
+        warningLevel,
+        recentRainB
       );
 
       const candidate = {
-        start: hourLabel(times[i]),
-        end: endHourLabel(times[i], 2),
+        start: times[i].slice(11, 16),
+        end: times[i + 1].slice(11, 16).replace(":00", "") + ":59",
         score: Math.round((scoreA + scoreB) / 2),
         rain: Math.round((Number(rainProb[i] || 0) + Number(rainProb[i + 1] || 0)) / 2),
         wind: Math.round((Number(wind[i] || 0) + Number(wind[i + 1] || 0)) / 2),
         uv: Math.round(((Number(uv[i] || 0) + Number(uv[i + 1] || 0)) / 2) * 10) / 10,
       };
 
+      if (candidate.score < minScore[activity]) continue;
       if (!best || candidate.score > best.score) best = candidate;
     }
 
@@ -357,7 +471,7 @@ function buildBestTimes(
       rainProbability: best?.rain ?? null,
       windSpeed: best?.wind ?? null,
       uvIndex: best?.uv ?? null,
-      verdict: best ? scoreLabel(best.score) : "Heute kein passendes Zeitfenster mehr",
+      verdict: best ? scoreLabel(best.score) : "Heute kein sinnvolles Zeitfenster mehr",
     };
   });
 }
@@ -444,56 +558,64 @@ async function loadBeaches(
     fetchLatin1Csv(BATHING_BASE + "/v_proben_odata.csv"),
   ]);
 
-  const localRows = masterRows.filter((row) => {
-    const haystack = [
-      row.GEMEINDE,
-      row.BADEGEWAESSERNAME,
-      row.KURZNAME,
-      row.ALLGEMEIN_GEBRAEUCHL_NAME,
-    ]
-      .filter(Boolean)
-      .join(" ");
-    return /glücksburg|gluecksburg/i.test(haystack) && /holnis|sandwig/i.test(haystack);
-  });
-
-  const targets = localRows.length
-    ? localRows
-    : masterRows.filter((row) => /holnis|sandwig/i.test(Object.values(row).join(" "))).slice(0, 6);
+  const targets = masterRows
+    .filter((row) => {
+      const all = Object.values(row).join(" ");
+      return /holnis\s*drei/i.test(all) ||
+        /sandwig/i.test(all) ||
+        /gl(?:ü|ue)cksburg\s*strand/i.test(all);
+    })
+    .filter((row, index, rows) => {
+      const name = beachDisplayName(row);
+      return rows.findIndex((entry) => beachDisplayName(entry) === name) === index;
+    })
+    .slice(0, 2);
 
   return targets.map((row) => {
-    const id = row.BADEGEWAESSERID;
-    const classifications = classificationRows
-      .filter((entry) => entry.BADEGEWAESSERID === id)
-      .sort(
-        (a, b) =>
-          Number(b.BEURTEILUNGSZEITRAUM_BIS || 0) - Number(a.BEURTEILUNGSZEITRAUM_BIS || 0)
-      );
-    const measurements = measurementRows
-      .filter((entry) => entry.BADEGEWAESSERID === id)
-      .sort((a, b) => parseGermanDate(b.DATUMMESSUNG) - parseGermanDate(a.DATUMMESSUNG));
+    const classifications = relatedRows(row, classificationRows)
+      .sort((a, b) => rowDateValue(b) - rowDateValue(a));
+    const measurements = relatedRows(row, measurementRows)
+      .sort((a, b) => rowDateValue(b) - rowDateValue(a));
 
     const latestClassification = classifications[0];
     const latestMeasurement = measurements[0];
+
     const quality =
-      latestClassification?.EINSTUFUNG_ODER_VORABBEWERTUNG ||
-      latestClassification?.EINSTUFUNG ||
-      "ohne aktuelle Einstufung";
+      valueMatching(latestClassification, /ausgezeichnet|gut|ausreichend|mangelhaft/i) ||
+      "keine veröffentlichte Einstufung gefunden";
+
+    const periodYears = latestClassification
+      ? Object.values(latestClassification)
+          .filter((value) => /^20\d{2}$/.test(value))
+          .filter((value, index, values) => values.indexOf(value) === index)
+          .sort()
+      : [];
+
+    const waterTemperature = parseGermanNumber(
+      fieldByKey(latestMeasurement, [/wassertemp/, /temperatur.*wasser/, /wasser.*temperatur/])
+    );
+
+    const dateValue =
+      fieldByKey(latestMeasurement, [/datummessung/, /mess.*datum/, /proben.*datum/, /datum/]) ||
+      (latestMeasurement
+        ? Object.values(latestMeasurement).find((value) => parseGermanDate(value) > 0) || ""
+        : "");
+
+    const remark = fieldByKey(latestMeasurement, [/bemerk/, /hinweis/, /kommentar/]) || null;
+    const ids = identifierCandidates(row);
+    const name = beachDisplayName(row);
     const light = beachTrafficLight(quality, beachWeatherScore, uvIndex, warningLevel, gusts);
 
     return {
-      id,
-      name: beachDisplayName(row),
-      latitude: parseGermanNumber(row.GEOGR_BREITE),
-      longitude: parseGermanNumber(row.GEOGR_LAENGE),
+      id: ids[0] || name,
+      name,
+      latitude: parseGermanNumber(fieldByKey(row, [/geogr.*breite/, /breitengrad/, /latitude/, /lat/])),
+      longitude: parseGermanNumber(fieldByKey(row, [/geogr.*laenge/, /laengengrad/, /longitude/, /lon/])),
       quality,
-      qualityPeriod: latestClassification
-        ? [latestClassification.BEURTEILUNGSZEITRAUM_VON, latestClassification.BEURTEILUNGSZEITRAUM_BIS]
-            .filter(Boolean)
-            .join("–")
-        : null,
-      waterTemperature: parseGermanNumber(latestMeasurement?.WASSERTEMP),
-      lastSampleAt: latestMeasurement?.DATUMMESSUNG || null,
-      remark: latestMeasurement?.BEMERKUNG || null,
+      qualityPeriod: periodYears.length ? periodYears.join("–") : null,
+      waterTemperature,
+      lastSampleAt: dateValue || null,
+      remark,
       status: light.status,
       statusLabel: light.label,
       summary: light.summary,
@@ -549,7 +671,7 @@ export async function GET() {
           return (await response.json()) as PegelMeasurement;
         }
       ),
-      fetch(pegelBase + "/measurements.json?start=P2H", { next: { revalidate: 300 } }).then(
+      fetch(pegelBase + "/measurements.json?start=P6H", { next: { revalidate: 300 } }).then(
         async (response) => {
           if (!response.ok) throw new Error("PEGELONLINE history unavailable");
           return (await response.json()) as PegelMeasurement[];
@@ -589,6 +711,9 @@ export async function GET() {
   const wind = Number(current.wind_speed_10m ?? 0);
   const gusts = Number(current.wind_gusts_10m ?? wind);
   const precipitation = Number(current.precipitation ?? 0);
+  const recentRainMm = (hourly.precipitation ?? [])
+    .slice(Math.max(0, currentIndex - 2), currentIndex + 1)
+    .reduce((sum, value) => sum + Number(value || 0), 0);
   const currentUv = Number((hourly.uv_index ?? [])[currentIndex] ?? 0);
   const currentIsDay = Number((hourly.is_day ?? [])[currentIndex] ?? 1) === 1;
 
@@ -628,7 +753,8 @@ export async function GET() {
       precipitation,
       currentUv,
       currentIsDay,
-      warningLevel
+      warningLevel,
+      recentRainMm
     );
     const meta = activityMeta(id);
     return {
@@ -636,7 +762,7 @@ export async function GET() {
       label: meta.label,
       icon: meta.icon,
       score,
-      verdict: scoreLabel(score),
+      verdict: activityVerdict(id, score, currentIsDay, recentRainMm),
       tone: scoreTone(score),
     };
   });
@@ -664,10 +790,28 @@ export async function GET() {
     const value = Number(currentPegelResult.value.value);
     let trendCm2h: number | null = null;
 
-    if (pegelHistoryResult.status === "fulfilled" && pegelHistoryResult.value.length > 1) {
-      const first = pegelHistoryResult.value[0];
-      const last = pegelHistoryResult.value[pegelHistoryResult.value.length - 1];
-      trendCm2h = Math.round((Number(last.value) - Number(first.value)) * 10) / 10;
+    if (pegelHistoryResult.status === "fulfilled" && pegelHistoryResult.value.length) {
+      const history = pegelHistoryResult.value
+        .filter((item) => Number.isFinite(Number(item.value)) && !Number.isNaN(new Date(item.timestamp).getTime()))
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+      const currentTimestamp = new Date(currentPegelResult.value.timestamp).getTime();
+      const targetTimestamp = currentTimestamp - 2 * 60 * 60 * 1000;
+      const baseline = history.reduce<PegelMeasurement | null>((best, item) => {
+        if (!best) return item;
+        const bestDistance = Math.abs(new Date(best.timestamp).getTime() - targetTimestamp);
+        const itemDistance = Math.abs(new Date(item.timestamp).getTime() - targetTimestamp);
+        return itemDistance < bestDistance ? item : best;
+      }, null);
+
+      if (baseline) {
+        const ageMinutes =
+          Math.abs(currentTimestamp - new Date(baseline.timestamp).getTime()) / 60000;
+        if (ageMinutes >= 45) {
+          trendCm2h =
+            Math.round((value - Number(baseline.value)) * 10) / 10;
+        }
+      }
     }
 
     pegel = {
@@ -700,6 +844,8 @@ export async function GET() {
       windGusts: gusts,
       windDirection: Number(current.wind_direction_10m ?? 0),
       rainProbability3h: rainProbability,
+      recentRainMm: Math.round(recentRainMm * 10) / 10,
+      surfaceWet: recentRainMm >= 0.3,
       uvIndex: currentUv,
       observedAt: current.time ?? null,
     },
