@@ -1,0 +1,49 @@
+name: Discover Schleswig-Holstein SIRI ET resource
+
+on:
+  push:
+    branches: [busradar-preview]
+    paths:
+      - ".github/workflows/discover-siri.yml"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Query public GovData catalog APIs
+        shell: bash
+        run: |
+          node <<'NODE'
+          const q = encodeURIComponent("DELFI-Realtime SIRI ET Schleswig-Holstein");
+          const endpoints = [
+            `https://www.govdata.de/ckan/api/3/action/package_search?q=${q}`,
+            `https://www.govdata.de/api/3/action/package_search?q=${q}`,
+            `https://ckan.govdata.de/api/3/action/package_search?q=${q}`,
+            `https://data.gov.de/ckan/api/3/action/package_search?q=${q}`
+          ];
+          for (const url of endpoints) {
+            try {
+              const res = await fetch(url, { headers: { "user-agent": "BusRadar resource discovery/0.1" } });
+              console.log("\nENDPOINT", url, "STATUS", res.status, res.headers.get("content-type"));
+              const body = await res.text();
+              try {
+                const json = JSON.parse(body);
+                const results = json?.result?.results || [];
+                console.log("RESULTS", results.length);
+                for (const item of results) {
+                  if (!String(item.title || "").toLowerCase().includes("schleswig")) continue;
+                  console.log("DATASET", item.name, item.title, "LICENSE", item.license_id, item.license_title);
+                  for (const resource of item.resources || []) console.log("RESOURCE", resource.name, resource.format, resource.url);
+                }
+              } catch {
+                console.log(body.slice(0, 1000).replace(/\s+/g, " "));
+              }
+            } catch (error) {
+              console.log("\nENDPOINT", url, "ERROR", error?.message || String(error));
+            }
+          }
+          NODE
