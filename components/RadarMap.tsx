@@ -5,6 +5,8 @@ import { GeolocateControl, type GeoJSONSource, Map as MapLibreMap, Marker, Navig
 import type { StopPoint, Vehicle } from "@/lib/types";
 import { REGION } from "@/lib/region";
 
+type RouteEndpoint = { id: string; name: string; latitude: number; longitude: number };
+
 const DEFAULT_MAP_STYLE: StyleSpecification = {
   version: 8,
   sources: {
@@ -19,10 +21,19 @@ const DEFAULT_MAP_STYLE: StyleSpecification = {
   layers: [{ id: "osm", type: "raster", source: "osm" }],
 };
 
-export default function RadarMap({ vehicles, stops, selected, routeGeometry, onSelect }: { vehicles: Vehicle[]; stops: StopPoint[]; selected?: Vehicle; routeGeometry: { type: "LineString"; coordinates: number[][] } | null; onSelect: (v: Vehicle) => void }) {
+export default function RadarMap({ vehicles, stops, selected, routeGeometry, routeStart, routeEnd, onSelect }: {
+  vehicles: Vehicle[];
+  stops: StopPoint[];
+  selected?: Vehicle;
+  routeGeometry: { type: "LineString"; coordinates: number[][] } | null;
+  routeStart?: RouteEndpoint | null;
+  routeEnd?: RouteEndpoint | null;
+  onSelect: (v: Vehicle) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
+  const routeMarkersRef = useRef<{ start?: Marker; end?: Marker }>({});
   const onSelectRef = useRef(onSelect);
   const [mapError, setMapError] = useState<string>();
   onSelectRef.current = onSelect;
@@ -98,6 +109,9 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
       window.clearTimeout(loadTimeout);
       markersRef.current.forEach((m) => m.remove());
       markersRef.current.clear();
+      routeMarkersRef.current.start?.remove();
+      routeMarkersRef.current.end?.remove();
+      routeMarkersRef.current = {};
       map.remove();
       mapRef.current = null;
     };
@@ -120,6 +134,38 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
   }, [routeGeometry]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    routeMarkersRef.current.start?.remove();
+    routeMarkersRef.current.end?.remove();
+    routeMarkersRef.current = {};
+
+    const makeEndpoint = (point: RouteEndpoint, kind: "start" | "end", label: string) => {
+      const el = document.createElement("div");
+      el.className = `route-endpoint ${kind}`;
+      const badge = document.createElement("strong");
+      badge.textContent = label;
+      const name = document.createElement("span");
+      name.textContent = point.name;
+      el.append(badge, name);
+      el.title = point.name;
+      return new Marker({ element: el, anchor: "bottom" })
+        .setLngLat([point.longitude, point.latitude])
+        .addTo(map);
+    };
+
+    if (routeStart) routeMarkersRef.current.start = makeEndpoint(routeStart, "start", "A");
+    if (routeEnd) routeMarkersRef.current.end = makeEndpoint(routeEnd, "end", "Z");
+
+    return () => {
+      routeMarkersRef.current.start?.remove();
+      routeMarkersRef.current.end?.remove();
+      routeMarkersRef.current = {};
+    };
+  }, [routeStart, routeEnd]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -196,7 +242,7 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
     }
 
     map.fitBounds([[minLon, minLat], [maxLon, maxLat]], {
-      padding: { top: 80, right: 70, bottom: 80, left: 70 },
+      padding: { top: 190, right: 70, bottom: 90, left: 70 },
       duration: 900,
       maxZoom: 13.5,
     });
