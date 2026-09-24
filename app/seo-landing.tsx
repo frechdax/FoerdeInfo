@@ -83,6 +83,7 @@ export default function SeoLanding({
           <a href="/veranstaltungen">Veranstaltungen</a>
           <a href="/heute-in-gluecksburg">Heute</a>
           <a href="/wochenende-in-gluecksburg">Wochenende</a>
+          <a href="/freizeit-gluecksburg">Freizeit</a>
           <a href="/urlaub">Urlaub</a>
           <a href="/sehenswuerdigkeiten-gluecksburg">Sehenswürdigkeiten</a>
           <a href="/straende-gluecksburg">Strände</a>
