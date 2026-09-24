@@ -55,11 +55,21 @@ export default function BusKarteApp() {
     return () => { es.close(); if (fallbackTimer) clearInterval(fallbackTimer); };
   }, [applyPayload]);
 
+  const selectedVehicle = useMemo(
+    () => selected ? vehicles.find((v) => v.id === selected.id) || selected : undefined,
+    [vehicles, selected],
+  );
+
   useEffect(() => {
     if (!selectedRoute) { setRouteGeometry(null); return; }
-    const tripQuery = selected?.routeId === selectedRoute && selected.tripId ? `?tripId=${encodeURIComponent(selected.tripId)}` : "";
-    fetch(`/api/routes/${encodeURIComponent(selectedRoute)}/shape${tripQuery}`).then((r) => r.json()).then((x) => setRouteGeometry(x.geometry || null)).catch(() => setRouteGeometry(null));
-  }, [selectedRoute, selected]);
+    const tripQuery = selectedVehicle?.routeId === selectedRoute && selectedVehicle.tripId
+      ? `?tripId=${encodeURIComponent(selectedVehicle.tripId)}`
+      : "";
+    fetch(`/api/routes/${encodeURIComponent(selectedRoute)}/shape${tripQuery}`)
+      .then((r) => r.json())
+      .then((x) => setRouteGeometry(x.geometry || null))
+      .catch(() => setRouteGeometry(null));
+  }, [selectedRoute, selectedVehicle]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -71,17 +81,29 @@ export default function BusKarteApp() {
   const hasGpsVehicles = useMemo(() => vehicles.some((v) => v.accuracyType === "gps"), [vehicles]);
   const hasRealtimeVehicles = useMemo(() => vehicles.some((v) => v.accuracyType === "realtime"), [vehicles]);
 
-  const groups = useMemo(() => {
-    const map = new Map<string, { routeId: string; line: string; destination?: string; color?: string; count: number; gps: number; realtime: number }>();
-    filtered.forEach((v) => {
-      const key = v.routeId || v.line;
-      const g = map.get(key) || { routeId: v.routeId, line: v.line, destination: v.destination, color: v.color, count: 0, gps: 0, realtime: 0 };
-      g.count += 1; if (v.accuracyType === "gps") g.gps += 1; if (v.accuracyType === "realtime") g.realtime += 1; map.set(key, g);
-    });
-    return [...map.values()].sort((a,b) => a.line.localeCompare(b.line, "de", { numeric: true }));
-  }, [filtered]);
+  const visibleVehicles = useMemo(
+    () => [...filtered].sort((a, b) => {
+      const quality = (v: Vehicle) => v.accuracyType === "gps" ? 3 : v.accuracyType === "realtime" ? 2 : 1;
+      return quality(b) - quality(a)
+        || a.line.localeCompare(b.line, "de", { numeric: true })
+        || String(a.destination || "").localeCompare(String(b.destination || ""), "de");
+    }),
+    [filtered],
+  );
 
-  const chooseVehicle = (v: Vehicle) => { setSelected(v); setSelectedRoute(v.routeId); setMobilePanel(true); };
+  const mapVehicles = selectedVehicle ? [selectedVehicle] : filtered;
+
+  const chooseVehicle = (v: Vehicle) => {
+    setSelected(v);
+    setSelectedRoute(v.routeId);
+    setMobilePanel(true);
+  };
+
+  const clearVehicle = () => {
+    setSelected(undefined);
+    setSelectedRoute(undefined);
+    setRouteGeometry(null);
+  };
 
   return (
     <main className="app-shell">
@@ -93,7 +115,7 @@ export default function BusKarteApp() {
 
       <section className="workspace">
         <div className="map-wrap">
-          <RadarMap vehicles={filtered} stops={stops} selected={selected} routeGeometry={routeGeometry} onSelect={chooseVehicle} />
+          <RadarMap vehicles={mapVehicles} stops={stops} selected={selectedVehicle} routeGeometry={routeGeometry} onSelect={chooseVehicle} />
           <div className="map-title"><h1>Busse in Flensburg & Schleswig <span>{hasGpsVehicles ? "live verfolgen" : hasRealtimeVehicles ? "mit Echtzeit-Prognosen" : "nach Fahrplan geschätzt"}</span></h1></div>
           <button className="mobile-sheet-button" onClick={() => setMobilePanel(true)}>Busse unterwegs <strong>{filtered.length}</strong></button>
         </div>
@@ -107,15 +129,26 @@ export default function BusKarteApp() {
           <div className="search"><span>⌕</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Linie oder Ort suchen …" /></div>
           <div className="chips"><button className={accuracy==='all'?'active':''} onClick={() => setAccuracy('all')}>Alle Daten</button><button className={accuracy==='gps'?'active':''} onClick={() => setAccuracy('gps')}>● Live GPS</button><button className={accuracy==='realtime'?'active':''} onClick={() => setAccuracy('realtime')}>● Echtzeit-Prognose</button><button className={accuracy==='estimated'?'active':''} onClick={() => setAccuracy('estimated')}>◐ Fahrplan</button></div>
 
-          {selected && <section className="vehicle-detail">
-            <button className="detail-close" onClick={() => { setSelected(undefined); setSelectedRoute(undefined); }}>×</button>
-            <div className="detail-line"><span style={{ background: selected.color || '#173dff' }}>{selected.line}</span><div><small>Richtung</small><strong>{selected.destination || "Ziel unbekannt"}</strong></div></div>
-            <dl><div><dt>Betreiber</dt><dd>{selected.operator}</dd></div><div><dt>Nächste Haltestelle</dt><dd>{selected.nextStop || "–"}</dd></div><div><dt>Verspätung</dt><dd>{selected.delaySeconds == null ? "–" : `${selected.delaySeconds >= 0 ? '+' : ''}${Math.round(selected.delaySeconds/60)} Min.`}</dd></div><div><dt>Position</dt><dd className={selected.accuracyType}>{selected.accuracyType === 'gps' ? '● Live GPS' : selected.accuracyType === 'realtime' ? '● Echtzeit-Prognose' : '◐ Fahrplan-Schätzung'}</dd></div><div><dt>Aktualisiert</dt><dd>{ageLabel(selected.timestamp)}</dd></div><div><dt>Datenbasis</dt><dd>{selected.source}</dd></div></dl>
+          {selectedVehicle && <section className="vehicle-detail">
+            <button className="detail-close" onClick={clearVehicle} aria-label="Busauswahl schließen">×</button>
+            <div className="detail-line"><span style={{ background: selectedVehicle.color || '#173dff' }}>{selectedVehicle.line}</span><div><small>Richtung</small><strong>{selectedVehicle.destination || "Ziel unbekannt"}</strong></div></div>
+            <dl><div><dt>Betreiber</dt><dd>{selectedVehicle.operator}</dd></div><div><dt>Nächste Haltestelle</dt><dd>{selectedVehicle.nextStop || "–"}</dd></div><div><dt>Verspätung</dt><dd>{selectedVehicle.delaySeconds == null ? "–" : `${selectedVehicle.delaySeconds >= 0 ? '+' : ''}${Math.round(selectedVehicle.delaySeconds/60)} Min.`}</dd></div><div><dt>Position</dt><dd className={selectedVehicle.accuracyType}>{selectedVehicle.accuracyType === 'gps' ? '● Live GPS' : selectedVehicle.accuracyType === 'realtime' ? '● Echtzeit-Prognose' : '◐ Fahrplan-Schätzung'}</dd></div><div><dt>Aktualisiert</dt><dd>{ageLabel(selectedVehicle.timestamp)}</dd></div><div><dt>Datenbasis</dt><dd>{selectedVehicle.source}</dd></div></dl>
+            <button className="show-all-buses" onClick={clearVehicle}>Alle Busse anzeigen</button>
           </section>}
 
           <div className="line-list">
-            {groups.length ? groups.map((g) => <button key={g.routeId} className={selectedRoute===g.routeId?'selected':''} onClick={() => setSelectedRoute(selectedRoute===g.routeId ? undefined : g.routeId)}>
-              <span className="route-chip" style={{ background: g.color || '#173dff' }}>{g.line}</span><span className="route-copy"><strong>{g.destination || 'Linie aktiv'}</strong><small>{g.count} {g.count===1?'Bus':'Busse'} · {g.gps ? `${g.gps} GPS` : g.realtime ? `${g.realtime} Echtzeit` : 'Fahrplan'}</small></span><span className="chevron">›</span>
+            {visibleVehicles.length ? visibleVehicles.map((v) => <button
+              key={v.id}
+              className={selectedVehicle?.id === v.id ? 'selected' : ''}
+              onClick={() => chooseVehicle(v)}
+              aria-label={`Bus Linie ${v.line} Richtung ${v.destination || 'unbekannt'} auswählen`}
+            >
+              <span className="route-chip" style={{ background: v.color || '#173dff' }}>{v.line}</span>
+              <span className="route-copy">
+                <strong>{v.destination || 'Ziel unbekannt'}</strong>
+                <small>{v.accuracyType === 'gps' ? 'Live GPS' : v.accuracyType === 'realtime' ? 'Echtzeit-Prognose' : 'Fahrplan'}{v.nextStop ? ` · Nächster Halt: ${v.nextStop}` : ''}</small>
+              </span>
+              <span className="chevron">›</span>
             </button>) : <div className="empty"><div className="empty-icon">⌁</div><strong>Derzeit keine Buspositionen</strong><p>Aktuell ist laut Fahrplandaten keine darstellbare Fahrt mit Liniengeometrie aktiv oder die Datenquelle ist vorübergehend nicht verfügbar.</p><Link href="/status">Provider prüfen</Link></div>}
           </div>
           <footer><span>Keine Fake-Daten</span><Link href="/datenquellen">Quellen & Lizenzen</Link></footer>
