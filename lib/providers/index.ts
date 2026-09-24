@@ -10,6 +10,12 @@ const flensburg = new FlensburgLiveProvider();
 const siriEt = new SiriEtProvider();
 const scheduleEstimate = new ScheduleEstimateProvider();
 
+const qualityRank: Record<Vehicle["accuracyType"], number> = {
+  gps: 3,
+  realtime: 2,
+  estimated: 1,
+};
+
 export async function getVehicles(): Promise<Vehicle[]> {
   const batches = await Promise.allSettled([
     flensburg.getVehicles(),
@@ -17,28 +23,44 @@ export async function getVehicles(): Promise<Vehicle[]> {
     siriEt.getVehicles(),
     scheduleEstimate.getVehicles(),
   ]);
+
   const all = batches.flatMap((r) => r.status === "fulfilled" ? r.value : []);
   const byTrip = new Map<string, Vehicle>();
+
   for (const vehicle of all) {
     const key = vehicle.tripId || vehicle.id;
     const existing = byTrip.get(key);
-    if (!existing || (vehicle.accuracyType === "gps" && existing.accuracyType !== "gps")) {
+    if (!existing || qualityRank[vehicle.accuracyType] > qualityRank[existing.accuracyType]) {
       byTrip.set(key, vehicle);
     }
   }
+
   return [...byTrip.values()];
 }
 
 export async function getProviderStatuses(): Promise<ProviderStatus[]> {
   const data = getRegionData();
   const staticStatus: ProviderStatus = data.trips.length
-    ? { id: "static-gtfs", name: "Regionale GTFS-Fahrplandaten", state: "online", lastUpdate: data.generatedAt || undefined, detail: `${data.routes.length} Buslinien · ${data.stops.length} Haltestellen · ${data.trips.length} Busfahrten · ${Object.keys(data.shapes).length} Shapes` }
-    : { id: "static-gtfs", name: "Regionale GTFS-Fahrplandaten", state: "disabled", detail: "Noch nicht importiert. `npm run gtfs:import` ausführen." };
+    ? {
+        id: "static-gtfs",
+        name: "Regionale GTFS-Fahrplandaten",
+        state: "online",
+        lastUpdate: data.generatedAt || undefined,
+        detail: `${data.routes.length} Buslinien · ${data.stops.length} Haltestellen · ${data.trips.length} Busfahrten · ${Object.keys(data.shapes).length} Shapes`,
+      }
+    : {
+        id: "static-gtfs",
+        name: "Regionale GTFS-Fahrplandaten",
+        state: "disabled",
+        detail: "Noch nicht importiert. `npm run gtfs:import` ausführen.",
+      };
+
   const statuses = await Promise.all([
-    scheduleEstimate.getProviderStatus(),
     realtime.getProviderStatus(),
+    scheduleEstimate.getProviderStatus(),
     siriEt.getProviderStatus(),
     flensburg.getProviderStatus(),
   ]);
+
   return [staticStatus, ...statuses];
 }
