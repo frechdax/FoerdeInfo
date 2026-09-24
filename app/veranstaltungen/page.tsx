@@ -37,7 +37,7 @@ export default async function VeranstaltungenPage() {
   const supabase = createPublicServerSupabase();
   const { data } = await supabase
     .from("events")
-    .select("id,title,date,time,location,source_url")
+    .select("id,title,description,date,end_date,time,location,organizer,source_url")
     .eq("status", "published")
     .gte("date", todayBerlin())
     .order("date")
@@ -67,7 +67,7 @@ export default async function VeranstaltungenPage() {
             {upcoming.map((event) => (
               <article key={event.id} className="seo-live-row">
                 <div>
-                  <strong>{event.title}</strong>
+                  <a href={`/veranstaltungen/${event.id}`}><strong>{event.title}</strong></a>
                   <span>
                     {eventDate(event.date)}
                     {event.time ? ` · ${String(event.time).slice(0, 5)} Uhr` : ""}
