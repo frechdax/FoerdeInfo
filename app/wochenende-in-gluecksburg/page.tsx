@@ -96,7 +96,7 @@ export default async function WochenendeInGluecksburgPage() {
             {events.map((event) => (
               <article key={event.id} className="seo-live-row">
                 <div>
-                  <strong>{event.title}</strong>
+                  <a href={`/veranstaltungen/${event.id}`}><strong>{event.title}</strong></a>
                   <span>
                     {shortDate(event.date)}
                     {event.time ? ` · ${String(event.time).slice(0, 5)} Uhr` : ""}
