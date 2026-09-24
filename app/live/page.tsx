@@ -1,16 +1,89 @@
 import type { Metadata } from "next";
 import LiveDashboard from "./LiveDashboard";
 
+const siteUrl = "https://www.xn--glcksburg-direkt-kzb.de";
+
 export const metadata: Metadata = {
-  title: "Glücksburg Jetzt – Live-Daten | GlücksburgDirekt",
+  title: {
+    absolute: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+  },
   description:
-    "Aktuelles Wetter, amtliche DWD-Warnungen, Fördepegel und ein verständlicher Draußen-Check für Glücksburg.",
-  keywords: ["Glücksburg Wetter", "Glücksburg live", "Fördepegel", "DWD Warnungen", "Flensburger Förde"],
+    "Glücksburg live: aktuelles Wetter, DWD-Warnungen, Strand-Ampel für Holnis und Sandwig, Fördepegel Flensburg, beste Zeit für draußen sowie Baustellen und Veränderungen.",
+  keywords: [
+    "Glücksburg live",
+    "Wetter Glücksburg heute",
+    "Glücksburg Wetter",
+    "Strand Holnis",
+    "Sandwig Strand",
+    "Badequalität Glücksburg",
+    "Fördepegel Flensburg",
+    "DWD Warnungen Schleswig-Flensburg",
+    "Baustellen Glücksburg",
+  ],
   alternates: { canonical: "/live" },
+  openGraph: {
+    type: "website",
+    locale: "de_DE",
+    url: "/live",
+    siteName: "GlücksburgDirekt",
+    title: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+    description:
+      "Aktuelle Bedingungen für Glücksburg: Wetter, Strand-Ampel Holnis & Sandwig, Fördepegel, DWD-Warnungen und lokale Veränderungen.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+    description:
+      "Wetter, Strandbedingungen, Fördepegel, Warnungen und lokale Veränderungen in Glücksburg auf einen Blick.",
+  },
+};
+
+const liveStructuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": siteUrl + "/live#webpage",
+      url: siteUrl + "/live",
+      name: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+      description:
+        "Aktuelle Wetterlage, Strand-Ampel für Holnis und Sandwig, Fördepegel Flensburg, DWD-Warnungen und lokale Veränderungen in Glücksburg.",
+      inLanguage: "de-DE",
+      about: [
+        { "@type": "Place", name: "Glücksburg (Ostsee)" },
+        { "@type": "Place", name: "Flensburger Förde" },
+        { "@type": "Thing", name: "Wetter in Glücksburg" },
+        { "@type": "Thing", name: "Badegewässerqualität Holnis und Sandwig" },
+      ],
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "GlücksburgDirekt",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Glücksburg Live",
+          item: siteUrl + "/live",
+        },
+      ],
+    },
+  ],
 };
 
 export default function LivePage() {
-  return <LiveDashboard />;
+  return (
+    <>
+      <LiveDashboard />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(liveStructuredData) }}
+      />
+    </>
+  );
 }
-
-// deploy-attempt-2

@@ -347,3 +347,54 @@
 @media(prefers-reduced-motion:reduce){
   .changeRow{transition:none}
 }
+
+
+/* Suchmaschinenfreundlicher, sichtbarer Infobereich */
+.seoInfo{
+  margin-top:16px;
+  padding:24px;
+  border:1px solid #dbe7e6;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 9px 28px rgba(18,63,75,.045);
+}
+.seoInfo h2{
+  margin:4px 0 12px;
+  max-width:850px;
+  font-size:1.35rem;
+}
+.seoInfo p{
+  max-width:900px;
+  margin:0 0 10px;
+  color:#60757a;
+  font-size:.84rem;
+  line-height:1.65;
+}
+.seoLinks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:16px;
+}
+.seoLinks a{
+  display:inline-flex;
+  align-items:center;
+  min-height:36px;
+  padding:7px 10px;
+  border:1px solid #dce8e7;
+  border-radius:999px;
+  background:#f7fbfa;
+  color:#176c73;
+  font-size:.72rem;
+  font-weight:800;
+  text-decoration:none;
+}
+.seoLinks a:hover{
+  border-color:#bad7d3;
+  background:#eef8f6;
+}
+@media(max-width:620px){
+  .seoInfo{padding:18px 15px}
+  .seoLinks{display:grid;grid-template-columns:1fr}
+  .seoLinks a{justify-content:center;text-align:center}
+}
