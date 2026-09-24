@@ -925,49 +925,18 @@ export default function HomePage() {
             <strong>{currentLabel}</strong>
           </div>
 
-          <button
-            className="topbar-brand"
-            aria-label="Glücksburg Direkt – Startseite"
-            onClick={() => navigate("home")}
-          >
-            <span className="topbar-brand-mark" aria-hidden="true">⚓</span>
-            <span className="topbar-brand-text">
-              <strong>Glücksburg</strong>
-              <small>DIREKT</small>
-            </span>
-          </button>
-
           <div className="header-live-cluster">
-            <div
-              className="header-weather"
-              aria-label={
-                weather && currentWeather
-                  ? `Wetter in Glücksburg: ${currentWeather.label}, ${Math.round(weather.temperature)} Grad, Wind ${Math.round(weather.windSpeed)} Kilometer pro Stunde aus ${windDirectionLabel(weather.windDirection)}`
-                  : "Wetter in Glücksburg wird geladen"
-              }
-              title={
-                weather && currentWeather
-                  ? `${currentWeather.label} · ${Math.round(weather.temperature)}°C · ${Math.round(weather.min)}° / ${Math.round(weather.max)}° · Wind ${Math.round(weather.windSpeed)} km/h aus ${windDirectionLabel(weather.windDirection)}`
-                  : "Wetter wird geladen"
-              }
+            <button
+              className="topbar-brand"
+              aria-label="Glücksburg Direkt – Startseite"
+              onClick={() => navigate("home")}
             >
-              <span className="header-weather-icon" aria-hidden="true">
-                {currentWeather?.icon || "🌤️"}
+              <span className="topbar-brand-mark" aria-hidden="true">⚓</span>
+              <span className="topbar-brand-text">
+                <strong>Glücksburg</strong>
+                <small>DIREKT</small>
               </span>
-              {weather ? (
-                <span className="header-weather-copy">
-                  <span className="header-weather-topline">
-                    <strong>{Math.round(weather.temperature)}°</strong>
-                    <span className="header-weather-label">{currentWeather?.label || "Wetter"}</span>
-                  </span>
-                  <span className="header-weather-wind">
-                    {Math.round(weather.windSpeed)} km/h · {windDirectionLabel(weather.windDirection)}
-                  </span>
-                </span>
-              ) : (
-                <span className="header-weather-label">…</span>
-              )}
-            </div>
+            </button>
 
             <a
               className="header-live-button"

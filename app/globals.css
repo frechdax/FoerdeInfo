@@ -2827,33 +2827,43 @@ footer span:last-child{margin-left:auto}
 /* Redeploy trigger: emergency pharmacy compact card */
 
 
-/* Wetter + Glücksburg Jetzt Live-Zugang */
+/* GlücksburgDirekt + LIVE im Kopfbereich */
 .header-live-cluster{
   margin-left:auto;
+  position:relative;
+  z-index:2;
   display:inline-flex;
   align-items:center;
-  gap:8px;
+  justify-content:flex-end;
+  gap:14px;
   min-width:0;
+  flex:0 0 auto;
 }
-.header-live-cluster .header-weather{
-  margin-left:0;
+.header-live-cluster .topbar-brand{
+  position:static;
+  left:auto;
+  transform:none;
+  margin:0;
+  flex:0 0 auto;
 }
 .header-live-button{
-  min-height:42px;
+  min-height:44px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:7px;
-  padding:7px 12px;
+  gap:9px;
+  padding:8px 16px;
   border:1px solid #d9e5e7;
   border-radius:999px;
   background:#fff;
   color:#173d47;
   box-shadow:0 4px 14px rgba(16,46,57,.07);
-  font-size:.72rem;
+  font-size:.78rem;
   font-weight:900;
   letter-spacing:.08em;
   text-decoration:none;
+  white-space:nowrap;
+  flex:0 0 auto;
   transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
 }
 .header-live-button:hover{
@@ -2862,8 +2872,8 @@ footer span:last-child{margin-left:auto}
   box-shadow:0 7px 18px rgba(16,46,57,.11);
 }
 .header-live-led{
-  width:8px;
-  height:8px;
+  width:9px;
+  height:9px;
   flex:0 0 auto;
   border-radius:50%;
   background:#e33434;
@@ -2875,36 +2885,71 @@ footer span:last-child{margin-left:auto}
   50%{opacity:.62;transform:scale(.86)}
 }
 @media (max-width:850px){
+  .topbar{
+    justify-content:flex-start;
+  }
   .header-live-cluster{
     position:absolute;
-    right:14px;
+    right:16px;
+    gap:10px;
     margin-left:0;
-    gap:6px;
   }
-  .header-live-cluster .header-weather{
+  .header-live-cluster .topbar-brand{
     position:static;
-    right:auto;
+    left:auto;
+    transform:none;
   }
   .header-live-button{
-    min-height:38px;
-    padding:6px 9px;
-    font-size:.66rem;
+    min-height:40px;
+    padding:7px 12px;
+    font-size:.72rem;
   }
   .header-live-led{
-    width:7px;
-    height:7px;
-    box-shadow:0 0 0 3px rgba(227,52,52,.12),0 0 8px rgba(227,52,52,.45);
+    width:8px;
+    height:8px;
   }
 }
-@media (max-width:430px){
-  .header-live-cluster{
-    right:8px;
-    gap:5px;
+@media (max-width:580px){
+  .breadcrumb{
+    display:none;
   }
+  .header-live-cluster{
+    position:static;
+    width:100%;
+    justify-content:flex-end;
+    gap:9px;
+    margin-left:auto;
+  }
+  .header-live-cluster .topbar-brand{
+    margin-right:auto;
+  }
+  .topbar-brand-text strong{font-size:.8rem}
+  .topbar-brand-text small{font-size:.56rem}
   .header-live-button{
-    padding:5px 8px;
-    min-height:36px;
-    letter-spacing:.06em;
+    min-height:38px;
+    padding:6px 11px;
+    font-size:.69rem;
+  }
+}
+@media (max-width:390px){
+  .topbar{
+    padding-left:10px;
+    padding-right:10px;
+  }
+  .header-live-cluster{gap:6px}
+  .topbar-brand{
+    gap:7px;
+    padding-right:2px;
+  }
+  .topbar-brand-mark{
+    width:34px;
+    height:34px;
+    font-size:1rem;
+  }
+  .topbar-brand-text strong{font-size:.74rem}
+  .topbar-brand-text small{font-size:.52rem;letter-spacing:1.1px}
+  .header-live-button{
+    padding:6px 9px;
   }
 }
 @media (prefers-reduced-motion:reduce){
