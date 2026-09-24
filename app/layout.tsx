@@ -54,15 +54,15 @@ export const metadata: Metadata = {
     locale: "de_DE",
     url: siteUrl,
     siteName: "GlücksburgDirekt",
-    title: "GlücksburgDirekt – Dein lokaler Überblick",
+    title: "GlücksburgDirekt – Veranstaltungen, Freizeit, Urlaub und mehr",
     description:
-      "Müllkalender, Veranstaltungen, Familie und Rathausinformationen für Glücksburg (Ostsee).",
+      "Urlaubstipps, Veranstaltungen, Freizeit, Familienangebote und Müllkalender für Glücksburg (Ostsee).",
   },
   twitter: {
     card: "summary",
-    title: "GlücksburgDirekt",
+    title: "GlücksburgDirekt – Veranstaltungen, Freizeit, Urlaub und mehr",
     description:
-      "Müllkalender, Veranstaltungen, Familie und Rathausinformationen für Glücksburg.",
+      "Veranstaltungen, Freizeit, Urlaubstipps und lokale Informationen für Glücksburg.",
   },
   ...(googleVerification
     ? { verification: { google: googleVerification } }
