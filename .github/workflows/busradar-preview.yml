@@ -13,8 +13,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Extract BusRadar source
-        run: tar -xzf busradar-preview-src.tgz
+      - name: Rebuild BusRadar source
+        run: cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Build
