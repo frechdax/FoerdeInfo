@@ -2,3 +2,34 @@
 @media(max-width:800px){.topbar{height:62px;padding:0 14px}.brand{min-width:0}.brand-icon{width:34px;height:34px}.brand span:last-child{display:none}.topbar nav{display:none}.live-cluster{margin-left:auto}.live-cluster span:last-child{display:none}.workspace{height:calc(100dvh - 62px);display:block}.map-wrap{height:100%}.map-title{left:14px;top:14px;right:14px}.map-title h1{font-size:12px;width:max-content;max-width:100%}.sidebar{position:fixed;left:8px;right:8px;bottom:8px;height:min(73dvh,620px);border:0;border-radius:22px;box-shadow:0 -8px 40px rgba(7,32,42,.2);transform:translateY(calc(100% + 20px));transition:transform .3s ease;overflow:hidden}.sidebar.mobile-open{transform:translateY(0)}.mobile-grabber{height:24px;display:grid;place-items:center;cursor:pointer}.mobile-grabber span{width:36px;height:4px;border-radius:9px;background:#d2dcdf}.mobile-sheet-button{display:flex;position:absolute;left:14px;right:14px;bottom:18px;z-index:8;border:0;border-radius:16px;background:#102f3a;color:#fff;height:52px;align-items:center;justify-content:space-between;padding:0 18px;box-shadow:0 10px 28px rgba(5,31,42,.25);font-weight:700}.mobile-sheet-button strong{background:#fff;color:#102f3a;border-radius:9px;padding:5px 8px}.maplibregl-ctrl-bottom-right{bottom:74px!important}.info-page h1{font-size:29px;margin-top:34px}.prose{padding:20px}}
 .map-error{position:absolute;left:50%;top:50%;z-index:10;transform:translate(-50%,-50%);display:grid;gap:5px;text-align:center;background:rgba(255,255,255,.96);border:1px solid #dce6e9;border-radius:14px;padding:14px 18px;box-shadow:0 10px 30px rgba(10,36,48,.16);max-width:min(360px,calc(100% - 32px));pointer-events:none}.map-error strong{font-size:13px;color:#17313b}.map-error span{font-size:11px;color:#6a7d85}
 .show-all-buses{width:100%;margin-top:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:750;cursor:pointer}.show-all-buses:hover{background:rgba(255,255,255,.16)}
+
+.workspace.route-focus{grid-template-columns:1fr}
+.route-focus-card{position:absolute;left:24px;top:20px;z-index:9;width:min(520px,calc(100% - 48px));background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border:1px solid rgba(12,52,68,.1);border-radius:18px;padding:14px 16px 16px;box-shadow:0 12px 36px rgba(7,32,42,.18)}
+.route-focus-back{border:0;background:transparent;color:#173dff;font-size:11px;font-weight:800;padding:0 0 10px;cursor:pointer}
+.route-focus-heading{display:flex;align-items:center;gap:11px}
+.route-focus-line{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;color:#fff;font-weight:900;box-shadow:0 5px 14px rgba(20,60,220,.18)}
+.route-focus-heading>div{display:grid;gap:2px;min-width:0}
+.route-focus-heading small,.route-focus-journey small{font-size:9px;color:#7b8b92;text-transform:uppercase;letter-spacing:.08em}
+.route-focus-heading strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-focus-journey{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #e6edef}
+.route-focus-journey>div{display:grid;gap:3px;min-width:0}
+.route-focus-journey>div:last-child{text-align:right}
+.route-focus-journey strong{font-size:11px;line-height:1.35}
+.route-focus-journey>span{text-align:center;color:#173dff;font-weight:900}
+.route-focus-live{margin-top:12px;display:flex;align-items:center;gap:7px;font-size:10px;color:#5f737b}
+.route-quality-dot{width:8px;height:8px;border-radius:50%;background:#e6a51e}
+.route-quality-dot.gps{background:#22b86a;box-shadow:0 0 0 4px rgba(34,184,106,.1)}
+.route-quality-dot.realtime{background:#2a95ff;box-shadow:0 0 0 4px rgba(42,149,255,.1)}
+.route-endpoint{display:flex;align-items:center;gap:6px;max-width:210px;background:rgba(255,255,255,.96);border:1px solid #dce6e9;border-radius:999px;padding:4px 8px 4px 4px;box-shadow:0 5px 16px rgba(9,38,50,.18);font-size:10px;font-weight:700;color:#17313b}
+.route-endpoint strong{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:10px;flex:0 0 auto}
+.route-endpoint span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-endpoint.start strong{background:#20a464}
+.route-endpoint.end strong{background:#e45151}
+
+@media(max-width:800px){
+  .route-focus-card{left:12px;right:12px;top:12px;width:auto;padding:12px 13px 14px}
+  .route-focus-journey{grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr)}
+  .route-focus-journey strong{font-size:10px}
+  .route-endpoint{max-width:150px}
+  .workspace.route-focus .maplibregl-ctrl-bottom-right{bottom:18px!important}
+}
