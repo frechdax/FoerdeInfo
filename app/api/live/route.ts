@@ -6,6 +6,8 @@ const LAT = 54.8357;
 const LON = 9.5487;
 const FLENSBURG_PEGEL_UUID = "9e19c411-f728-4a43-a057-39d4155c71cc";
 const SCHLESWIG_FLENSBURG_WARNCELL = "101059000";
+const BATHING_BASE = "https://efi2.schleswig-holstein.de/bg/opendata";
+const DANORD_URL = "https://danord.gdi-sh.de/viewer/resources/apps/BuFPlaene/index.html";
 
 type WeatherPayload = {
   current?: {
@@ -27,6 +29,8 @@ type WeatherPayload = {
     wind_speed_10m?: number[];
     wind_gusts_10m?: number[];
     weather_code?: number[];
+    uv_index?: number[];
+    is_day?: number[];
   };
 };
 
@@ -36,6 +40,10 @@ type PegelMeasurement = {
   stateMnwMhw?: string;
   stateNswHsw?: string;
 };
+
+type ActivityId = "outside" | "beach" | "walk" | "bike" | "playground";
+
+type CsvRow = Record<string, string>;
 
 function clamp(value: number, min = 0, max = 100) {
   return Math.max(min, Math.min(max, Math.round(value)));
@@ -70,29 +78,62 @@ function weatherLabel(code: number) {
   return "Wechselhaft";
 }
 
-function activityScores(temp: number, wind: number, gusts: number, rainProbability: number, precipitation: number) {
+function activityScore(
+  activity: ActivityId,
+  temp: number,
+  wind: number,
+  gusts: number,
+  rainProbability: number,
+  precipitation: number,
+  uv: number,
+  isDay: boolean,
+  warningLevel: number
+) {
   const wetPenalty = rainProbability * 0.48 + Math.min(30, precipitation * 12);
   const gustPenalty = Math.max(0, gusts - 35) * 0.7;
+  const warningPenalty = warningLevel >= 3 ? 35 : warningLevel === 2 ? 18 : warningLevel === 1 ? 8 : 0;
+  const darkPenalty = isDay ? 0 : activity === "walk" ? 18 : 38;
 
-  const outside = clamp(
-    100 - wetPenalty - Math.max(0, wind - 22) * 0.8 - gustPenalty - temperaturePenalty(temp, 18, 8)
-  );
-  const beach = clamp(
-    100 - wetPenalty - Math.max(0, wind - 24) * 0.75 - gustPenalty - temperaturePenalty(temp, 23, 7)
-  );
-  const walk = clamp(
-    100 - wetPenalty * 0.8 - Math.max(0, wind - 28) * 0.6 - gustPenalty * 0.7 - temperaturePenalty(temp, 16, 10)
-  );
-  const bike = clamp(
-    100 - wetPenalty - Math.max(0, wind - 18) * 1.25 - gustPenalty * 1.1 - temperaturePenalty(temp, 17, 9)
-  );
+  if (activity === "beach") {
+    return clamp(
+      100 - wetPenalty - Math.max(0, wind - 24) * 0.75 - gustPenalty -
+      temperaturePenalty(temp, 23, 7) - Math.max(0, uv - 7) * 2 - warningPenalty - darkPenalty
+    );
+  }
 
-  return [
-    { id: "outside", label: "Draußen", icon: "🌤️", score: outside, verdict: scoreLabel(outside), tone: scoreTone(outside) },
-    { id: "beach", label: "Strand", icon: "🏖️", score: beach, verdict: scoreLabel(beach), tone: scoreTone(beach) },
-    { id: "walk", label: "Spaziergang", icon: "🚶", score: walk, verdict: scoreLabel(walk), tone: scoreTone(walk) },
-    { id: "bike", label: "Fahrrad", icon: "🚲", score: bike, verdict: scoreLabel(bike), tone: scoreTone(bike) },
-  ];
+  if (activity === "walk") {
+    return clamp(
+      100 - wetPenalty * 0.8 - Math.max(0, wind - 28) * 0.6 - gustPenalty * 0.7 -
+      temperaturePenalty(temp, 16, 10) - Math.max(0, uv - 8) * 1.5 - warningPenalty - darkPenalty
+    );
+  }
+
+  if (activity === "bike") {
+    return clamp(
+      100 - wetPenalty - Math.max(0, wind - 18) * 1.25 - gustPenalty * 1.1 -
+      temperaturePenalty(temp, 17, 9) - warningPenalty - darkPenalty
+    );
+  }
+
+  if (activity === "playground") {
+    return clamp(
+      100 - wetPenalty - Math.max(0, wind - 24) * 0.8 - gustPenalty * 0.8 -
+      temperaturePenalty(temp, 18, 8) - Math.max(0, uv - 6) * 4 - warningPenalty - (isDay ? 0 : 55)
+    );
+  }
+
+  return clamp(
+    100 - wetPenalty - Math.max(0, wind - 22) * 0.8 - gustPenalty -
+    temperaturePenalty(temp, 18, 8) - warningPenalty - darkPenalty
+  );
+}
+
+function activityMeta(id: ActivityId) {
+  if (id === "beach") return { label: "Strand", icon: "🏖️" };
+  if (id === "walk") return { label: "Spaziergang", icon: "🚶" };
+  if (id === "bike") return { label: "Fahrrad", icon: "🚲" };
+  if (id === "playground") return { label: "Spielplatz", icon: "🛝" };
+  return { label: "Draußen", icon: "🌤️" };
 }
 
 function parseDwdJson(raw: string) {
@@ -101,6 +142,363 @@ function parseDwdJson(raw: string) {
   const match = trimmed.match(/^[^(]+\((.*)\);?$/s);
   if (!match) throw new Error("Unbekanntes DWD-Format");
   return JSON.parse(match[1]);
+}
+
+function parseDelimitedLine(line: string, delimiter = "|") {
+  const values: string[] = [];
+  let value = "";
+  let quoted = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      if (quoted && line[i + 1] === '"') {
+        value += '"';
+        i += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === delimiter && !quoted) {
+      values.push(value.trim());
+      value = "";
+    } else {
+      value += char;
+    }
+  }
+
+  values.push(value.trim());
+  return values;
+}
+
+function parsePipeCsv(text: string) {
+  const lines = text
+    .replace(/^\uFEFF/, "")
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0);
+
+  if (!lines.length) return [] as CsvRow[];
+
+  const headers = parseDelimitedLine(lines[0]).map((header) => header.replace(/^"|"$/g, "").trim());
+  return lines.slice(1).map((line) => {
+    const cells = parseDelimitedLine(line);
+    return headers.reduce<CsvRow>((row, header, index) => {
+      row[header] = (cells[index] || "").replace(/^"|"$/g, "").trim();
+      return row;
+    }, {});
+  });
+}
+
+async function fetchLatin1Csv(url: string) {
+  const response = await fetch(url, { next: { revalidate: 21600 } });
+  if (!response.ok) throw new Error("Open-Data-Datei nicht erreichbar");
+  const bytes = await response.arrayBuffer();
+  const text = new TextDecoder("iso-8859-1").decode(bytes);
+  return parsePipeCsv(text);
+}
+
+function parseGermanNumber(value?: string) {
+  if (!value) return null;
+  const parsed = Number(value.replace(",", ".").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseGermanDate(value?: string) {
+  if (!value) return 0;
+  const match = value.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!match) return 0;
+  return Date.UTC(
+    Number(match[3]),
+    Number(match[2]) - 1,
+    Number(match[1]),
+    Number(match[4] || 12),
+    Number(match[5] || 0),
+    Number(match[6] || 0)
+  );
+}
+
+function beachDisplayName(row: CsvRow) {
+  return (
+    row.ALLGEMEIN_GEBRAEUCHL_NAME ||
+    row.KURZNAME ||
+    row.BADEGEWAESSERNAME ||
+    row.MESSSTELLENNAME ||
+    "Badestelle"
+  );
+}
+
+function qualityRank(value: string) {
+  const normalized = value.toLocaleLowerCase("de");
+  if (normalized.includes("ausgezeichnet")) return 4;
+  if (normalized.includes("gut")) return 3;
+  if (normalized.includes("ausreichend")) return 2;
+  if (normalized.includes("mangelhaft")) return 1;
+  return 0;
+}
+
+function beachTrafficLight(
+  quality: string,
+  beachScore: number,
+  uvIndex: number,
+  warningLevel: number,
+  gusts: number
+) {
+  const q = qualityRank(quality);
+
+  if (q === 1 || warningLevel >= 3 || beachScore < 42 || gusts >= 60) {
+    return {
+      status: "red" as const,
+      label: "Rot",
+      summary: q === 1 ? "Amtliche Qualitätsbewertung beachten" : "Bedingungen aktuell ungünstig",
+    };
+  }
+
+  if (q === 2 || q === 0 || warningLevel > 0 || beachScore < 72 || uvIndex >= 6 || gusts >= 42) {
+    return {
+      status: "yellow" as const,
+      label: "Gelb",
+      summary: uvIndex >= 6 ? "Gute Bedingungen, aber UV-Schutz beachten" : "Mit Einschränkungen",
+    };
+  }
+
+  return {
+    status: "green" as const,
+    label: "Grün",
+    summary: "Gute Gesamtbedingungen",
+  };
+}
+
+function hourLabel(value: string) {
+  return value.slice(11, 16);
+}
+
+function endHourLabel(value: string, offset: number) {
+  const hour = Number(value.slice(11, 13));
+  const end = hour + offset;
+  return (end >= 24 ? "24" : String(end).padStart(2, "0")) + ":00";
+}
+
+function buildBestTimes(
+  hourly: NonNullable<WeatherPayload["hourly"]>,
+  currentTime: string | undefined,
+  warningLevel: number
+) {
+  const times = hourly.time || [];
+  const temps = hourly.temperature_2m || [];
+  const rainProb = hourly.precipitation_probability || [];
+  const precipitation = hourly.precipitation || [];
+  const wind = hourly.wind_speed_10m || [];
+  const gusts = hourly.wind_gusts_10m || [];
+  const uv = hourly.uv_index || [];
+  const isDay = hourly.is_day || [];
+  const currentDate = (currentTime || times[0] || "").slice(0, 10);
+  const currentHour = (currentTime || times[0] || "").slice(0, 13);
+
+  const activities: ActivityId[] = ["beach", "walk", "bike", "playground"];
+
+  return activities.map((activity) => {
+    let best:
+      | {
+          start: string;
+          end: string;
+          score: number;
+          rain: number;
+          wind: number;
+          uv: number;
+        }
+      | null = null;
+
+    for (let i = 0; i < times.length - 1; i += 1) {
+      if (times[i].slice(0, 10) !== currentDate || times[i].slice(0, 13) < currentHour) continue;
+      if (times[i + 1].slice(0, 10) !== currentDate) continue;
+
+      const scoreA = activityScore(
+        activity,
+        Number(temps[i] || 0),
+        Number(wind[i] || 0),
+        Number(gusts[i] || wind[i] || 0),
+        Number(rainProb[i] || 0),
+        Number(precipitation[i] || 0),
+        Number(uv[i] || 0),
+        Number(isDay[i] ?? 1) === 1,
+        warningLevel
+      );
+      const scoreB = activityScore(
+        activity,
+        Number(temps[i + 1] || 0),
+        Number(wind[i + 1] || 0),
+        Number(gusts[i + 1] || wind[i + 1] || 0),
+        Number(rainProb[i + 1] || 0),
+        Number(precipitation[i + 1] || 0),
+        Number(uv[i + 1] || 0),
+        Number(isDay[i + 1] ?? 1) === 1,
+        warningLevel
+      );
+
+      const candidate = {
+        start: hourLabel(times[i]),
+        end: endHourLabel(times[i], 2),
+        score: Math.round((scoreA + scoreB) / 2),
+        rain: Math.round((Number(rainProb[i] || 0) + Number(rainProb[i + 1] || 0)) / 2),
+        wind: Math.round((Number(wind[i] || 0) + Number(wind[i + 1] || 0)) / 2),
+        uv: Math.round(((Number(uv[i] || 0) + Number(uv[i + 1] || 0)) / 2) * 10) / 10,
+      };
+
+      if (!best || candidate.score > best.score) best = candidate;
+    }
+
+    const meta = activityMeta(activity);
+    return {
+      id: activity,
+      label: meta.label,
+      icon: meta.icon,
+      start: best?.start || null,
+      end: best?.end || null,
+      score: best?.score ?? null,
+      rainProbability: best?.rain ?? null,
+      windSpeed: best?.wind ?? null,
+      uvIndex: best?.uv ?? null,
+      verdict: best ? scoreLabel(best.score) : "Heute kein passendes Zeitfenster mehr",
+    };
+  });
+}
+
+async function loadChanges() {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wggtdpyzkeneyfywcume.supabase.co";
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    "sb_publishable_goBV5794K15cywyrAFSRpg_RdEpycrg";
+
+  const headers = {
+    apikey: supabaseKey,
+    Authorization: "Bearer " + supabaseKey,
+  };
+
+  const queries = [
+    fetch(
+      supabaseUrl +
+        "/rest/v1/official_notices?select=id,published_at,title,source_url&order=published_at.desc.nullslast&limit=80",
+      { headers, next: { revalidate: 900 } }
+    ).then((response) => (response.ok ? response.json() : [])),
+    fetch(
+      supabaseUrl +
+        "/rest/v1/rathaus_news?select=id,published_at,title,source_url&order=published_at.desc.nullslast&limit=80",
+      { headers, next: { revalidate: 900 } }
+    ).then((response) => (response.ok ? response.json() : [])),
+  ];
+
+  const [notices, news] = await Promise.all(queries);
+  const keywords =
+    /(bebauungsplan|bauleit|flächennutzungsplan|flaechennutzungsplan|baugebiet|baustell|straßenbau|strassenbau|sperrung|vollsperr|teilsperr|verkehr|sanierung|ausbau|erschließ|erschliess|planung|bauvorhaben|satzung)/i;
+
+  const normalized = [
+    ...(notices as Array<Record<string, unknown>>).map((item) => ({
+      ...item,
+      sourceType: "Amtliche Bekanntmachung",
+    })),
+    ...(news as Array<Record<string, unknown>>).map((item) => ({
+      ...item,
+      sourceType: "Rathaus",
+    })),
+  ]
+    .filter((item) => keywords.test(String(item.title || "")))
+    .map((item) => {
+      const title = String(item.title || "");
+      const category = /bebauungsplan|bauleit|flächennutzungsplan|flaechennutzungsplan|satzung/i.test(title)
+        ? "Bauleitplanung"
+        : /sperrung|vollsperr|teilsperr|verkehr|straßenbau|strassenbau|baustell/i.test(title)
+          ? "Straße & Verkehr"
+          : "Bau & Entwicklung";
+
+      return {
+        id: String(item.sourceType || "") + "-" + String(item.id || title),
+        title,
+        publishedAt: item.published_at ? String(item.published_at) : null,
+        sourceUrl: String(item.source_url || DANORD_URL),
+        sourceType: String(item.sourceType || "Amtliche Quelle"),
+        category,
+      };
+    })
+    .sort((a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
+
+  const seen = new Set<string>();
+  return normalized.filter((item) => {
+    const key = item.title.toLocaleLowerCase("de").trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 6);
+}
+
+async function loadBeaches(
+  beachWeatherScore: number,
+  uvIndex: number,
+  warningLevel: number,
+  gusts: number
+) {
+  const [masterRows, classificationRows, measurementRows] = await Promise.all([
+    fetchLatin1Csv(BATHING_BASE + "/v_badegewaesser_odata.csv"),
+    fetchLatin1Csv(BATHING_BASE + "/v_einstufung_odata.csv"),
+    fetchLatin1Csv(BATHING_BASE + "/v_proben_odata.csv"),
+  ]);
+
+  const localRows = masterRows.filter((row) => {
+    const haystack = [
+      row.GEMEINDE,
+      row.BADEGEWAESSERNAME,
+      row.KURZNAME,
+      row.ALLGEMEIN_GEBRAEUCHL_NAME,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    return /glücksburg|gluecksburg/i.test(haystack) && /holnis|sandwig/i.test(haystack);
+  });
+
+  const targets = localRows.length
+    ? localRows
+    : masterRows.filter((row) => /holnis|sandwig/i.test(Object.values(row).join(" "))).slice(0, 6);
+
+  return targets.map((row) => {
+    const id = row.BADEGEWAESSERID;
+    const classifications = classificationRows
+      .filter((entry) => entry.BADEGEWAESSERID === id)
+      .sort(
+        (a, b) =>
+          Number(b.BEURTEILUNGSZEITRAUM_BIS || 0) - Number(a.BEURTEILUNGSZEITRAUM_BIS || 0)
+      );
+    const measurements = measurementRows
+      .filter((entry) => entry.BADEGEWAESSERID === id)
+      .sort((a, b) => parseGermanDate(b.DATUMMESSUNG) - parseGermanDate(a.DATUMMESSUNG));
+
+    const latestClassification = classifications[0];
+    const latestMeasurement = measurements[0];
+    const quality =
+      latestClassification?.EINSTUFUNG_ODER_VORABBEWERTUNG ||
+      latestClassification?.EINSTUFUNG ||
+      "ohne aktuelle Einstufung";
+    const light = beachTrafficLight(quality, beachWeatherScore, uvIndex, warningLevel, gusts);
+
+    return {
+      id,
+      name: beachDisplayName(row),
+      latitude: parseGermanNumber(row.GEOGR_BREITE),
+      longitude: parseGermanNumber(row.GEOGR_LAENGE),
+      quality,
+      qualityPeriod: latestClassification
+        ? [latestClassification.BEURTEILUNGSZEITRAUM_VON, latestClassification.BEURTEILUNGSZEITRAUM_BIS]
+            .filter(Boolean)
+            .join("–")
+        : null,
+      waterTemperature: parseGermanNumber(latestMeasurement?.WASSERTEMP),
+      lastSampleAt: latestMeasurement?.DATUMMESSUNG || null,
+      remark: latestMeasurement?.BEMERKUNG || null,
+      status: light.status,
+      statusLabel: light.label,
+      summary: light.summary,
+      weatherScore: beachWeatherScore,
+      uvIndex,
+    };
+  });
 }
 
 export async function GET() {
@@ -125,33 +523,43 @@ export async function GET() {
       "wind_speed_10m",
       "wind_gusts_10m",
       "weather_code",
+      "uv_index",
+      "is_day",
     ].join(","),
     timezone: "Europe/Berlin",
-    forecast_hours: "6",
+    forecast_days: "1",
   }).toString();
 
-  const pegelBase = `https://pegelonline.wsv.de/webservices/rest-api/v2/stations/${FLENSBURG_PEGEL_UUID}/W`;
+  const pegelBase =
+    "https://pegelonline.wsv.de/webservices/rest-api/v2/stations/" +
+    FLENSBURG_PEGEL_UUID +
+    "/W";
 
-  const [weatherResult, currentPegelResult, pegelHistoryResult, warningsResult] =
+  const [weatherResult, currentPegelResult, pegelHistoryResult, warningsResult, changesResult] =
     await Promise.allSettled([
       fetch(weatherUrl, { next: { revalidate: 300 } }).then(async (response) => {
         if (!response.ok) throw new Error("Weather API unavailable");
         return (await response.json()) as WeatherPayload;
       }),
-      fetch(`${pegelBase}/currentmeasurement.json`, { next: { revalidate: 300 } }).then(async (response) => {
-        if (!response.ok) throw new Error("PEGELONLINE unavailable");
-        return (await response.json()) as PegelMeasurement;
-      }),
-      fetch(`${pegelBase}/measurements.json?start=P2H`, { next: { revalidate: 300 } }).then(async (response) => {
-        if (!response.ok) throw new Error("PEGELONLINE history unavailable");
-        return (await response.json()) as PegelMeasurement[];
-      }),
+      fetch(pegelBase + "/currentmeasurement.json", { next: { revalidate: 300 } }).then(
+        async (response) => {
+          if (!response.ok) throw new Error("PEGELONLINE unavailable");
+          return (await response.json()) as PegelMeasurement;
+        }
+      ),
+      fetch(pegelBase + "/measurements.json?start=P2H", { next: { revalidate: 300 } }).then(
+        async (response) => {
+          if (!response.ok) throw new Error("PEGELONLINE history unavailable");
+          return (await response.json()) as PegelMeasurement[];
+        }
+      ),
       fetch("https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json", {
         next: { revalidate: 120 },
       }).then(async (response) => {
         if (!response.ok) throw new Error("DWD warnings unavailable");
         return parseDwdJson(await response.text());
       }),
+      loadChanges(),
     ]);
 
   if (weatherResult.status === "rejected") {
@@ -179,8 +587,66 @@ export async function GET() {
   const wind = Number(current.wind_speed_10m ?? 0);
   const gusts = Number(current.wind_gusts_10m ?? wind);
   const precipitation = Number(current.precipitation ?? 0);
+  const currentUv = Number((hourly.uv_index ?? [])[currentIndex] ?? 0);
+  const currentIsDay = Number((hourly.is_day ?? [])[currentIndex] ?? 1) === 1;
 
-  const scores = activityScores(temp, wind, gusts, rainProbability, precipitation);
+  let warnings: Array<{
+    headline: string;
+    event: string;
+    level: number;
+    start: number;
+    end: number;
+    description?: string;
+    instruction?: string;
+  }> = [];
+
+  if (warningsResult.status === "fulfilled") {
+    const warningMap = warningsResult.value?.warnings ?? {};
+    const entries = warningMap[SCHLESWIG_FLENSBURG_WARNCELL] ?? [];
+    warnings = entries.map((entry: Record<string, unknown>) => ({
+      headline: String(entry.headline ?? entry.event ?? "Amtliche Wetterwarnung"),
+      event: String(entry.event ?? "Wetterwarnung"),
+      level: Number(entry.level ?? 1),
+      start: Number(entry.start ?? 0),
+      end: Number(entry.end ?? 0),
+      description: entry.description ? String(entry.description) : undefined,
+      instruction: entry.instruction ? String(entry.instruction) : undefined,
+    }));
+  }
+
+  const warningLevel = warnings.reduce((max, item) => Math.max(max, item.level || 0), 0);
+  const activityIds: ActivityId[] = ["outside", "beach", "walk", "bike", "playground"];
+  const scores = activityIds.map((id) => {
+    const score = activityScore(
+      id,
+      temp,
+      wind,
+      gusts,
+      rainProbability,
+      precipitation,
+      currentUv,
+      currentIsDay,
+      warningLevel
+    );
+    const meta = activityMeta(id);
+    return {
+      id,
+      label: meta.label,
+      icon: meta.icon,
+      score,
+      verdict: scoreLabel(score),
+      tone: scoreTone(score),
+    };
+  });
+
+  const bestTimes = buildBestTimes(hourly, current.time, warningLevel);
+  const beachScore = scores.find((item) => item.id === "beach")?.score ?? 0;
+
+  const beachesResult = await Promise.allSettled([
+    loadBeaches(beachScore, currentUv, warningLevel, gusts),
+  ]);
+  const beaches =
+    beachesResult[0].status === "fulfilled" ? beachesResult[0].value : [];
 
   let pegel = null as null | {
     station: string;
@@ -218,30 +684,6 @@ export async function GET() {
     };
   }
 
-  let warnings: Array<{
-    headline: string;
-    event: string;
-    level: number;
-    start: number;
-    end: number;
-    description?: string;
-    instruction?: string;
-  }> = [];
-
-  if (warningsResult.status === "fulfilled") {
-    const warningMap = warningsResult.value?.warnings ?? {};
-    const entries = warningMap[SCHLESWIG_FLENSBURG_WARNCELL] ?? [];
-    warnings = entries.map((entry: Record<string, unknown>) => ({
-      headline: String(entry.headline ?? entry.event ?? "Amtliche Wetterwarnung"),
-      event: String(entry.event ?? "Wetterwarnung"),
-      level: Number(entry.level ?? 1),
-      start: Number(entry.start ?? 0),
-      end: Number(entry.end ?? 0),
-      description: entry.description ? String(entry.description) : undefined,
-      instruction: entry.instruction ? String(entry.instruction) : undefined,
-    }));
-  }
-
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     location: { name: "Glücksburg", latitude: LAT, longitude: LON },
@@ -256,15 +698,20 @@ export async function GET() {
       windGusts: gusts,
       windDirection: Number(current.wind_direction_10m ?? 0),
       rainProbability3h: rainProbability,
+      uvIndex: currentUv,
       observedAt: current.time ?? null,
     },
     scores,
+    bestTimes,
+    beaches,
+    changes: changesResult.status === "fulfilled" ? changesResult.value : [],
+    planningSourceUrl: DANORD_URL,
     pegel,
     warnings,
     sources: [
       {
         name: "Open-Meteo",
-        purpose: "Wetter und Kurzfristprognose",
+        purpose: "Wetter, UV und Kurzfristprognose",
         url: "https://open-meteo.com/",
       },
       {
@@ -276,6 +723,16 @@ export async function GET() {
         name: "PEGELONLINE / WSV",
         purpose: "Fördepegel Flensburg",
         url: "https://pegelonline.wsv.de/",
+      },
+      {
+        name: "Land Schleswig-Holstein",
+        purpose: "Amtliche Badegewässerdaten",
+        url: "https://opendata.schleswig-holstein.de/collection/badegewasser-stammdaten/aktuell",
+      },
+      {
+        name: "Digitaler Atlas Nord",
+        purpose: "Bauleitplanung Schleswig-Holstein",
+        url: DANORD_URL,
       },
     ],
   });
