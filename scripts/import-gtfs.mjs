@@ -2,7 +2,6 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { pipeline } from "node:stream/promises";
 import { parse } from "csv-parse";
 import unzipper from "unzipper";
 
@@ -32,7 +31,9 @@ async function downloadGtfs() {
       const res = await fetch(candidate, { headers: { "user-agent": "BusKarte GTFS importer/0.1" }, redirect: "follow" });
       const contentType = res.headers.get("content-type") || "";
       if (!res.ok || !res.body || contentType.includes("text/html")) throw new Error(`HTTP ${res.status}, content-type ${contentType}`);
-      await pipeline(res.body, fs.createWriteStream(zipPath));
+      const bytes = Buffer.from(await res.arrayBuffer());
+      if (!bytes.length) throw new Error("Empty GTFS response");
+      await fsp.writeFile(zipPath, bytes);
       const head = Buffer.alloc(4);
       const fd = await fsp.open(zipPath, "r");
       await fd.read(head, 0, 4, 0);
