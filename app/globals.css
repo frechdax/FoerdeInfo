@@ -33,3 +33,5 @@
   .route-endpoint{max-width:150px}
   .workspace.route-focus .maplibregl-ctrl-bottom-right{bottom:18px!important}
 }
+
+.route-visible-note{margin-left:auto;font-size:9px;color:#173dff;background:#eef3ff;border-radius:999px;padding:4px 7px;white-space:nowrap}
