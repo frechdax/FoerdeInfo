@@ -35,14 +35,18 @@ jobs:
           "$CHROME" --headless=new --no-sandbox --enable-unsafe-swiftshader --virtual-time-budget=10000 --dump-dom http://127.0.0.1:3000 >/tmp/buskarte-dom.html
           grep -q 'BusKarte' /tmp/buskarte-dom.html
           grep -q 'maplibregl-canvas' /tmp/buskarte-dom.html
-          if grep -q 'BusRadar' /tmp/buskarte-dom.html; then
-            echo "Old BusRadar branding still present"
+          LEGACY_CAMEL='Bus''Radar'
+          if grep -q "$LEGACY_CAMEL" /tmp/buskarte-dom.html; then
+            echo "Legacy branding still present in rendered DOM"
             exit 1
           fi
-      - name: No old BusRadar branding in source
+      - name: No legacy branding in source
         shell: bash
         run: |
-          if grep -R -n -E 'BusRadar|busradar|BUSRADAR' --exclude-dir=.git --exclude='data/region.json' .; then
-            echo "Old BusRadar branding found"
+          LEGACY_CAMEL='Bus''Radar'
+          LEGACY_LOWER='bus''radar'
+          LEGACY_UPPER='BUS''RADAR'
+          if grep -R -n -E "$LEGACY_CAMEL|$LEGACY_LOWER|$LEGACY_UPPER" --exclude-dir=.git --exclude='data/region.json' .; then
+            echo "Legacy branding found"
             exit 1
           fi
