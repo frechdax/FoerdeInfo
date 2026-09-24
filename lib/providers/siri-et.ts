@@ -85,7 +85,10 @@ export class SiriEtProvider implements TransitRealtimeProvider {
 
   async getVehicles(): Promise<Vehicle[]> {
     const updates = await this.getTripUpdates();
-    return updates.map((u) => estimateVehicle(u)).filter((v): v is Vehicle => Boolean(v));
+    return updates
+      .map((u) => estimateVehicle(u))
+      .filter((v): v is Vehicle => Boolean(v))
+      .map((v) => ({ ...v, id: `realtime:${v.tripId || v.id}`, accuracyType: "realtime" as const, source: "DELFI SIRI-ET Echtzeit-Prognose · NAH.SH Liniengeometrie" }));
   }
 
   async getServiceAlerts(): Promise<ServiceAlertSnapshot[]> { return []; }
