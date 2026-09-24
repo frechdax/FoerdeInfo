@@ -129,7 +129,8 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
 
     for (const v of vehicles) {
       const age = Date.now() - new Date(v.timestamp).getTime();
-      if (age > 120_000) continue;
+      const isSelected = selected?.id === v.id;
+      if (age > 120_000 && !isSelected) continue;
       let marker = markersRef.current.get(v.id);
       if (!marker) {
         const el = document.createElement("button");
