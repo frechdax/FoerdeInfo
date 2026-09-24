@@ -10,11 +10,11 @@ export default function DataSourcesPage() {
         <p>BusKarte nutzt primär den von NAH.SH veröffentlichten Schleswig-Holstein-GTFS-Datensatz. Der Datensatz wird im deutschen GovData-Portal als frei nutzbar unter Creative Commons Namensnennung 4.0 (CC BY 4.0) geführt. Beim Import werden nur Buslinien und Haltestellen aus Flensburg sowie dem Kreis Schleswig-Flensburg übernommen.</p>
         <p>Als technischer Fallback kann der freie Deutschland-Nahverkehrsfeed von GTFS.de verwendet werden. Fehlende Liniengeometrien werden niemals durch erfundene gerade Verbindungen ersetzt.</p>
 
-        <h2>Aktuelle Positionsschätzung</h2>
-        <p>Solange keine kompatiblen Echtzeitdaten oder freigegebenen GPS-Positionen vorliegen, berechnet BusKarte aktive Busse ausschließlich aus dem offiziellen Fahrplan und vorhandenen GTFS-Shapes. Diese Marker sind sichtbar als <strong>Geschätzt</strong> gekennzeichnet und enthalten keine behauptete Echtzeitkorrektur.</p>
+        <h2>Echtzeit-Prognose</h2>
+        <p>BusKarte verknüpft den zum GTFS.de-Fahrplan passenden Realtime-Stream mit dem offiziellen NAH.SH-Datensatz über einen täglich erzeugten Trip-Crosswalk. Bei eindeutig zugeordneten Fahrten werden aktuelle TripUpdates und StopTimeUpdates für Verspätung, nächste Haltestelle und Fortschritt verwendet. Die Position wird anschließend entlang der echten NAH.SH-Liniengeometrie fortgeschrieben und als <strong>Echtzeit-Prognose</strong> gekennzeichnet.</p>
 
         <h2>GTFS-Realtime</h2>
-        <p>Der freie GTFS.de-Realtime-Stream liefert TripUpdates und ServiceAlerts, aber keine allgemeinen VehiclePositions. Ein automatischer Kompatibilitätstest ergab für den aktuell verwendeten offiziellen NAH.SH-GTFS keine direkten Trip-ID-Treffer. Deshalb ordnet BusKarte diese Realtime-Daten derzeit bewusst <strong>nicht</strong> den NAH.SH-Fahrten zu.</p>
+        <p>Der freie GTFS.de-Realtime-Stream wird etwa alle zehn Sekunden aktualisiert und liefert TripUpdates und ServiceAlerts, jedoch keine allgemeinen GPS- bzw. VehiclePositions. Deshalb ist eine <strong>Echtzeit-Prognose</strong> nicht dasselbe wie Live GPS. Wenn eine Fahrt nicht eindeutig zugeordnet werden kann, fällt BusKarte für diese Fahrt auf die sichtbar gekennzeichnete Fahrplan-Schätzung zurück.</p>
 
         <h2>DELFI / SIRI-ET Schleswig-Holstein</h2>
         <p>Das Schleswig-Holstein-SIRI-ET-Angebot ist in GovData/Mobilithek als öffentlicher Open-Data-Datensatz katalogisiert. Der aktuelle Paketabruf der Mobilithek verlangt jedoch Authorization; der vorgesehene noauth-Abruf antwortet mit 403. Der Adapter ist vorbereitet und kann nach rechtmäßigem Zugang über Server-Environment-Variablen aktiviert werden.</p>
@@ -26,7 +26,7 @@ export default function DataSourcesPage() {
         <p>Die Karte wird mit MapLibre GL gerendert. Der Kartenstil ist konfigurierbar; die Attribution des jeweiligen Kartenproviders wird direkt in der Karte dargestellt.</p>
 
         <h2>Datenqualität</h2>
-        <p><strong>Live GPS</strong> bedeutet eine echte, ausdrücklich nutzbare Fahrzeugposition. <strong>Geschätzt</strong> bedeutet eine Berechnung aus Fahrplan und tatsächlicher Liniengeometrie; sofern später kompatible Realtime-Daten vorliegen, kann diese zusätzlich korrigiert werden. Fehlende Daten werden nicht durch Demo-Positionen ersetzt.</p>
+        <p><strong>Live GPS</strong> bedeutet eine echte, ausdrücklich nutzbare Fahrzeugposition. <strong>Echtzeit-Prognose</strong> verwendet aktuelle Realtime-Abweichungen und Haltestellenprognosen, die Position wird aber entlang des Linienwegs berechnet. <strong>Fahrplan-Schätzung</strong> verwendet nur Sollzeiten und Shape. Fehlende Daten werden nicht durch Demo-Positionen ersetzt.</p>
 
         <h2>Hinweis</h2>
         <p>BusKarte ist kein offizielles Angebot der Verkehrsunternehmen oder von NAH.SH. Fahrplan- und Echtzeitinformationen können abweichen.</p>
