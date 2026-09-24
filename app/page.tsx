@@ -1117,6 +1117,15 @@ export default function HomePage() {
                       <em>Sandwig, Holnis & Quellental →</em>
                     </span>
                   </a>
+
+                  <a className="home-discovery-card" href="/freizeit-gluecksburg">
+                    <span className="home-discovery-icon" aria-hidden="true">🎯</span>
+                    <span>
+                      <small>Familie & Aktiv</small>
+                      <strong>Freizeit in Glücksburg</strong>
+                      <em>Ideen für Sonne & Schietwetter →</em>
+                    </span>
+                  </a>
                 </div>
               </section>
 

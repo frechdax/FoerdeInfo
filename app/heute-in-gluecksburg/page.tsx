@@ -40,7 +40,7 @@ export default async function HeuteInGluecksburgPage() {
   const supabase = createPublicServerSupabase();
   const { data } = await supabase
     .from("events")
-    .select("id,title,date,time,location,source_url,summary")
+    .select("id,title,date,time,location,source_url")
     .eq("status", "published")
     .eq("date", date)
     .order("time")
@@ -71,7 +71,7 @@ export default async function HeuteInGluecksburgPage() {
             {events.map((event) => (
               <article key={event.id} className="seo-live-row">
                 <div>
-                  <strong>{event.title}</strong>
+                  <a href={`/veranstaltungen/${event.id}`}><strong>{event.title}</strong></a>
                   <span>
                     {event.time ? `${String(event.time).slice(0, 5)} Uhr` : "Uhrzeit siehe Veranstalter"}
                     {event.location ? ` · ${event.location}` : ""}
