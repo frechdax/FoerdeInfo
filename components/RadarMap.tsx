@@ -7,6 +7,63 @@ import { REGION } from "@/lib/region";
 
 type RouteEndpoint = { id: string; name: string; latitude: number; longitude: number };
 
+function visibleRouteColor(color?: string) {
+  const fallback = "#ff2d55";
+  if (!color || !/^#[0-9a-f]{6}$/i.test(color)) return fallback;
+  const value = color.slice(1);
+  const r = parseInt(value.slice(0, 2), 16);
+  const g = parseInt(value.slice(2, 4), 16);
+  const b = parseInt(value.slice(4, 6), 16);
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return luminance > 0.88 ? fallback : color;
+}
+
+function ensureRouteLayers(map: MapLibreMap, color?: string) {
+  const highlight = visibleRouteColor(color);
+
+  if (!map.getSource("selected-route")) {
+    map.addSource("selected-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  }
+
+  if (!map.getLayer("selected-route-glow")) {
+    map.addLayer({
+      id: "selected-route-glow",
+      type: "line",
+      source: "selected-route",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": highlight, "line-width": 30, "line-opacity": .30, "line-blur": 7 },
+    });
+  }
+
+  if (!map.getLayer("selected-route-halo")) {
+    map.addLayer({
+      id: "selected-route-halo",
+      type: "line",
+      source: "selected-route",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": "#12212b", "line-width": 18, "line-opacity": .92 },
+    });
+  }
+
+  if (!map.getLayer("selected-route")) {
+    map.addLayer({
+      id: "selected-route",
+      type: "line",
+      source: "selected-route",
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": highlight, "line-width": 11, "line-opacity": 1 },
+    });
+  }
+
+  map.setPaintProperty("selected-route-glow", "line-color", highlight);
+  map.setPaintProperty("selected-route", "line-color", highlight);
+
+  // Keep the selected route above every map-style layer.
+  map.moveLayer("selected-route-glow");
+  map.moveLayer("selected-route-halo");
+  map.moveLayer("selected-route");
+}
+
 const DEFAULT_MAP_STYLE: StyleSpecification = {
   version: 8,
   sources: {
@@ -66,28 +123,7 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, rou
       setMapError(undefined);
       map.addSource("stops", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "stops", type: "circle", source: "stops", minzoom: 11.3, paint: { "circle-radius": ["interpolate",["linear"],["zoom"],11,2.5,15,5], "circle-color": "#ffffff", "circle-stroke-width": 1.5, "circle-stroke-color": "#244154" } });
-      map.addSource("selected-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      map.addLayer({
-        id: "selected-route-glow",
-        type: "line",
-        source: "selected-route",
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#173dff", "line-width": 22, "line-opacity": .34, "line-blur": 5 },
-      });
-      map.addLayer({
-        id: "selected-route-halo",
-        type: "line",
-        source: "selected-route",
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#ffffff", "line-width": 13, "line-opacity": .98 },
-      });
-      map.addLayer({
-        id: "selected-route",
-        type: "line",
-        source: "selected-route",
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#173dff", "line-width": 7.5, "line-opacity": 1 },
-      });
+      ensureRouteLayers(map, routeColor);
       map.on("mouseenter", "stops", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "stops", () => { map.getCanvas().style.cursor = ""; });
       map.on("click", "stops", async (event) => {
@@ -149,20 +185,14 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, rou
   useEffect(() => {
     const map = mapRef.current; if (!map) return;
     const update = () => {
+      ensureRouteLayers(map, routeColor);
       const source = map.getSource("selected-route") as GeoJSONSource | undefined;
       source?.setData(routeGeometry ? {
         type:"Feature",
-        properties:{ routeColor: routeColor || "#173dff" },
+        properties:{ routeColor: visibleRouteColor(routeColor) },
         geometry: routeGeometry,
       } : { type:"FeatureCollection", features:[] });
-
-      const highlight = routeColor || "#173dff";
-      if (map.getLayer("selected-route-glow")) {
-        map.setPaintProperty("selected-route-glow", "line-color", highlight);
-      }
-      if (map.getLayer("selected-route")) {
-        map.setPaintProperty("selected-route", "line-color", highlight);
-      }
+      map.triggerRepaint();
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
   }, [routeGeometry, routeColor]);
