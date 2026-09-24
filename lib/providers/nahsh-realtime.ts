@@ -29,7 +29,7 @@ export class NahSHRealtimeProvider implements TransitRealtimeProvider {
             const tu = entity.tripUpdate;
             const firstDelay = tu.delay != null ? Number(tu.delay) : undefined;
             tripUpdates.push({
-              tripId: tu.trip.tripId,
+              tripId: tu.trip.tripId!,
               routeId: tu.trip.routeId || undefined,
               startDate: tu.trip.startDate || undefined,
               timestamp: tu.timestamp ? new Date(Number(tu.timestamp) * 1000).toISOString() : undefined,
