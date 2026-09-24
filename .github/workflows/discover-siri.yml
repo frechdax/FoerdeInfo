@@ -14,35 +14,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Resolve Mobilithek public offer
+      - name: Inspect public Mobilithek app configuration
         shell: bash
         run: |
           node <<'NODE'
-          const offer = "832254079439458304";
-          const endpoints = [
-            `https://mobilithek.info/api/offers/${offer}`,
-            `https://mobilithek.info/api/v1/offers/${offer}`,
-            `https://mobilithek.info/backend/offers/${offer}`,
-            `https://mobilithek.info/mobilithek-api/offers/${offer}`,
-            `https://mobilithek.info/offers/${offer}`
-          ];
-          for (const url of endpoints) {
-            try {
-              const res = await fetch(url, { redirect: "follow", headers: { "user-agent": "BusRadar resource discovery/0.2", accept: "application/json,text/html,*/*" } });
-              const body = await res.text();
-              console.log("\nENDPOINT", url, "STATUS", res.status, "FINAL", res.url, "TYPE", res.headers.get("content-type"), "LEN", body.length);
-              console.log(body.slice(0, 3000).replace(/\s+/g, " "));
-              const absolute = [...body.matchAll(/https?:\\?\/\\?\/[^"'<>\\s]+/g)].map(m => m[0].replaceAll("\\/", "/"));
-              for (const candidate of [...new Set(absolute)].filter(x => /siri|xml|access|delfi|mobilithek|download/i.test(x)).slice(0, 50)) console.log("URLCANDIDATE", candidate);
-              const scripts = [...body.matchAll(/<script[^>]+src=["']([^"']+)/gi)].map(m => new URL(m[1], res.url).href);
-              for (const script of scripts.slice(-10)) {
-                try {
-                  const js = await (await fetch(script, { headers: { "user-agent": "BusRadar resource discovery/0.2" } })).text();
-                  console.log("SCRIPT", script, "LEN", js.length);
-                  const apiBits = [...js.matchAll(/https?:\\?\/\\?\/[^"'\\s]+|\/api\/[A-Za-z0-9_?&=./{}:-]+/g)].map(m => m[0].replaceAll("\\/", "/"));
-                  for (const bit of [...new Set(apiBits)].filter(x => /offer|access|resource|api/i.test(x)).slice(0, 80)) console.log("APICANDIDATE", bit.slice(0, 500));
-                } catch (e) { console.log("SCRIPTERR", script, e?.message || String(e)); }
-              }
-            } catch (error) { console.log("\nERROR", url, error?.message || String(error)); }
+          const html = await (await fetch("https://mobilithek.info/offers/832254079439458304", { headers: { "user-agent": "BusRadar resource discovery/0.3" } })).text();
+          const src = html.match(/<script[^>]+src=["']([^"']+)/i)?.[1];
+          if (!src) throw new Error("No app bundle found");
+          const scriptUrl = new URL(src, "https://mobilithek.info").href;
+          const js = await (await fetch(scriptUrl, { headers: { "user-agent": "BusRadar resource discovery/0.3" } })).text();
+          console.log("BUNDLE", scriptUrl, "LEN", js.length);
+
+          for (const needle of ["accessURL","accessUrl","accessUrls","offerId","/offers","graphql","apiUrl","baseURL","backend","resourceUrl","downloadUrl"]) {
+            let at = -1;
+            let count = 0;
+            while ((at = js.indexOf(needle, at + 1)) >= 0 && count < 12) {
+              console.log("CONTEXT", needle, at, js.slice(Math.max(0, at - 450), Math.min(js.length, at + 700)).replace(/\s+/g, " "));
+              count++;
+            }
           }
+
+          const urls = [...js.matchAll(/https?:\\?\/\\?\/[^"'<>\\s)]+/g)].map(m => m[0].replaceAll("\\/", "/"));
+          for (const url of [...new Set(urls)].filter(u => /mobilithek|api|offer|resource|download|siri/i.test(u)).slice(0, 200)) console.log("FULLURL", url);
           NODE
