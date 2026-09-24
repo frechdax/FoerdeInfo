@@ -69,7 +69,7 @@ export default function BusKarteApp() {
 
     const loadFast = async () => {
       try {
-        const response = await fetch("/api/vehicles/fast", { cache: "no-store" });
+        const response = await fetch("/api/vehicles/fast");
         if (!response.ok) throw new Error("Fast vehicle endpoint failed");
         const payload = await response.json();
         if (!cancelled) {
@@ -77,7 +77,7 @@ export default function BusKarteApp() {
           setStreamState("polling");
         }
       } catch {
-        if (!cancelled && !fastVehicles.length && !realtimeVehicles.length) setStreamState("offline");
+        if (!cancelled) setStreamState((state) => state === "live" ? state : "offline");
       }
     };
 
@@ -87,7 +87,7 @@ export default function BusKarteApp() {
       try {
         const controller = new AbortController();
         const timer = window.setTimeout(() => controller.abort(), 55_000);
-        const response = await fetch("/api/vehicles/realtime", { cache: "no-store", signal: controller.signal });
+        const response = await fetch("/api/vehicles/realtime", { signal: controller.signal });
         window.clearTimeout(timer);
         if (!response.ok) throw new Error("Realtime endpoint failed");
         const payload = await response.json();
