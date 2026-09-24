@@ -1,7 +1,13 @@
-import data from "@/data/region.json";
+import fs from "node:fs";
+import path from "node:path";
 import type { Agency, RegionData, StaticRoute, StaticTrip, StopPoint } from "@/lib/types";
 
-const regionData = data as RegionData;
+function loadRegionData(): RegionData {
+  const file = path.join(process.cwd(), "data", "region.json");
+  return JSON.parse(fs.readFileSync(file, "utf8")) as RegionData;
+}
+
+const regionData = loadRegionData();
 const routes = new Map(regionData.routes.map((x) => [x.id, x]));
 const trips = new Map(regionData.trips.map((x) => [x.id, x]));
 const stops = new Map(regionData.stops.map((x) => [x.id, x]));
