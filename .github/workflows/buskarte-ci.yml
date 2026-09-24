@@ -35,6 +35,8 @@ jobs:
           "$CHROME" --headless=new --no-sandbox --enable-unsafe-swiftshader --virtual-time-budget=10000 --dump-dom http://127.0.0.1:3000 >/tmp/buskarte-dom.html
           grep -q 'BusKarte' /tmp/buskarte-dom.html
           grep -q 'maplibregl-canvas' /tmp/buskarte-dom.html
+          curl -fsS --max-time 90 http://127.0.0.1:3000/api/vehicles >/tmp/buskarte-vehicles.json
+          node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("/tmp/buskarte-vehicles.json","utf8")); const rt=(p.vehicles||[]).filter(v=>v.accuracyType==="realtime"); const gps=(p.vehicles||[]).filter(v=>v.accuracyType==="gps"); const est=(p.vehicles||[]).filter(v=>v.accuracyType==="estimated"); console.log("Vehicle API:", {total:(p.vehicles||[]).length,realtime:rt.length,gps:gps.length,estimated:est.length}); if(!rt.length) process.exit(2);'
           LEGACY_CAMEL='Bus''Radar'
           if grep -q "$LEGACY_CAMEL" /tmp/buskarte-dom.html; then
             echo "Legacy branding still present in rendered DOM"
