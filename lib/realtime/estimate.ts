@@ -70,15 +70,19 @@ export function estimateVehicle(update: TripUpdateSnapshot, now = new Date()): V
     const b = trip.stops[i + 1];
     const aRt = stopRealtime(update, a.stopId, a.sequence);
     const bRt = stopRealtime(update, b.stopId, b.sequence);
-    const departDelay = aRt?.departureDelay ?? aRt?.arrivalDelay ?? update.delaySeconds ?? 0;
-    const arriveDelay = bRt?.arrivalDelay ?? bRt?.departureDelay ?? update.delaySeconds ?? departDelay;
-    const depart = gtfsSeconds(a.departure) + departDelay;
-    const arrive = gtfsSeconds(b.arrival) + arriveDelay;
+    const departDelay = aRt?.departureDelay ?? aRt?.arrivalDelay ?? bRt?.arrivalDelay ?? bRt?.departureDelay ?? update.delaySeconds ?? 0;
+    const arriveDelay = bRt?.arrivalDelay ?? bRt?.departureDelay ?? aRt?.departureDelay ?? aRt?.arrivalDelay ?? update.delaySeconds ?? departDelay;
+    const depart = aRt?.departureTime
+      ? serviceSecondsForDate(serviceDate, new Date(aRt.departureTime * 1000))
+      : gtfsSeconds(a.departure) + departDelay;
+    const arrive = bRt?.arrivalTime
+      ? serviceSecondsForDate(serviceDate, new Date(bRt.arrivalTime * 1000))
+      : gtfsSeconds(b.arrival) + arriveDelay;
     if (current >= depart && current <= arrive) {
       segment = i;
       segmentDeparture = depart;
       segmentArrival = arrive;
-      effectiveDelay = arriveDelay;
+      effectiveDelay = bRt?.arrivalTime ? arrive - gtfsSeconds(b.arrival) : arriveDelay;
       break;
     }
   }
