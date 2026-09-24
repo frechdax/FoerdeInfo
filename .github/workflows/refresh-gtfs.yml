@@ -1,0 +1,32 @@
+name: Refresh regional GTFS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --ignore-scripts
+      - run: npm run gtfs:import
+      - name: Commit refreshed regional feed
+        run: |
+          if git diff --quiet -- data/region.json; then
+            echo "No GTFS changes"
+            exit 0
+          fi
+          git config user.name "busradar-data-bot"
+          git config user.email "busradar-data-bot@users.noreply.github.com"
+          git add data/region.json
+          git commit -m "chore: refresh regional GTFS"
+          git push
