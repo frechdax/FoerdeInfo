@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { track } from "@vercel/analytics";
 import { stay22AccommodationUrl, stay22AffiliateEnabled } from "@/lib/stay22";
+import HomeAiExperience from "./HomeAiExperience";
 
 type View =
   | "home"
@@ -1040,6 +1041,8 @@ export default function HomePage() {
                   )}
                 </article>
               </div>
+
+              <HomeAiExperience />
 
               {!selectedStreet && (
                 <section className="onboard-banner">
