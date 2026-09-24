@@ -147,7 +147,8 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
         const old = marker.getLngLat();
         const started = performance.now();
         const animate = (t: number) => {
-          const p = Math.min(1, (t-started)/700);
+          const duration = v.accuracyType === "realtime" ? 9000 : v.accuracyType === "gps" ? 4000 : 700;
+          const p = Math.min(1, (t-started)/duration);
           const eased = 1-Math.pow(1-p,3);
           marker!.setLngLat([old.lng+(v.longitude-old.lng)*eased, old.lat+(v.latitude-old.lat)*eased]);
           if (p<1) requestAnimationFrame(animate);
@@ -161,6 +162,7 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, onS
       el.classList.toggle("stale", age > 60_000);
       el.classList.toggle("selected", selected?.id === v.id);
       el.classList.toggle("gps", v.accuracyType === "gps");
+      el.classList.toggle("realtime", v.accuracyType === "realtime");
       el.classList.toggle("estimated", v.accuracyType === "estimated");
       el.style.setProperty("--route-color", v.color || "#173dff");
     }
