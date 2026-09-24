@@ -391,7 +391,7 @@ async function loadChanges() {
   const keywords =
     /(bebauungsplan|bauleit|flächennutzungsplan|flaechennutzungsplan|baugebiet|baustell|straßenbau|strassenbau|sperrung|vollsperr|teilsperr|verkehr|sanierung|ausbau|erschließ|erschliess|planung|bauvorhaben|satzung)/i;
 
-  const normalized = [
+  const sourceItems = [
     ...(notices as Array<Record<string, unknown>>).map((item) => ({
       ...item,
       sourceType: "Amtliche Bekanntmachung",
@@ -400,7 +400,9 @@ async function loadChanges() {
       ...item,
       sourceType: "Rathaus",
     })),
-  ]
+  ] as Array<Record<string, unknown> & { sourceType: string }>;
+
+  const normalized = sourceItems
     .filter((item) => keywords.test(String(item.title || "")))
     .map((item) => {
       const title = String(item.title || "");
