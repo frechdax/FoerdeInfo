@@ -2,6 +2,10 @@ name: Refresh regional GTFS
 
 on:
   workflow_dispatch:
+  push:
+    branches: [busradar-preview]
+    paths:
+      - "scripts/import-gtfs.mjs"
   schedule:
     - cron: "17 3 * * *"
 
