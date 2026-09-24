@@ -6,12 +6,19 @@ export default function DataSourcesPage() {
       <div className="info-nav"><Link href="/">← BusRadar</Link><span>Datenquellen</span></div>
       <h1>Datenquellen & Kennzeichnung</h1>
       <div className="prose">
-        <h2>Fahrplandaten</h2><p>BusRadar nutzt standardmäßig den kostenfreien Deutschland-ÖPNV-GTFS-Feed von GTFS.de. Dieser basiert auf DELFI-/NeTEx-Daten, wird regelmäßig aktualisiert und wird von GTFS.de unter einer Creative-Commons-4.0-Lizenz angeboten. Der Import speichert anschließend nur den für Flensburg, Schleswig und den Kreis Schleswig-Flensburg relevanten Ausschnitt.</p>
-        <p>Der direkt von NAH.SH bereitgestellte GTFS-Download ist bewusst nicht als Standardquelle eingetragen: Die dort veröffentlichten Nutzungsbedingungen enthalten zusätzliche Zweck- und Mindestanforderungen. BusRadar verwendet ihn daher nicht ohne gesonderte Prüfung bzw. Freigabe.</p>
-        <h2>Echtzeit</h2><p>Der voreingestellte GTFS-Realtime-Stream von GTFS.de wird unter CC BY-SA 4.0 veröffentlicht und liefert TripUpdates und ServiceAlerts. Daraus können – zusammen mit importierten Fahrten und Shapes – als <strong>geschätzt</strong> markierte Positionen berechnet werden. Der freie Stream enthält keine allgemeinen VehiclePositions.</p>
-        <h2>Flensburg GPS</h2><p>Aktiv Bus veröffentlicht einen eigenen Busradar. Dessen Nutzungsbedingungen erlauben automatisierten Abruf bzw. die Integration in eine eigene Anwendung nicht ohne ausdrückliche Genehmigung. Deshalb greift BusRadar nicht auf diesen Webdienst zu. Der GPS-Provider wird erst aktiviert, wenn ein separat freigegebener Endpoint oder eine schriftliche Nutzungserlaubnis vorliegt.</p>
-        <h2>Karten</h2><p>Die Karte wird mit MapLibre GL gerendert. Der Tile-/Style-Provider ist konfigurierbar; die jeweilige Attribution wird direkt in der Karte dargestellt.</p>
-        <h2>Hinweis</h2><p>BusRadar ist kein offizielles Angebot der Verkehrsunternehmen oder von NAH.SH. Fahrplan- und Echtzeitinformationen können abweichen.</p>
+        <h2>Offizielle Fahrplandaten</h2>
+        <p>BusRadar nutzt primär den von NAH.SH veröffentlichten Schleswig-Holstein-GTFS-Datensatz. Der Datensatz wird im deutschen GovData-Portal als frei nutzbar unter Creative Commons Namensnennung 4.0 (CC BY 4.0) geführt. Beim Import werden nur Buslinien und nur der für Flensburg, Schleswig und den Kreis Schleswig-Flensburg relevante Ausschnitt gespeichert.</p>
+        <p>Als technischer Fallback kann der freie Deutschland-Nahverkehrsfeed von GTFS.de verwendet werden. Er enthält für den betrachteten Ausschnitt derzeit keine nutzbaren Shapes; deshalb werden daraus keine geradlinig erfundenen Buspositionen erzeugt.</p>
+        <h2>Echtzeit</h2>
+        <p>Der voreingestellte GTFS-Realtime-Stream von GTFS.de wird unter CC BY-SA 4.0 veröffentlicht und liefert TripUpdates und ServiceAlerts. BusRadar nutzt daraus Verspätungs- und Prognoseinformationen. Eine geschätzte Position wird nur erzeugt, wenn die Fahrt sicher einem statischen Trip zugeordnet werden kann und eine echte GTFS-Shape-Geometrie vorhanden ist.</p>
+        <h2>Flensburg GPS</h2>
+        <p>Aktiv Bus betreibt einen eigenen öffentlichen Busradar. BusRadar liest diesen Webdienst nicht automatisiert aus. Der GPS-Provider wird erst aktiviert, wenn ein separat freigegebener bzw. ausdrücklich rechtmäßig nutzbarer Fahrzeugpositions-Endpunkt vorliegt.</p>
+        <h2>Karten</h2>
+        <p>Die Karte wird mit MapLibre GL gerendert. Der Kartenstil ist konfigurierbar; die Attribution des jeweiligen Kartenproviders wird direkt in der Karte dargestellt.</p>
+        <h2>Datenqualität</h2>
+        <p><strong>Live GPS</strong> bedeutet eine echte, ausdrücklich nutzbare Fahrzeugposition. <strong>Geschätzt</strong> bedeutet eine Berechnung aus Fahrt, Fahrzeiten, Echtzeitabweichung und tatsächlicher Liniengeometrie. Fehlende Daten werden nicht durch Demo-Positionen ersetzt.</p>
+        <h2>Hinweis</h2>
+        <p>BusRadar ist kein offizielles Angebot der Verkehrsunternehmen oder von NAH.SH. Fahrplan- und Echtzeitinformationen können abweichen.</p>
       </div>
     </div></main>
   );

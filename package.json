@@ -2,15 +2,14 @@
   "name": "busradar",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": { "node": ">=22" },
   "scripts": {
     "dev": "next dev",
-    "build": "cat busradar-src.part* | base64 -d > /tmp/busradar.tgz && tar -xzf /tmp/busradar.tgz && node preview-patch.mjs && GTFS_STATIC_URL=https://www.connect-info.net/opendata/gtfs/nah.sh/rjqfrkqhgu node scripts/import-gtfs.mjs && next build",
+    "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "gtfs:import": "node scripts/import-gtfs.mjs"
+    "gtfs:import": "node scripts/import-gtfs.mjs",
+    "realtime:check": "node scripts/check-realtime-match.mjs"
   },
   "dependencies": {
     "gtfs-realtime-bindings": "2.2.0",
