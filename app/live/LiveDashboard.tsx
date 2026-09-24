@@ -42,6 +42,9 @@ type Beach = {
   summary: string;
   weatherScore: number;
   uvIndex: number;
+  windSpeed: number;
+  rainProbability: number;
+  officialBathingData: boolean;
 };
 
 type ChangeItem = {
@@ -531,9 +534,9 @@ export default function LiveDashboard() {
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.kicker}>Strand-Ampel</span>
-                  <h2>Holnis & Sandwig auf einen Blick</h2>
+                  <h2>Holnis, Sandwig & Quellental auf einen Blick</h2>
                 </div>
-                <span className={styles.updated}>Wetter + UV + amtliche Badegewässerdaten</span>
+                <span className={styles.updated}>Wetter + UV + amtliche Daten, wo verfügbar</span>
               </div>
 
               {data.beaches.length ? (
@@ -555,7 +558,7 @@ export default function LiveDashboard() {
 
                       <div className={styles.beachFacts}>
                         <span>
-                          Amtliche Qualität
+                          {beach.officialBathingData ? "Amtliche Qualität" : "Amtliche Einstufung"}
                           <strong>{beach.quality}</strong>
                         </span>
                         <span>
@@ -566,18 +569,27 @@ export default function LiveDashboard() {
                           UV
                           <strong>{beach.uvIndex.toFixed(1)}</strong>
                         </span>
-                        <span>
-                          Wassertemperatur
-                          <strong>
-                            {beach.waterTemperature === null ? "—" : beach.waterTemperature.toFixed(1) + " °C"}
-                          </strong>
-                        </span>
+                        {beach.officialBathingData ? (
+                          <span>
+                            Wassertemperatur
+                            <strong>
+                              {beach.waterTemperature === null ? "—" : beach.waterTemperature.toFixed(1) + " °C"}
+                            </strong>
+                          </span>
+                        ) : (
+                          <span>
+                            Wind / Regen
+                            <strong>{Math.round(beach.windSpeed)} km/h · {Math.round(beach.rainProbability)}%</strong>
+                          </span>
+                        )}
                       </div>
 
                       <small className={styles.beachFoot}>
-                        {beach.lastSampleAt
-                          ? "Letzte veröffentlichte Probe: " + formatDate(beach.lastSampleAt)
-                          : "Kein aktuelles Probedatum geladen"}
+                        {beach.officialBathingData
+                          ? beach.lastSampleAt
+                            ? "Letzte veröffentlichte Probe: " + formatDate(beach.lastSampleAt)
+                            : "Kein aktuelles Probedatum geladen"
+                          : "Keine separate amtliche Proben- oder Qualitätseinstufung für Quellental eingebunden"}
                         {beach.qualityPeriod ? " · Einstufung " + beach.qualityPeriod : ""}
                       </small>
                       {beach.remark ? <p className={styles.beachRemark}>{beach.remark}</p> : null}
@@ -592,9 +604,11 @@ export default function LiveDashboard() {
               )}
 
               <p className={styles.explainer}>
-                Die Ampelfarbe ist eine GlücksburgDirekt-Zusammenfassung aus Wetterbedingungen,
-                UV, DWD-Warnungen und der veröffentlichten Badegewässer-Einstufung. Aktuelle
-                Sperrungen, Warnschilder und Hinweise der Behörden vor Ort haben immer Vorrang.
+                Die Ampelfarbe ist eine GlücksburgDirekt-Zusammenfassung. Bei Holnis Drei und
+                Sandwig fließen Wetter, UV, DWD-Warnungen und die veröffentlichten amtlichen
+                Badegewässerdaten ein. Bei Quellental basiert die Ampel mangels separater amtlicher
+                Einstufung auf Wetter, UV, Wind, Regen und DWD-Warnungen. Aktuelle Sperrungen,
+                Warnschilder und Hinweise der Behörden vor Ort haben immer Vorrang.
               </p>
             </section>
 
@@ -657,7 +671,7 @@ export default function LiveDashboard() {
               <p>
                 Auf GlücksburgDirekt findest du aktuelle Informationen für Glücksburg an der Ostsee:
                 Wetter und Regenrisiko, amtliche DWD-Warnungen, den Fördepegel bei Flensburg,
-                Strandbedingungen für Holnis Drei und Sandwig sowie Hinweise zu Bauleitplanung,
+                Strandbedingungen für Holnis Drei, Sandwig und Quellental sowie Hinweise zu Bauleitplanung,
                 Baustellen und Veränderungen im Stadtgebiet.
               </p>
               <p>

@@ -579,7 +579,9 @@ async function loadBeaches(
   beachWeatherScore: number,
   uvIndex: number,
   warningLevel: number,
-  gusts: number
+  gusts: number,
+  windSpeed: number,
+  rainProbability: number
 ) {
   const [masterRows, classificationRows, measurementRows] = await Promise.all([
     fetchLatin1Csv(BATHING_BASE + "/v_badegewaesser_odata.csv"),
@@ -600,7 +602,7 @@ async function loadBeaches(
     })
     .slice(0, 2);
 
-  return targets.map((row) => {
+  const officialBeaches = targets.map((row) => {
     const classifications = relatedRows(row, classificationRows)
       .sort((a, b) => rowDateValue(b) - rowDateValue(a));
     const measurements = relatedRows(row, measurementRows)
@@ -650,8 +652,47 @@ async function loadBeaches(
       summary: light.summary,
       weatherScore: beachWeatherScore,
       uvIndex,
+      windSpeed,
+      rainProbability,
+      officialBathingData: true,
     };
   });
+
+  const quellentalLight = beachTrafficLight(
+    "keine separate amtliche Einstufung",
+    beachWeatherScore,
+    uvIndex,
+    warningLevel,
+    gusts
+  );
+
+  return [
+    ...officialBeaches,
+    {
+      id: "quellental",
+      name: "Quellental",
+      latitude: null,
+      longitude: null,
+      quality: "Keine separate amtliche Badegewässer-Einstufung",
+      qualityPeriod: null,
+      waterTemperature: null,
+      lastSampleAt: null,
+      remark: "Für Quellental wird keine separate amtliche Badegewässer-Einstufung angezeigt. Die Ampel basiert hier auf Wetter, UV, Wind, Regen und DWD-Warnungen.",
+      status: quellentalLight.status,
+      statusLabel: quellentalLight.label,
+      summary:
+        beachWeatherScore >= 72
+          ? "Wetterbedingungen aktuell günstig"
+          : beachWeatherScore >= 50
+            ? "Wetterbedingungen mit Einschränkungen"
+            : "Wetterbedingungen aktuell ungünstig",
+      weatherScore: beachWeatherScore,
+      uvIndex,
+      windSpeed,
+      rainProbability,
+      officialBathingData: false,
+    },
+  ];
 }
 
 export async function GET() {
@@ -800,7 +841,7 @@ export async function GET() {
   const beachScore = scores.find((item) => item.id === "beach")?.score ?? 0;
 
   const beachesResult = await Promise.allSettled([
-    loadBeaches(beachScore, currentUv, warningLevel, gusts),
+    loadBeaches(beachScore, currentUv, warningLevel, gusts, wind, rainProbability),
   ]);
   const beaches =
     beachesResult[0].status === "fulfilled" ? beachesResult[0].value : [];
