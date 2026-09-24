@@ -68,18 +68,25 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, rou
       map.addLayer({ id: "stops", type: "circle", source: "stops", minzoom: 11.3, paint: { "circle-radius": ["interpolate",["linear"],["zoom"],11,2.5,15,5], "circle-color": "#ffffff", "circle-stroke-width": 1.5, "circle-stroke-color": "#244154" } });
       map.addSource("selected-route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({
+        id: "selected-route-glow",
+        type: "line",
+        source: "selected-route",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#173dff", "line-width": 22, "line-opacity": .34, "line-blur": 5 },
+      });
+      map.addLayer({
         id: "selected-route-halo",
         type: "line",
         source: "selected-route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#ffffff", "line-width": 13, "line-opacity": .96 },
+        paint: { "line-color": "#ffffff", "line-width": 13, "line-opacity": .98 },
       });
       map.addLayer({
         id: "selected-route",
         type: "line",
         source: "selected-route",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#173dff", "line-width": 7, "line-opacity": 1 },
+        paint: { "line-color": "#173dff", "line-width": 7.5, "line-opacity": 1 },
       });
       map.on("mouseenter", "stops", () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "stops", () => { map.getCanvas().style.cursor = ""; });
@@ -149,8 +156,12 @@ export default function RadarMap({ vehicles, stops, selected, routeGeometry, rou
         geometry: routeGeometry,
       } : { type:"FeatureCollection", features:[] });
 
+      const highlight = routeColor || "#173dff";
+      if (map.getLayer("selected-route-glow")) {
+        map.setPaintProperty("selected-route-glow", "line-color", highlight);
+      }
       if (map.getLayer("selected-route")) {
-        map.setPaintProperty("selected-route", "line-color", routeColor || "#173dff");
+        map.setPaintProperty("selected-route", "line-color", highlight);
       }
     };
     if (map.isStyleLoaded()) update(); else map.once("load", update);
