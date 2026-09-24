@@ -16,7 +16,7 @@ export class NahSHRealtimeProvider implements TransitRealtimeProvider {
 
   private async snapshot(): Promise<Snapshot> {
     const url = process.env.GTFS_RT_URL || DEFAULT_URL;
-    return cached("gtfs-rt", 15_000, async () => {
+    return cached("gtfs-rt", 9_000, async () => {
       try {
         const response = await fetch(url, {
           cache: "no-store",
