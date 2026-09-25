@@ -10,7 +10,7 @@ type StructuredEvent = {
   source_url?: string | null;
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://xn--frde-5qa.info";
 
 function startDate(event: StructuredEvent) {
   const match = event.time

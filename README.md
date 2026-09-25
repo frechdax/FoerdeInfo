@@ -19,7 +19,7 @@ Next.js 16 (App Router), React 19, Supabase für bestehende Glücksburger Inhalt
 
 ## Domain und Veröffentlichung
 
-Die Zieladresse ist [förde.info](https://xn--frde-5qa.info) (`xn--frde-5qa.info` in IDN/Punycode). Die Domain muss im Vercel-Projekt verbunden und verifiziert sein, bevor sie als kanonische Domain eingesetzt wird. Bis dahin bleibt die bestehende Domain unter `www.glücksburg-direkt.de` erreichbar. Siehe [Deployment](docs/DEPLOYMENT.md).
+Die Website ist für [förde.info](https://xn--frde-5qa.info) konfiguriert (`xn--frde-5qa.info` in IDN/Punycode). Siehe [Deployment](docs/DEPLOYMENT.md).
 
 ## Quellen und Hinweise
 

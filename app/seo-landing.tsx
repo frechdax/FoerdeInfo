@@ -29,13 +29,13 @@ export default function SeoLanding({
         "@type": "ListItem",
         position: 1,
         name: "förde.info",
-        item: process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de/",
+        item: process.env.NEXT_PUBLIC_SITE_URL || "https://xn--frde-5qa.info/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: title,
-        item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de"}${canonicalPath}`,
+        item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://xn--frde-5qa.info"}${canonicalPath}`,
       },
     ],
   };

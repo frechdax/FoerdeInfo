@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createPublicServerSupabase } from "@/lib/supabase-public-server";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://xn--frde-5qa.info";
 
 function todayBerlin() {
   return new Intl.DateTimeFormat("en-CA", {

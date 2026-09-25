@@ -14,6 +14,6 @@ Die vorhandenen Glücksburger Veranstaltungen und der Apotheken-Notdienst werden
 
 ## Veröffentlichung und SEO
 
-Next.js erzeugt Metadaten, `robots.txt` und `sitemap.xml`. Bis zur verifizierten Verbindung der neuen Domain bleibt die bisherige Domain als kanonische Herkunft konfiguriert. Danach kann `NEXT_PUBLIC_SITE_URL` auf `https://xn--frde-5qa.info` gesetzt werden; die alte Domain sollte auf die neue weiterleiten.
+Next.js erzeugt Metadaten, `robots.txt` und `sitemap.xml` mit `https://xn--frde-5qa.info` als kanonischer Herkunft. `NEXT_PUBLIC_SITE_URL` kann diese Adresse bei Bedarf überschreiben.
 
 Die Datenschutz-Einwilligung wird unter dem bisherigen lokalen Speicherschlüssel weitergelesen, damit vorhandene Einstellungen nicht unbemerkt verloren gehen.

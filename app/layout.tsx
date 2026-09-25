@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import ConsentManager from "./consent-manager";
 
-// Use the existing verified domain until förde.info is connected to this project.
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://xn--frde-5qa.info";
 const googleVerification =
   process.env.GOOGLE_SITE_VERIFICATION ||
   "yhScvTLAqjL9Z2zvqCixkpq612QAJss1EbD2FxgwTzQ";
