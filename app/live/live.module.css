@@ -492,33 +492,136 @@
   .referralCard{transition:none}
 }
 
+
 .homeEmbed{
   min-height:0;
   background:transparent;
-  margin:0 0 28px;
+  margin:0 0 24px;
 }
 .homeEmbed .shell{
   width:100%;
   max-width:none;
   padding:0;
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:14px;
+  align-items:start;
 }
 .homeEmbed .hero{
+  grid-column:1 / -1;
+  min-height:0;
+  margin:0;
+  padding:18px 20px;
+  border-radius:18px;
+  align-items:center;
+}
+.homeEmbed .hero h1{
+  margin:3px 0 5px;
+  font-size:clamp(1.55rem,3vw,2.35rem);
+  letter-spacing:-.04em;
+  line-height:1;
+}
+.homeEmbed .hero p{
+  max-width:760px;
+  font-size:.82rem;
+  line-height:1.45;
+}
+.homeEmbed .eyebrow{
+  font-size:.6rem;
+}
+.homeEmbed .liveBadge{
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.22);
+  color:#fff;
+  cursor:pointer;
+}
+.homeEmbed .liveBadge:disabled{
+  cursor:default;
+  opacity:.72;
+}
+.homeEmbed .nowSummary,
+.homeEmbed .nowGrid,
+.homeEmbed .loadingGrid,
+.homeEmbed .errorBox{
+  grid-column:1 / -1;
   margin-top:0;
 }
+.homeEmbed .scoreSection{
+  grid-column:span 7;
+  margin-top:0;
+  height:100%;
+}
+.homeEmbed .referralSection{
+  grid-column:span 5;
+  margin-top:0;
+  height:100%;
+}
+.homeEmbed .referralGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.homeEmbed .referralCard{
+  min-height:185px;
+}
+.homeEmbed [data-home-section="best-times"],
+.homeEmbed [data-home-section="beaches"]{
+  grid-column:1 / -1;
+  margin-top:0;
+}
+.homeEmbed [data-home-optional="true"]{
+  display:none;
+}
 .homeEmbedFooter{
+  grid-column:1 / -1;
   display:flex;
   justify-content:flex-end;
-  margin-top:14px;
+  margin-top:0;
 }
 .homeEmbedFooter a{
   color:#176c73;
-  font-size:.82rem;
+  font-size:.78rem;
   font-weight:900;
   text-decoration:none;
 }
 .homeEmbedFooter a:hover{text-decoration:underline}
-@media(max-width:620px){
-  .homeEmbed{margin-bottom:20px}
-  .homeEmbed .shell{width:100%;padding:0}
-  .homeEmbedFooter{justify-content:flex-start;padding:0 2px}
+@media(max-width:1080px){
+  .homeEmbed .scoreSection,
+  .homeEmbed .referralSection{
+    grid-column:1 / -1;
+  }
+}
+@media(max-width:700px){
+  .homeEmbed{
+    margin-bottom:18px;
+  }
+  .homeEmbed .shell{
+    grid-template-columns:1fr;
+    gap:11px;
+  }
+  .homeEmbed .hero{
+    grid-column:1;
+    padding:15px 16px;
+    align-items:flex-start;
+    flex-direction:column;
+    gap:12px;
+  }
+  .homeEmbed .hero p{
+    font-size:.78rem;
+  }
+  .homeEmbed .nowSummary,
+  .homeEmbed .nowGrid,
+  .homeEmbed .scoreSection,
+  .homeEmbed .referralSection,
+  .homeEmbed [data-home-section="best-times"],
+  .homeEmbed [data-home-section="beaches"],
+  .homeEmbedFooter{
+    grid-column:1;
+  }
+  .homeEmbed .referralGrid{
+    grid-template-columns:1fr;
+  }
+  .homeEmbedFooter{
+    justify-content:flex-start;
+    padding:0 2px;
+  }
 }
