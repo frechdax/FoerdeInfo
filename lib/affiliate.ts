@@ -23,5 +23,9 @@ export const affiliateLinks = {
     url: withPartnerId("https://www.getyourguide.com/flensburg-l101640/"),
     enabled: Boolean(getYourGuidePartnerId),
     provider: "GetYourGuide",
+    offers: {
+      sailing: withPartnerId("https://www.getyourguide.com/flensburg-l101640/flensburger-fjord-sailing-tour-with-captain-s-dinner-and-fun-swimming-in-ankerbucht-t1257250/"),
+      historyWalk: withPartnerId("https://www.getyourguide.com/flensburg-l101640/flensburg-a-historical-journey-through-northern-germany-t1272323/"),
+    },
   },
 } as const;
