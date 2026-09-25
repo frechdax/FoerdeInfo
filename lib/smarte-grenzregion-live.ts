@@ -1,7 +1,8 @@
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
-// Public live dashboard of the Smarte Grenzregion. Values are parsed only after client-side loading.\nconst DASHBOARD_URL = "https://portal.smarte-grenzregion.de/dashboard";
+// Public live dashboard of the Smarte Grenzregion. Values are parsed only after client-side loading.
+const DASHBOARD_URL = "https://portal.smarte-grenzregion.de/dashboard";
 const CACHE_MS = 75_000;
 
 export type SgrParking = {
@@ -124,7 +125,7 @@ function parseVisitors(text: string): SgrVisitor[] {
       if (unavailable(segment)) continue;
       const current =
         firstInt(/Aktuelle Besucheranzahl\s*(\d+)/i, segment) ??
-        firstInt(/Besuchermanagement\s*(\d+)\s*(?:Besucher\s*)?Aktuell/i, segment) ??
+        firstInt(/Besuchermanagement\s*(\d+)[\s\S]{0,80}?Aktuell/i, segment) ??
         firstInt(/\n\s*(\d+)\s*\n\s*Aktuell/i, segment);
       const today = firstInt(
         /Heute wurden bis jetzt\s*(\d+)\s*Besucher/i,
