@@ -2996,3 +2996,68 @@ footer span:last-child{margin-left:auto}
     height:38px;
   }
 }
+
+/* Kompakte Notfallapotheke im Header */
+.header-live-cluster{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-left:auto;
+}
+.header-pharmacy{
+  min-width:0;
+  max-width:360px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:9px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:12px;
+  background:rgba(255,255,255,.1);
+  color:#fff;
+  text-decoration:none;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.header-pharmacy:hover{background:rgba(255,255,255,.15)}
+.header-pharmacy-icon{
+  width:31px;
+  height:31px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:rgba(255,255,255,.12);
+}
+.header-pharmacy-copy{
+  min-width:0;
+  display:grid;
+  gap:1px;
+}
+.header-pharmacy-copy small{
+  color:rgba(255,255,255,.72);
+  font-size:.56rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.header-pharmacy-copy strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:.72rem;
+}
+.header-pharmacy-copy em{
+  color:rgba(255,255,255,.76);
+  font-size:.58rem;
+  font-style:normal;
+}
+.header-pharmacy--loading{opacity:.72}
+@media(max-width:700px){
+  .header-pharmacy{max-width:220px;padding:6px 8px}
+  .header-pharmacy-copy em{display:none}
+}
+@media(max-width:520px){
+  .header-pharmacy-copy small{display:none}
+  .header-pharmacy{max-width:180px}
+}
