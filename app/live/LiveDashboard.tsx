@@ -48,15 +48,6 @@ type Beach = {
   officialBathingData: boolean;
 };
 
-type ChangeItem = {
-  id: string;
-  title: string;
-  publishedAt: string | null;
-  sourceUrl: string;
-  sourceType: string;
-  category: string;
-};
-
 type LiveData = {
   generatedAt: string;
   location: { name: string; areas?: string[] };
@@ -75,8 +66,6 @@ type LiveData = {
   scores: Score[];
   bestTimes: BestTime[];
   beaches: Beach[];
-  changes: ChangeItem[];
-  planningSourceUrl: string;
   pegel: null | {
     station: string;
     value: number;
@@ -233,7 +222,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
     description: outdoorGood
       ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
       : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind.",
-    href: "/freizeit-gluecksburg",
+    href: "https://www.flensburg.de/Freizeit-Kultur/",
     provider: "FlensburgDirekt",
     affiliate: false,
   };
@@ -538,7 +527,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                 >
                   <span className={styles.referralIcon} aria-hidden="true">🤝</span>
                   <span className={styles.referralBadge + " " + styles.partnerBadge}>Für Betriebe</span>
-                  <strong>Lokaler Anbieter in Glücksburg?</strong>
+                  <strong>Lokaler Anbieter in Flensburg oder an der Förde?</strong>
                   <p>Mit einem passenden Angebot auf FlensburgDirekt sichtbar werden.</p>
                   <em>Partner werden →</em>
                 </a>
