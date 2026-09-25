@@ -643,7 +643,7 @@ async function sensorThingsDiagnostics() {
           ok: response.ok,
           status: response.status,
           contentType: response.headers.get("content-type"),
-          sample: text.slice(0, 300),
+          sample: text.slice(0, 5000),
         };
       } catch (error) {
         return {
