@@ -1,0 +1,66 @@
+name: Verify real live data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/smarte-grenzregion-live.ts"
+      - "app/api/live-daten/route.ts"
+      - "package.json"
+      - "next.config.mjs"
+      - ".github/workflows/verify-live-data.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Start and verify Flensburg live data
+        shell: bash
+        run: |
+          npm run start -- -p 3000 > /tmp/foerde-next.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID || true' EXIT
+
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/live-daten >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          curl --fail --show-error --max-time 90             "http://127.0.0.1:3000/api/live-daten?ort=flensburg"             -o /tmp/live.json
+
+          echo "=== REAL LIVE API RESPONSE ==="
+          cat /tmp/live.json
+          echo
+          echo "=== END RESPONSE ==="
+
+          node - <<'NODE'
+          const fs = require("fs");
+          const data = JSON.parse(fs.readFileSync("/tmp/live.json", "utf8"));
+          const parking = data?.modules?.parking;
+          const visitors = data?.modules?.visitors;
+          const sourceOk = [parking, visitors].some(
+            (m) =>
+              m?.status === "live" &&
+              String(m?.source || "").includes("Smarte Grenzregion") &&
+              Array.isArray(m?.items) &&
+              m.items.length > 0
+          );
+          if (!sourceOk) {
+            console.error("No real Smarte Grenzregion values were parsed.");
+            process.exit(1);
+          }
+          console.log("Verified real Smarte Grenzregion values.");
+          NODE
