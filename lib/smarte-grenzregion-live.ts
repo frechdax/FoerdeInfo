@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
-// Public live dashboard of the Smarte Grenzregion. Values are parsed only after client-side loading.
+// Public live dashboard of the Smarte Grenzregion. Values are parsed only after client-side loading. Production live source.
 const DASHBOARD_URL = "https://portal.smarte-grenzregion.de/dashboard";
 const CACHE_MS = 75_000;
 
