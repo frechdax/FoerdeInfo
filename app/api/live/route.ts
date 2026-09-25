@@ -607,6 +607,62 @@ async function loadBeaches(
   });
 }
 
+type AreaCondition = {
+  id: string;
+  name: string;
+  role: "Fokus" | "Zusatz";
+  temperature: number;
+  windSpeed: number;
+  rainProbability: number;
+  weatherCode: number;
+  weatherLabel: string;
+};
+
+async function loadAreaCondition(
+  id: string,
+  name: string,
+  latitude: number,
+  longitude: number
+): Promise<AreaCondition> {
+  const url = new URL("https://api.open-meteo.com/v1/forecast");
+  url.search = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    current: "temperature_2m,weather_code,wind_speed_10m",
+    hourly: "precipitation_probability",
+    timezone: "Europe/Berlin",
+    forecast_days: "1",
+  }).toString();
+
+  const response = await fetch(url, { next: { revalidate: 300 } });
+  if (!response.ok) throw new Error("Regional weather unavailable");
+
+  const weather = (await response.json()) as WeatherPayload;
+  const current = weather.current ?? {};
+  const hourly = weather.hourly ?? {};
+  const currentHour = current.time?.slice(0, 13);
+  const currentIndex = Math.max(
+    0,
+    (hourly.time ?? []).findIndex((entry) => entry.slice(0, 13) === currentHour)
+  );
+  const rain = (hourly.precipitation_probability ?? [])
+    .slice(currentIndex, currentIndex + 3)
+    .map(Number)
+    .filter(Number.isFinite);
+
+  const code = Number(current.weather_code ?? -1);
+  return {
+    id,
+    name,
+    role: "Zusatz",
+    temperature: Number(current.temperature_2m ?? 0),
+    windSpeed: Number(current.wind_speed_10m ?? 0),
+    rainProbability: rain.length ? Math.max(...rain) : 0,
+    weatherCode: code,
+    weatherLabel: weatherLabel(code),
+  };
+}
+
 export async function GET() {
   const weatherUrl = new URL("https://api.open-meteo.com/v1/forecast");
   weatherUrl.search = new URLSearchParams({
@@ -642,7 +698,7 @@ export async function GET() {
     FLENSBURG_PEGEL_UUID +
     "/W";
 
-  const [weatherResult, currentPegelResult, pegelHistoryResult, warningsResult] =
+  const [weatherResult, currentPegelResult, pegelHistoryResult, warningsResult, regionalWeatherResult] =
     await Promise.allSettled([
       fetch(weatherUrl, { next: { revalidate: 300 } }).then(async (response) => {
         if (!response.ok) throw new Error("Weather API unavailable");
@@ -666,6 +722,10 @@ export async function GET() {
         if (!response.ok) throw new Error("DWD warnings unavailable");
         return parseDwdJson(await response.text());
       }),
+      Promise.all([
+        loadAreaCondition("wassersleben", "Wassersleben", 54.8272, 9.41822),
+        loadAreaCondition("gluecksburg", "Glücksburg", 54.834079, 9.54758),
+      ]),
     ]);
 
   if (weatherResult.status === "rejected") {
@@ -704,6 +764,20 @@ export async function GET() {
       ? Number(current.is_day) === 1
       : Number((hourly.is_day ?? [])[currentIndex] ?? 1) === 1;
   const currentLocalHour = Number(current.time?.slice(11, 13) ?? 12);
+
+  const areaConditions: AreaCondition[] = [
+    {
+      id: "flensburg",
+      name: "Flensburg",
+      role: "Fokus",
+      temperature: temp,
+      windSpeed: wind,
+      rainProbability,
+      weatherCode: Number(current.weather_code ?? -1),
+      weatherLabel: weatherLabel(Number(current.weather_code ?? -1)),
+    },
+    ...(regionalWeatherResult.status === "fulfilled" ? regionalWeatherResult.value : []),
+  ];
 
   let warnings: Array<{
     headline: string;
@@ -837,6 +911,7 @@ export async function GET() {
       longitude: LON,
       areas: ["Flensburg", "Wassersleben", "Glücksburg"],
     },
+    areaConditions,
     weather: {
       temperature: temp,
       apparentTemperature: Number(current.apparent_temperature ?? temp),
