@@ -1,0 +1,252 @@
+.statusPanel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid #cfe1df;
+  border-radius: 15px;
+  background: #f8fcfb;
+}
+
+.statusPanel > div {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.statusPanel strong,
+.statusPanel small {
+  display: block;
+}
+
+.statusPanel strong {
+  color: #173f49;
+  font-size: .88rem;
+}
+
+.statusPanel small {
+  margin-top: 2px;
+  color: #61777d;
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #d99a2b;
+  box-shadow: 0 0 0 5px #fff3d9;
+}
+
+.experimental {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef3f4;
+  color: #60757b;
+  font-size: .68rem;
+  font-weight: 800;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #d6e4e6;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 7px 24px rgba(18, 63, 75, .035);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #eaf5f3;
+  font-size: 1.35rem;
+}
+
+.usefulness {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: .65rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.high {
+  color: #17684f;
+  background: #e7f6ee;
+}
+
+.good {
+  color: #286478;
+  background: #e9f3f7;
+}
+
+.possible {
+  color: #74663a;
+  background: #f7f1df;
+}
+
+.titleRow h2 {
+  margin: 0;
+  font-size: 1.22rem;
+}
+
+.region {
+  display: block;
+  margin-top: 4px;
+  color: #63797f;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.example {
+  display: grid;
+  gap: 5px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  background: #f2f7f7;
+}
+
+.example small {
+  color: #6e8287;
+  font-size: .64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .035em;
+}
+
+.example strong {
+  color: #173f49;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.card > p {
+  margin: 0;
+  color: #566f77;
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.dataStatus {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  margin-top: auto;
+  padding: 11px 12px;
+  border-radius: 12px;
+}
+
+.dataStatus > span:first-child {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.dataStatus strong,
+.dataStatus small {
+  display: block;
+}
+
+.dataStatus strong {
+  font-size: .76rem;
+}
+
+.dataStatus small {
+  margin-top: 2px;
+  font-size: .68rem;
+  line-height: 1.4;
+}
+
+.research {
+  color: #725c24;
+  background: #fff7e4;
+}
+
+.partial {
+  color: #17685e;
+  background: #eaf6f3;
+}
+
+.cardLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  align-self: flex-start;
+  color: #087c77;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.nextStep {
+  margin: 18px 0 24px;
+  padding: 22px;
+  border: 1px solid #d6e4e6;
+  border-radius: 18px;
+  background: #123e4e;
+  color: #fff;
+}
+
+.nextStep .foerde-kicker {
+  color: #aee6dd;
+}
+
+.nextStep h2 {
+  margin: 5px 0 8px;
+  font-size: 1.3rem;
+}
+
+.nextStep p {
+  max-width: 820px;
+  margin: 0;
+  color: #d8e7eb;
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .statusPanel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .experimental {
+    margin-left: 21px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 17px;
+  }
+
+  .nextStep {
+    padding: 18px;
+  }
+}
