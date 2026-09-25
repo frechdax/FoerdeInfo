@@ -187,6 +187,66 @@ function sourceTime(value: string | null | undefined) {
   return /^\d{2}:\d{2}$/.test(time) ? time : null;
 }
 
+function strandampelStatus(
+  quality: string | null,
+  weather: Weather | null,
+  warningLevel: number,
+  marine: Marine | null
+) {
+  if (!weather) {
+    return {
+      tone: "neutral" as const,
+      label: "Keine Live-Lage",
+      reason: "Aktuelle Wetterdaten fehlen",
+    };
+  }
+
+  const beachScore =
+    activityScores(weather, warningLevel, marine).find((item) => item.id === "beach")
+      ?.score ?? 0;
+  const normalizedQuality = (quality ?? "").toLocaleLowerCase("de");
+
+  if (
+    normalizedQuality.includes("mangelhaft") ||
+    warningLevel >= 3 ||
+    beachScore < 40
+  ) {
+    return {
+      tone: "red" as const,
+      label: "Rot",
+      reason:
+        normalizedQuality.includes("mangelhaft")
+          ? "Amtliche Einstufung mangelhaft"
+          : warningLevel >= 3
+            ? "Deutliche amtliche Wetterwarnung"
+            : "Aktuelle Strandbedingungen eher ungeeignet",
+    };
+  }
+
+  if (
+    !quality ||
+    normalizedQuality.includes("ausreichend") ||
+    warningLevel >= 1 ||
+    beachScore < 70
+  ) {
+    return {
+      tone: "yellow" as const,
+      label: "Gelb",
+      reason: !quality
+        ? "Keine veröffentlichte Einstufung verfügbar"
+        : warningLevel >= 1
+          ? "Amtliche Wetterwarnung vorhanden"
+          : "Bedingungen nur eingeschränkt passend",
+    };
+  }
+
+  return {
+    tone: "green" as const,
+    label: "Grün",
+    reason: "Gute aktuelle Bedingungen und positive veröffentlichte Einstufung",
+  };
+}
+
 export default function HomePage() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [error, setError] = useState(false);
@@ -268,7 +328,21 @@ export default function HomePage() {
       (feed?.places ?? []).flatMap((place) => {
         const regionName =
           regions.find((region) => region.id === place.id)?.name ?? place.id;
-        return place.beaches.map((beach) => ({ ...beach, regionName }));
+        const placeWarningLevel = (place.warnings ?? []).reduce(
+          (max, warning) => Math.max(max, Number(warning.level) || 0),
+          0
+        );
+
+        return place.beaches.map((beach) => ({
+          ...beach,
+          regionName,
+          status: strandampelStatus(
+            beach.quality,
+            place.weather,
+            placeWarningLevel,
+            feed?.marine ?? null
+          ),
+        }));
       }),
     [feed]
   );
@@ -591,9 +665,12 @@ export default function HomePage() {
               </section>
             ) : null}
 
-            <section className="foerde-beaches" id="badestellen" aria-label="Badestellen an der Flensburger Förde">
+            <section className="foerde-beaches" id="badestellen" aria-label="Strandampel an der Flensburger Förde">
               <div className="foerde-section-head">
-                <h3>Badestellen an der Förde</h3>
+                <div>
+                  <span className="foerde-kicker">Aktuelle Lage + amtliche Einstufung</span>
+                  <h3>Strandampel</h3>
+                </div>
                 <a
                   href={
                     feed?.sources.bathing ??
@@ -608,8 +685,38 @@ export default function HomePage() {
               {beaches.length ? (
                 <div className="foerde-beach-list">
                   {beaches.map((beach) => (
-                    <div className="foerde-beach" key={beach.regionName + "-" + beach.name}>
-                      <strong>{beach.name}</strong>
+                    <div
+                      className={
+                        "foerde-beach " +
+                        (beach.status.tone === "green"
+                          ? styles.beachGreen
+                          : beach.status.tone === "yellow"
+                            ? styles.beachYellow
+                            : beach.status.tone === "red"
+                              ? styles.beachRed
+                              : styles.beachNeutral)
+                      }
+                      key={beach.regionName + "-" + beach.name}
+                    >
+                      <div className={styles.beachCardHead}>
+                        <strong>{beach.name}</strong>
+                        <span
+                          className={
+                            styles.beachStatus +
+                            " " +
+                            (beach.status.tone === "green"
+                              ? styles.beachStatusGreen
+                              : beach.status.tone === "yellow"
+                                ? styles.beachStatusYellow
+                                : beach.status.tone === "red"
+                                  ? styles.beachStatusRed
+                                  : styles.beachStatusNeutral)
+                          }
+                        >
+                          <i aria-hidden="true" />
+                          {beach.status.label}
+                        </span>
+                      </div>
                       <span>
                         {beach.regionName}
                         {beach.quality
@@ -619,19 +726,22 @@ export default function HomePage() {
                             beach.quality
                           : " · Keine Einstufung verfügbar"}
                       </span>
+                      <small className={styles.beachReason}>{beach.status.reason}</small>
                     </div>
                   ))}
                 </div>
               ) : (
                 <p className="foerde-empty">
                   {error || feed
-                    ? "Amtliche Badestellen derzeit nicht abrufbar."
-                    : "Badestellen werden geladen."}
+                    ? "Strandampel derzeit nicht abrufbar."
+                    : "Strandampel wird geladen."}
                 </p>
               )}
               <small>
-                Die Einstufung beschreibt die amtliche Badegewässerqualität. Sie ist keine
-                aktuelle Messung der Wassertemperatur oder Strandauslastung.
+                Die Strandampel ist eine Orientierung von förde.info aus aktueller Wetterlage,
+                Tageslicht, DWD-Warnungen, Fördebedingungen und veröffentlichter amtlicher
+                Badegewässer-Einstufung. Sie ist keine amtliche Freigabe, keine Live-Messung
+                der Wasserqualität und keine Aussage zur Strandauslastung.
               </small>
             </section>
           </div>
