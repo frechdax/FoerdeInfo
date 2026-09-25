@@ -24,16 +24,25 @@ type Weather = {
   observedAt: string | null;
 };
 
+type DwdWarning = {
+  headline: string;
+  event: string;
+  level: number;
+  start: number;
+  end: number;
+};
+
 type RegionData = {
   id: RegionId;
   weather: Weather | null;
   beaches: Bathing[];
+  warnings: DwdWarning[];
 };
 
 type Feed = {
   updatedAt: string;
   places: RegionData[];
-  sources: { weather: string; bathing: string };
+  sources: { weather: string; bathing: string; warnings: string };
 };
 
 type ActivityScore = {
@@ -71,9 +80,11 @@ function verdict(score: number, isDay: boolean, id: ActivityScore["id"]) {
   return "Gerade eher nicht";
 }
 
-function activityScores(weather: Weather): ActivityScore[] {
+function activityScores(weather: Weather, warningLevel: number): ActivityScore[] {
   const wet = weather.rainChance * 0.58 + Math.min(28, weather.precipitation * 16);
   const gust = Math.max(0, weather.windGusts - 35) * 0.75;
+  const warningPenalty =
+    warningLevel >= 4 ? 70 : warningLevel === 3 ? 45 : warningLevel === 2 ? 25 : warningLevel === 1 ? 12 : 0;
 
   const walk = clamp(
     100 -
@@ -82,6 +93,7 @@ function activityScores(weather: Weather): ActivityScore[] {
       gust -
       tempPenalty(weather.temperature, 16, 10) -
       Math.max(0, weather.uvIndex - 8) * 2 -
+      warningPenalty -
       (weather.isDay ? 0 : 30)
   );
 
@@ -91,6 +103,7 @@ function activityScores(weather: Weather): ActivityScore[] {
       Math.max(0, weather.windSpeed - 18) * 2 -
       gust * 1.2 -
       tempPenalty(weather.temperature, 17, 9) -
+      warningPenalty -
       (weather.isDay ? 0 : 55)
   );
 
@@ -101,6 +114,7 @@ function activityScores(weather: Weather): ActivityScore[] {
       gust -
       tempPenalty(weather.temperature, 22, 7) -
       Math.max(0, weather.uvIndex - 7) * 2.5 -
+      warningPenalty -
       (weather.isDay ? 0 : 85)
   );
 
@@ -161,9 +175,14 @@ export default function HomePage() {
   const region = regions.find((item) => item.id === selected)!;
   const live = feed?.places.find((item) => item.id === selected);
 
+  const warningLevel = live?.warnings?.reduce(
+    (max, item) => Math.max(max, Number(item.level) || 0),
+    0
+  ) ?? 0;
+
   const scores = useMemo(
-    () => (live?.weather ? activityScores(live.weather) : []),
-    [live?.weather]
+    () => (live?.weather ? activityScores(live.weather, warningLevel) : []),
+    [live?.weather, warningLevel]
   );
   const best = scores[0];
 
@@ -325,6 +344,23 @@ export default function HomePage() {
               </article>
             </div>
 
+            {live?.warnings?.length ? (
+              <aside className={styles.warningBox} role="status">
+                <span aria-hidden="true">⚠️</span>
+                <span>
+                  <strong>Amtliche DWD-Warnung für {region.name}</strong>
+                  <small>{live.warnings[0].headline}</small>
+                </span>
+                <a
+                  href={feed?.sources.warnings ?? "https://www.dwd.de/"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  DWD öffnen ↗
+                </a>
+              </aside>
+            ) : null}
+
             {live?.weather ? (
               <section className={styles.nowSection} aria-label="Was kann ich gerade machen?">
                 <div className={styles.sectionHeading}>
@@ -354,8 +390,8 @@ export default function HomePage() {
 
                 <p className={styles.scoreNote}>
                   Der Index kombiniert Tageslicht, Temperatur, Regenrisiko, Niederschlag,
-                  Wind, Böen und UV. Er ist eine Orientierung von förde.info und keine
-                  amtliche Bewertung.
+                  Wind, Böen, UV und vorhandene amtliche DWD-Warnungen. Er ist eine
+                  Orientierung von förde.info und keine amtliche Bewertung.
                 </p>
               </section>
             ) : null}
