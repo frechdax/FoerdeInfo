@@ -4,15 +4,15 @@ Privates, unabhängiges Informationsangebot für Flensburg, Wassersleben (Harris
 
 ## Seiten
 
-- `/` und `/live`: Ortswahl mit aktuellem Wetter von Open-Meteo und amtlicher Badegewässer-Einstufung des Landes Schleswig-Holstein.
+- `/` und `/live`: mobile Ortswahl mit Live-Wetter von Open-Meteo, amtlichen DWD-Warnungen, Badegewässer-Einstufung und einem daraus berechneten „Was kann ich gerade machen?“-Index. Passende GetYourGuide-Links werden wetterabhängig als Werbung gekennzeichnet ausgespielt.
 - `/orte/flensburg`, `/orte/wassersleben`, `/orte/gluecksburg`, `/orte/langballig`: örtliche Informationen, Badestellen und Links zu Originalquellen.
-- `/veranstaltungen`: regionale Originalkalender und vorhandene, als Glücksburg gekennzeichnete Termine aus Supabase.
+- `/veranstaltungen`: vorhandene förde.info-Termine aus Supabase sowie öffentlich sichtbare Event-Highlights der Tourismus Agentur Flensburger Förde; Einträge bieten Originalquelle und iCalendar-Aktion.
 - `/urlaub`: Ausflugs- und Freizeitübersicht.
 - `/gluecksburg`: ausführliche Glücksburger Ansicht. Dazu gehören `/gluecksburg/live`, `/gluecksburg/veranstaltungen` und `/gluecksburg/urlaub`.
 - `/partner`: Kontakt für regionale Kooperationen.
 - `/wege`: mobile Wegprüfung mit freiwilligem GPS-Start, Fuß-/Fahrradrouting, Ortsuche und zeitlich begrenzten Nachbarschaftsmeldungen.
 
-Die Anwendung enthält keinen Müllkalender. Die Veranstaltungsdaten anderer Orte werden derzeit nicht automatisch importiert. Badegewässer-Einstufungen sind keine aktuelle Messung der Wassertemperatur oder Besucherzahl.
+Die Anwendung enthält keinen Müllkalender. Externe Veranstaltungskalender werden nicht vollständig gespiegelt; öffentlich sichtbare Highlights werden ergänzend eingelesen und die Originalkalender bleiben verlinkt. Badegewässer-Einstufungen sind keine aktuelle Messung der Wassertemperatur oder Besucherzahl.
 
 ## Wegecheck
 
