@@ -250,3 +250,131 @@
     padding: 18px;
   }
 }
+
+
+.placePicker {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.placePicker > span {
+  color: #60767d;
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.placePicker > div {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.placePicker button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 8px 13px;
+  border: 1px solid #cfe0e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #365b63;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.placePicker .placeActive {
+  border-color: #087c77;
+  background: #087c77;
+  color: #fff;
+}
+
+.statusDotLive {
+  background: #279267;
+  box-shadow: 0 0 0 5px #e1f5ec;
+}
+
+.liveValue {
+  display: grid;
+  gap: 4px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  background: #f2f7f7;
+}
+
+.liveValue small {
+  color: #5d777d;
+  font-size: .64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.liveValue strong {
+  color: #173f49;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.liveValue span {
+  color: #71858a;
+  font-size: .66rem;
+}
+
+.itemList {
+  display: grid;
+  gap: 6px;
+}
+
+.itemList > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 1px solid #e1eaeb;
+  border-radius: 10px;
+  background: #fbfdfd;
+}
+
+.itemList > div > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.itemList strong {
+  overflow: hidden;
+  color: #34555d;
+  font-size: .72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemList small {
+  color: #798b8f;
+  font-size: .62rem;
+}
+
+.itemList b {
+  flex: 0 0 auto;
+  color: #176c73;
+  font-size: .72rem;
+  text-align: right;
+}
+
+.live {
+  color: #17684f;
+  background: #e7f6ee;
+}
+
+.errorBox {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid #efc6c0;
+  border-radius: 12px;
+  background: #fff0ee;
+  color: #8b453d;
+  font-size: .78rem;
+  font-weight: 700;
+}

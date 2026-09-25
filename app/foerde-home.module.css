@@ -295,3 +295,91 @@
     padding: 18px 20px;
   }
 }
+
+
+.beachGreen,
+.beachYellow,
+.beachRed,
+.beachNeutral {
+  position: relative;
+  overflow: hidden;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.beachGreen {
+  border-color: #b7dfc9;
+  background: linear-gradient(135deg, #f4fbf7, #eaf7ef);
+}
+
+.beachYellow {
+  border-color: #ead498;
+  background: linear-gradient(135deg, #fffaf0, #fff4d9);
+}
+
+.beachRed {
+  border-color: #e7bab5;
+  background: linear-gradient(135deg, #fff7f5, #fde9e6);
+}
+
+.beachNeutral {
+  border-color: #dbe5e6;
+  background: #f8fbfb;
+}
+
+.beachCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.beachCardHead > strong {
+  min-width: 0;
+}
+
+.beachStatus {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: .66rem;
+  font-weight: 900;
+}
+
+.beachStatus i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.beachStatusGreen {
+  color: #1e7048;
+  background: #dff3e7;
+}
+
+.beachStatusYellow {
+  color: #84620d;
+  background: #ffedbb;
+}
+
+.beachStatusRed {
+  color: #a3463f;
+  background: #f9d8d4;
+}
+
+.beachStatusNeutral {
+  color: #63777c;
+  background: #eaf0f1;
+}
+
+.beachReason {
+  display: block;
+  margin-top: 4px;
+  color: #5f7479;
+  font-size: .68rem;
+  line-height: 1.4;
+}
