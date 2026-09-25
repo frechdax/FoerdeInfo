@@ -25,10 +25,13 @@ export const affiliateLinks = {
     provider: "GetYourGuide",
     offers: {
       sailing: withPartnerId(
-        "https://www.getyourguide.com/flensburg-l101640/flensburger-fjord-sailing-tour-with-captain-s-dinner-and-fun-swimming-in-ankerbucht-t1257250/"
+        "https://www.getyourguide.com/flensburg-l101640/flensburg-fjord-sailing-tour-with-captain-s-dinner-and-fun-swimming-in-ankerbucht-t1257250/"
       ),
-      historyWalk: withPartnerId(
-        "https://www.getyourguide.com/flensburg-l101640/flensburg-a-historical-journey-through-northern-germany-t1272323/"
+      eBoat: withPartnerId(
+        "https://www.getyourguide.com/flensburg-l101640/flensburg-e-boat-rent-t674597/"
+      ),
+      runningTour: withPartnerId(
+        "https://www.getyourguide.com/flensburg-l101640/flensburg-running-tour-with-insider-tip-guarantee-t729641/"
       ),
     },
   },
