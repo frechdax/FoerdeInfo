@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 300;
 
-const LAT = 54.8357;
-const LON = 9.5487;
+const LAT = 54.7937;
+const LON = 9.4469;
 const FLENSBURG_PEGEL_UUID = "9e19c411-f728-4a43-a057-39d4155c71cc";
+const FLENSBURG_WARNCELL = "101001000";
 const SCHLESWIG_FLENSBURG_WARNCELL = "101059000";
 const BATHING_BASE = "https://efi2.schleswig-holstein.de/bg/opendata";
 const DANORD_URL = "https://danord.gdi-sh.de/viewer/resources/apps/BuFPlaene/index.html";
@@ -324,9 +325,12 @@ function relatedRows(master: CsvRow, rows: CsvRow[]) {
 
 function beachDisplayName(row: CsvRow) {
   const all = Object.values(row).join(" ");
+  if (/solit(?:ü|ue)de/i.test(all)) return "Solitüde";
+  if (/ost(?:see)?bad/i.test(all) || /ostseebad/i.test(all)) return "Ostseebad";
+  if (/wassersleben/i.test(all)) return "Wassersleben";
   if (/holnis\s*drei/i.test(all)) return "Holnis Drei";
   if (/sandwig/i.test(all) || /gl(?:ü|ue)cksburg\s*strand/i.test(all)) {
-    return "Sandwig – Glücksburg Strand";
+    return "Sandwig";
   }
 
   return (
@@ -592,10 +596,15 @@ async function loadBeaches(
     fetchLatin1Csv(BATHING_BASE + "/v_proben_odata.csv"),
   ]);
 
+  const wanted = ["Solitüde", "Ostseebad", "Wassersleben", "Sandwig", "Holnis Drei"];
+
   const targets = masterRows
     .filter((row) => {
       const all = Object.values(row).join(" ");
-      return /holnis\s*drei/i.test(all) ||
+      return /solit(?:ü|ue)de/i.test(all) ||
+        /ost(?:see)?bad/i.test(all) ||
+        /wassersleben/i.test(all) ||
+        /holnis\s*drei/i.test(all) ||
         /sandwig/i.test(all) ||
         /gl(?:ü|ue)cksburg\s*strand/i.test(all);
     })
@@ -603,9 +612,9 @@ async function loadBeaches(
       const name = beachDisplayName(row);
       return rows.findIndex((entry) => beachDisplayName(entry) === name) === index;
     })
-    .slice(0, 2);
+    .sort((a, b) => wanted.indexOf(beachDisplayName(a)) - wanted.indexOf(beachDisplayName(b)));
 
-  const officialBeaches = targets.map((row) => {
+  return targets.map((row) => {
     const classifications = relatedRows(row, classificationRows)
       .sort((a, b) => rowDateValue(b) - rowDateValue(a));
     const measurements = relatedRows(row, measurementRows)
@@ -639,10 +648,17 @@ async function loadBeaches(
     const ids = identifierCandidates(row);
     const name = beachDisplayName(row);
     const light = beachTrafficLight(quality, beachWeatherScore, uvIndex, warningLevel, gusts);
+    const region =
+      name === "Solitüde" || name === "Ostseebad"
+        ? "Flensburg"
+        : name === "Wassersleben"
+          ? "Wassersleben / Harrislee"
+          : "Glücksburg";
 
     return {
       id: ids[0] || name,
       name,
+      region,
       latitude: parseGermanNumber(fieldByKey(row, [/geogr.*breite/, /breitengrad/, /latitude/, /lat/])),
       longitude: parseGermanNumber(fieldByKey(row, [/geogr.*laenge/, /laengengrad/, /longitude/, /lon/])),
       quality,
@@ -660,53 +676,6 @@ async function loadBeaches(
       officialBathingData: true,
     };
   });
-
-  const quellentalLight =
-    warningLevel >= 3 || beachWeatherScore < 42 || gusts >= 60
-      ? {
-          status: "red" as const,
-          label: "Rot",
-          summary: "Bedingungen aktuell ungünstig",
-        }
-      : warningLevel > 0 || beachWeatherScore < 72 || uvIndex >= 6 || gusts >= 42
-        ? {
-            status: "yellow" as const,
-            label: "Gelb",
-            summary: uvIndex >= 6 ? "Gute Bedingungen, aber UV-Schutz beachten" : "Mit Einschränkungen",
-          }
-        : {
-            status: "green" as const,
-            label: "Grün",
-            summary: "Gute Wetterbedingungen",
-          };
-
-  return [
-    ...officialBeaches,
-    {
-      id: "quellental",
-      name: "Quellental",
-      latitude: null,
-      longitude: null,
-      quality: "Keine separate amtliche Badegewässer-Einstufung",
-      qualityPeriod: null,
-      waterTemperature: null,
-      lastSampleAt: null,
-      remark: "Für Quellental wird keine separate amtliche Badegewässer-Einstufung angezeigt. Die Ampel basiert hier auf Wetter, UV, Wind, Regen und DWD-Warnungen.",
-      status: quellentalLight.status,
-      statusLabel: quellentalLight.label,
-      summary:
-        beachWeatherScore >= 72
-          ? "Wetterbedingungen aktuell günstig"
-          : beachWeatherScore >= 50
-            ? "Wetterbedingungen mit Einschränkungen"
-            : "Wetterbedingungen aktuell ungünstig",
-      weatherScore: beachWeatherScore,
-      uvIndex,
-      windSpeed,
-      rainProbability,
-      officialBathingData: false,
-    },
-  ];
 }
 
 export async function GET() {
@@ -820,8 +789,19 @@ export async function GET() {
 
   if (warningsResult.status === "fulfilled") {
     const warningMap = warningsResult.value?.warnings ?? {};
-    const entries = warningMap[SCHLESWIG_FLENSBURG_WARNCELL] ?? [];
-    warnings = entries.map((entry: Record<string, unknown>) => ({
+    const entries = [
+      ...(warningMap[FLENSBURG_WARNCELL] ?? []),
+      ...(warningMap[SCHLESWIG_FLENSBURG_WARNCELL] ?? []),
+    ];
+    const seenWarnings = new Set<string>();
+    warnings = entries
+      .filter((entry: Record<string, unknown>) => {
+        const key = String(entry.headline ?? entry.event ?? "") + ":" + String(entry.start ?? "");
+        if (seenWarnings.has(key)) return false;
+        seenWarnings.add(key);
+        return true;
+      })
+      .map((entry: Record<string, unknown>) => ({
       headline: String(entry.headline ?? entry.event ?? "Amtliche Wetterwarnung"),
       event: String(entry.event ?? "Wetterwarnung"),
       level: Number(entry.level ?? 1),
@@ -923,7 +903,12 @@ export async function GET() {
 
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
-    location: { name: "Glücksburg", latitude: LAT, longitude: LON },
+    location: {
+      name: "Flensburg",
+      latitude: LAT,
+      longitude: LON,
+      areas: ["Flensburg", "Wassersleben", "Glücksburg"],
+    },
     weather: {
       temperature: temp,
       apparentTemperature: Number(current.apparent_temperature ?? temp),
@@ -966,8 +951,13 @@ export async function GET() {
       },
       {
         name: "Land Schleswig-Holstein",
-        purpose: "Amtliche Badegewässerdaten",
-        url: "https://opendata.schleswig-holstein.de/collection/badegewasser-stammdaten/aktuell",
+        purpose: "Amtliche Badegewässerdaten für Flensburg, Wassersleben und Glücksburg",
+        url: "https://www.schleswig-holstein.de/DE/landesregierung/themen/gesundheit-verbraucherschutz/badegewaesserqualitaet",
+      },
+      {
+        name: "Stadt Flensburg",
+        purpose: "Badewasserqualität Solitüde und Ostseebad",
+        url: "https://www.flensburg.de/Leben-Soziales/Gesundheitsdienste/Infektionsschutz/Hygiene-Umweltmedizin/Badewasserqualit%C3%A4t/",
       },
       {
         name: "Digitaler Atlas Nord",
