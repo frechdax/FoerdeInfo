@@ -79,15 +79,11 @@ export default function SeoLanding({
         {children}
 
         <nav className="seo-links" aria-label="Weitere Bereiche">
-          <a href="/">Alle Orte</a>
-          <a href="/orte/flensburg">Flensburg</a>
-          <a href="/orte/wassersleben">Wassersleben</a>
-          <a href="/orte/gluecksburg">Glücksburg</a>
-          <a href="/orte/langballig">Langballig</a>
-          <a href="/gluecksburg">Glücksburg im Detail</a>
-          <a href="/veranstaltungen">Veranstaltungen</a>
+          <a href="/">Start</a>
           <a href="/live">Live</a>
-          <a href="/urlaub">Urlaub</a>
+          <a href="/veranstaltungen">Veranstaltungen</a>
+          <a href="/wege">Wegecheck</a>
+          <a href="/gluecksburg">Glücksburg im Detail</a>
         </nav>
 
         <p className="seo-disclaimer">
