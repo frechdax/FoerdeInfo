@@ -5,36 +5,37 @@ const siteUrl = "https://www.xn--glcksburg-direkt-kzb.de";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+    absolute: "Flensburg Live – Wetter, Strand-Ampel & Fördepegel",
   },
   description:
-    "Glücksburg live: aktuelles Wetter, DWD-Warnungen, Strand-Ampel für Holnis und Sandwig, Fördepegel Flensburg, beste Zeit für draußen sowie Baustellen und Veränderungen.",
+    "Flensburg live: aktuelles Wetter, DWD-Warnungen, Strand-Ampel für Solitüde, Ostseebad, Wassersleben und Glücksburg sowie der Fördepegel Flensburg.",
   keywords: [
-    "Glücksburg live",
-    "Wetter Glücksburg heute",
-    "Glücksburg Wetter",
-    "Strand Holnis",
-    "Sandwig Strand",
-    "Badequalität Glücksburg",
+    "Flensburg live",
+    "Wetter Flensburg heute",
+    "Flensburg Wetter",
+    "Solitüde Strand",
+    "Ostseebad Flensburg",
+    "Wassersleben Strand",
+    "Badequalität Flensburg",
     "Fördepegel Flensburg",
-    "DWD Warnungen Schleswig-Flensburg",
-    "Baustellen Glücksburg",
+    "DWD Warnungen Flensburg",
+    "Glücksburg Strand",
   ],
   alternates: { canonical: "/live" },
   openGraph: {
     type: "website",
     locale: "de_DE",
     url: "/live",
-    siteName: "GlücksburgDirekt",
-    title: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+    siteName: "FlensburgDirekt",
+    title: "Flensburg Live – Wetter, Strand-Ampel & Fördepegel",
     description:
-      "Aktuelle Bedingungen für Glücksburg: Wetter, Strand-Ampel Holnis & Sandwig, Fördepegel, DWD-Warnungen und lokale Veränderungen.",
+      "Aktuelle Bedingungen für Flensburg und die Förderegion: Wetter, Strand-Ampel, Fördepegel und DWD-Warnungen.",
   },
   twitter: {
     card: "summary",
-    title: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+    title: "Flensburg Live – Wetter, Strand-Ampel & Fördepegel",
     description:
-      "Wetter, Strandbedingungen, Fördepegel, Warnungen und lokale Veränderungen in Glücksburg auf einen Blick.",
+      "Wetter, Strandbedingungen, Fördepegel und Warnungen für Flensburg, Wassersleben und Glücksburg auf einen Blick.",
   },
 };
 
@@ -45,15 +46,17 @@ const liveStructuredData = {
       "@type": "WebPage",
       "@id": siteUrl + "/live#webpage",
       url: siteUrl + "/live",
-      name: "Glücksburg Live – Wetter, Strand-Ampel & Fördepegel",
+      name: "Flensburg Live – Wetter, Strand-Ampel & Fördepegel",
       description:
-        "Aktuelle Wetterlage, Strand-Ampel für Holnis und Sandwig, Fördepegel Flensburg, DWD-Warnungen und lokale Veränderungen in Glücksburg.",
+        "Aktuelle Wetterlage, Strand-Ampel für Solitüde, Ostseebad, Wassersleben und Glücksburg, Fördepegel Flensburg und DWD-Warnungen.",
       inLanguage: "de-DE",
       about: [
+        { "@type": "Place", name: "Flensburg" },
+        { "@type": "Place", name: "Wassersleben" },
         { "@type": "Place", name: "Glücksburg (Ostsee)" },
         { "@type": "Place", name: "Flensburger Förde" },
-        { "@type": "Thing", name: "Wetter in Glücksburg" },
-        { "@type": "Thing", name: "Badegewässerqualität Holnis und Sandwig" },
+        { "@type": "Thing", name: "Wetter in Flensburg" },
+        { "@type": "Thing", name: "Badegewässerqualität Solitüde, Ostseebad, Wassersleben und Glücksburg" },
       ],
     },
     {
@@ -62,13 +65,13 @@ const liveStructuredData = {
         {
           "@type": "ListItem",
           position: 1,
-          name: "GlücksburgDirekt",
+          name: "FlensburgDirekt",
           item: siteUrl,
         },
         {
           "@type": "ListItem",
           position: 2,
-          name: "Glücksburg Live",
+          name: "Flensburg Live",
           item: siteUrl + "/live",
         },
       ],
