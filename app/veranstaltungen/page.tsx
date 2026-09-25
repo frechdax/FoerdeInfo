@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { createPublicServerSupabase } from "@/lib/supabase-public-server";
-import { regions } from "@/lib/regions";
-import styles from "./events.module.css";
+import EventsBrowser, { type CalendarEvent } from "./events-browser";
 
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: "Veranstaltungen an der Flensburger Förde",
   description:
-    "Aktuelle Termine für Flensburg, Wassersleben, Glücksburg und Langballig mit Originalquelle und Kalender-Aktion.",
+    "Aktuelle Termine für Flensburg, Wassersleben, Glücksburg und Langballig mit Suche, Filtern, Originalquelle und Kalender-Aktion.",
   alternates: { canonical: "/veranstaltungen" },
 };
 
@@ -35,18 +34,6 @@ function deDateToIso(value: string) {
   const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
   if (!match) return null;
   return `${match[3]}-${match[2]}-${match[1]}`;
-}
-
-function dateLabel(start: string, end?: string | null) {
-  const format = (value: string) =>
-    new Intl.DateTimeFormat("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(`${value}T12:00:00`));
-
-  if (end && end !== start) return `${format(start)} – ${format(end)}`;
-  return format(start);
 }
 
 function decodeEntities(value: string) {
@@ -116,13 +103,13 @@ async function fetchTaffHighlights(): Promise<TaffEvent[]> {
       events.push({ key, title, date, endDate, sourceUrl });
     }
 
-    return events.slice(0, 18);
+    return events.slice(0, 30);
   } catch {
     return [];
   }
 }
 
-function classifyRegion(event: Pick<ImportedEvent, "title" | "location">) {
+function classifyRegion(event: { title: string; location?: string | null }) {
   const haystack = `${event.title} ${event.location ?? ""}`.toLowerCase();
   if (/wassersleben|harrislee/.test(haystack)) return "Wassersleben";
   if (/langballig|langballigau|unewatt/.test(haystack)) return "Langballig";
@@ -155,13 +142,11 @@ export default async function EventsPage() {
   const [{ data }, taffEvents] = await Promise.all([
     supabase
       .from("events")
-      .select(
-        "id,title,date,end_date,time,location,organizer,source_url"
-      )
+      .select("id,title,date,end_date,time,location,organizer,source_url")
       .eq("status", "published")
       .gte("date", current)
       .order("date")
-      .limit(80),
+      .limit(100),
     fetchTaffHighlights(),
   ]);
 
@@ -169,6 +154,39 @@ export default async function EventsPage() {
   const visibleTaff = taffEvents.filter(
     (event) => (event.endDate ?? event.date) >= current
   );
+
+  const events: CalendarEvent[] = [
+    ...imported.map((event) => ({
+      key: `stored-${event.id}`,
+      title: event.title,
+      date: event.date,
+      endDate: event.end_date,
+      time: event.time,
+      location: event.location,
+      organizer: event.organizer,
+      region: classifyRegion(event),
+      sourceUrl: event.source_url,
+      calendarUrl: `/api/calendar/${event.id}`,
+      sourceLabel: "förde.info / Originalquelle",
+    })),
+    ...visibleTaff.map((event) => ({
+      key: `taff-${event.key}`,
+      title: event.title,
+      date: event.date,
+      endDate: event.endDate,
+      time: null,
+      location: null,
+      organizer: null,
+      region: classifyRegion({ title: event.title }),
+      sourceUrl: event.sourceUrl,
+      calendarUrl: externalCalendarHref(event),
+      sourceLabel: "Tourismus Agentur Flensburger Förde / verlinkte Quelle",
+    })),
+  ].sort((a, b) => {
+    const byDate = a.date.localeCompare(b.date);
+    if (byDate !== 0) return byDate;
+    return a.title.localeCompare(b.title, "de");
+  });
 
   return (
     <main className="foerde-page">
@@ -180,7 +198,6 @@ export default async function EventsPage() {
           <nav>
             <a href="/">Start</a>
             <a href="/live">Live</a>
-            <a href="/urlaub">Entdecken</a>
           </nav>
         </header>
 
@@ -188,114 +205,17 @@ export default async function EventsPage() {
           <span className="foerde-kicker">Termine für die Region</span>
           <h1>Veranstaltungen an der Förde</h1>
           <p>
-            Aktuelle Termine mit Details, Originalquelle und iCalendar-Aktion.
-            Änderungen oder Absagen bitte immer noch einmal beim Veranstalter prüfen.
+            Suche nach Veranstaltungen und filtere nach Zeitraum oder Ort. Der
+            Details-Link öffnet direkt die jeweilige Original-Veranstaltungsseite.
           </p>
         </section>
 
-        <section className={styles.sourceStrip} aria-label="Originalkalender">
-          {regions.map((region) => (
-            <a
-              key={region.id}
-              href={region.eventsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>📍</span>
-              <span>
-                <strong>{region.name}</strong>
-                <small>Originalkalender ↗</small>
-              </span>
-            </a>
-          ))}
-        </section>
-
-        {imported.length > 0 ? (
-          <section className={styles.eventSection}>
-            <div className={styles.sectionHead}>
-              <div>
-                <span className="foerde-kicker">Auf förde.info erfasst</span>
-                <h2>Nächste Termine</h2>
-              </div>
-              <span>{imported.length} Einträge</span>
-            </div>
-
-            <div className={styles.eventGrid}>
-              {imported.map((event) => (
-                <article className={styles.eventCard} key={event.id}>
-                  <div className={styles.eventDate}>
-                    <span>{dateLabel(event.date, event.end_date)}</span>
-                    <small>{classifyRegion(event)}</small>
-                  </div>
-                  <div className={styles.eventCopy}>
-                    <h3>{event.title}</h3>
-                    <p>
-                      {event.time ? `${String(event.time).slice(0, 5)} Uhr` : "Uhrzeit siehe Quelle"}
-                      {event.location ? ` · ${event.location}` : ""}
-                    </p>
-                    {event.organizer ? <small>{event.organizer}</small> : null}
-                  </div>
-                  <div className={styles.eventActions}>
-                    <a href={`/veranstaltungen/${event.id}`}>Details</a>
-                    <a href={`/api/calendar/${event.id}`}>📅 iCal</a>
-                    {event.source_url ? (
-                      <a
-                        href={event.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Original ↗
-                      </a>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {visibleTaff.length > 0 ? (
-          <section className={styles.eventSection}>
-            <div className={styles.sectionHead}>
-              <div>
-                <span className="foerde-kicker">Öffentliche Event-Highlights</span>
-                <h2>Flensburger Förde</h2>
-              </div>
-              <span>automatisch aktualisiert</span>
-            </div>
-
-            <div className={styles.eventGrid}>
-              {visibleTaff.map((event) => (
-                <article className={styles.eventCard} key={event.key}>
-                  <div className={styles.eventDate}>
-                    <span>{dateLabel(event.date, event.endDate)}</span>
-                    <small>Förde-Region</small>
-                  </div>
-                  <div className={styles.eventCopy}>
-                    <h3>{event.title}</h3>
-                    <p>Details und kurzfristige Änderungen in der Originalquelle.</p>
-                    <small>Tourismus Agentur Flensburger Förde / verlinkte Quelle</small>
-                  </div>
-                  <div className={styles.eventActions}>
-                    <a href={externalCalendarHref(event)}>📅 iCal</a>
-                    <a
-                      href={event.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Details / Original ↗
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        <EventsBrowser events={events} today={current} />
 
         <footer className="foerde-footer">
           <span>
             Termine werden aus vorhandenen förde.info-Daten und öffentlich sichtbaren
-            Event-Highlights ergänzt.
+            Event-Highlights ergänzt. Änderungen oder Absagen bitte in der Originalquelle prüfen.
           </span>
           <a href="/gluecksburg#impressum">Impressum & Datenschutz</a>
         </footer>
