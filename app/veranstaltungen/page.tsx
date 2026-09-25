@@ -144,7 +144,7 @@ export default async function EventsPage() {
       .from("events")
       .select("id,title,date,end_date,time,location,organizer,source_url")
       .eq("status", "published")
-      .gte("date", current)
+      .or(`date.gte.${current},end_date.gte.${current}`)
       .order("date")
       .limit(100),
     fetchTaffHighlights(),
