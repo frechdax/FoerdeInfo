@@ -151,7 +151,7 @@ function parseDashboardText(raw: string): SgrSnapshot | null {
 async function renderDashboard() {
   chromium.setGraphicsMode = false;
   const browser = await puppeteer.launch({
-    args: puppeteer.defaultArgs({ args: chromium.args, headless: "shell" }),
+    args: await puppeteer.defaultArgs({ args: chromium.args, headless: "shell" }),
     executablePath: await chromium.executablePath(),
     headless: "shell",
   });
