@@ -30,6 +30,7 @@ type BestTime = {
 type Beach = {
   id: string;
   name: string;
+  region: string;
   latitude: number | null;
   longitude: number | null;
   quality: string;
@@ -58,7 +59,7 @@ type ChangeItem = {
 
 type LiveData = {
   generatedAt: string;
-  location: { name: string };
+  location: { name: string; areas?: string[] };
   weather: {
     temperature: number;
     apparentTemperature: number;
@@ -233,7 +234,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
       ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
       : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind.",
     href: "/freizeit-gluecksburg",
-    provider: "GlücksburgDirekt",
+    provider: "FlensburgDirekt",
     affiliate: false,
   };
 
@@ -263,9 +264,9 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
     <section className={styles.page + (embedded ? " " + styles.homeEmbed : "")}>
       <div className={styles.shell}>
         {!embedded ? <header className={styles.topbar}>
-          <a className={styles.brand} href="/" aria-label="Zurück zu GlücksburgDirekt">
+          <a className={styles.brand} href="/" aria-label="Zurück zu FlensburgDirekt">
             <span className={styles.brandMark}>⚓</span>
-            <span>Glücksburg<strong>DIREKT</strong></span>
+            <span>Flensburg<strong>DIREKT</strong></span>
           </a>
           <a className={styles.back} href="/">← Zur Startseite</a>
         </header> : null}
@@ -273,11 +274,11 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
         <section className={styles.hero}>
           <div>
             <span className={styles.eyebrow}>Live · automatisch aktualisiert</span>
-            <h1>Glücksburg Jetzt</h1>
+            <h1>Flensburg Jetzt</h1>
             <p>
               {embedded
-                ? "Was sich heute in Glücksburg lohnt – Wetter, beste Zeit für draußen, Strandbedingungen und passende Empfehlungen auf einen Blick."
-                : "Öffentliche Daten verständlich zusammengefasst: Wetter, beste Zeit für draußen, Strandbedingungen, Fördepegel, amtliche Warnungen und lokale Veränderungen."}
+                ? "Flensburg im Fokus – mit Wassersleben und Glücksburg als Ergänzung. Wetter, Förde, Strand und passende Empfehlungen auf einen Blick."
+                : "Aktuelle Bedingungen für Flensburg und die Förderegion: Wetter, Strandbedingungen, Fördepegel, amtliche Warnungen und passende Empfehlungen."}
             </p>
           </div>
           <button
@@ -300,7 +301,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
         </section>
 
         {data && bestScore ? (
-          <section className={styles.nowSummary} aria-label="Glücksburg jetzt Zusammenfassung">
+          <section className={styles.nowSummary} aria-label="Flensburg jetzt Zusammenfassung">
             <div className={styles.summaryLead}>
               <span className={styles.summaryIcon} aria-hidden="true">{bestScore.icon}</span>
               <span>
@@ -416,7 +417,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                 ) : (
                   <div className={styles.allClear}>
                     <strong>Keine aktive DWD-Wetterwarnung</strong>
-                    <span>für den Kreis Schleswig-Flensburg</span>
+                    <span>für Flensburg und das direkte Förde-Umland</span>
                   </div>
                 )}
               </article>
@@ -453,7 +454,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
 
               <p className={styles.explainer}>
                 Der Index kombiniert Temperatur, Regenrisiko, Wind, Böen, UV, Tageslicht und
-                amtliche Wetterwarnungen. Er ist eine Orientierung von GlücksburgDirekt und keine
+                amtliche Wetterwarnungen. Er ist eine Orientierung von FlensburgDirekt und keine
                 amtliche Bewertung.
               </p>
             </section>
@@ -475,7 +476,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                   rel="sponsored noreferrer"
                   onClick={() =>
                     trackReferralClick(
-                      "Unterkunft in Glücksburg",
+                      "Unterkunft in Flensburg",
                       affiliateLinks.accommodation.provider,
                       true
                     )
@@ -483,8 +484,8 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                 >
                   <span className={styles.referralIcon} aria-hidden="true">🏨</span>
                   <span className={styles.referralBadge}>Werbung · Affiliate-Link</span>
-                  <strong>Unterkunft in Glücksburg finden</strong>
-                  <p>Hotels, Ferienwohnungen und weitere Übernachtungsmöglichkeiten vergleichen.</p>
+                  <strong>Unterkunft in Flensburg finden</strong>
+                  <p>Hotels, Ferienwohnungen und weitere Übernachtungsmöglichkeiten in Flensburg vergleichen.</p>
                   <em>Unterkünfte ansehen ↗</em>
                 </a>
 
@@ -514,36 +515,38 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
 
                 <a
                   className={styles.referralCard}
-                  href="/heute-in-gluecksburg"
+                  href="https://kulturbytes.de/de/veranstaltungen/deutschland/schleswig-holstein/flensburg"
+                  target="_blank"
+                  rel="noreferrer"
                   onClick={() =>
-                    trackReferralClick("Heute in Glücksburg", "GlücksburgDirekt", false)
+                    trackReferralClick("Veranstaltungen in Flensburg", "kulturbytes", false)
                   }
                 >
                   <span className={styles.referralIcon} aria-hidden="true">📅</span>
-                  <span className={styles.referralBadge + " " + styles.editorialBadge}>Redaktionell</span>
-                  <strong>Was ist heute in Glücksburg los?</strong>
-                  <p>Aktuelle Veranstaltungen und Termine mit dem Live-Check kombinieren.</p>
-                  <em>Heute ansehen →</em>
+                  <span className={styles.referralBadge + " " + styles.editorialBadge}>Aktuell</span>
+                  <strong>Was ist heute in Flensburg los?</strong>
+                  <p>Aktuelle Veranstaltungen in Flensburg direkt bei kulturbytes entdecken.</p>
+                  <em>Veranstaltungen öffnen ↗</em>
                 </a>
 
                 <a
                   className={styles.referralCard}
                   href="/partner"
                   onClick={() =>
-                    trackReferralClick("Lokaler Partner werden", "GlücksburgDirekt", false)
+                    trackReferralClick("Lokaler Partner werden", "FlensburgDirekt", false)
                   }
                 >
                   <span className={styles.referralIcon} aria-hidden="true">🤝</span>
                   <span className={styles.referralBadge + " " + styles.partnerBadge}>Für Betriebe</span>
                   <strong>Lokaler Anbieter in Glücksburg?</strong>
-                  <p>Mit einem passenden Angebot auf GlücksburgDirekt sichtbar werden.</p>
+                  <p>Mit einem passenden Angebot auf FlensburgDirekt sichtbar werden.</p>
                   <em>Partner werden →</em>
                 </a>
               </div>
 
               <p className={styles.affiliateNote}>
                 Affiliate-Hinweis: Bei einer Buchung über entsprechend gekennzeichnete Links kann
-                GlücksburgDirekt eine Provision erhalten. Für dich entstehen dadurch keine
+                FlensburgDirekt eine Provision erhalten. Für dich entstehen dadurch keine
                 zusätzlichen Kosten. Redaktionelle Empfehlungen sind davon unabhängig.
               </p>
             </section>
@@ -589,7 +592,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.kicker}>Strand-Ampel</span>
-                  <h2>Holnis, Sandwig & Quellental auf einen Blick</h2>
+                  <h2>Solitüde, Ostseebad, Wassersleben & Glücksburg</h2>
                 </div>
                 <span className={styles.updated}>Wetter + UV + amtliche Daten, wo verfügbar</span>
               </div>
@@ -600,7 +603,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                     <article className={styles.beachCard} key={beach.id}>
                       <div className={styles.beachHead}>
                         <div>
-                          <span className={styles.beachPlace}>🏖️ Badestelle</span>
+                          <span className={styles.beachPlace}>🏖️ {beach.region}</span>
                           <h3>{beach.name}</h3>
                         </div>
                         <span className={styles.trafficLight + " " + beachTone(beach.status)}>
@@ -644,7 +647,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                           ? beach.lastSampleAt
                             ? "Letzte veröffentlichte Probe: " + formatDate(beach.lastSampleAt)
                             : "Kein aktuelles Probedatum geladen"
-                          : "Keine separate amtliche Proben- oder Qualitätseinstufung für Quellental eingebunden"}
+                          : "Keine separate amtliche Proben- oder Qualitätseinstufung eingebunden"}
                         {beach.qualityPeriod ? " · Einstufung " + beach.qualityPeriod : ""}
                       </small>
                       {beach.remark ? <p className={styles.beachRemark}>{beach.remark}</p> : null}
@@ -659,71 +662,18 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               )}
 
               <p className={styles.explainer}>
-                Die Ampelfarbe ist eine GlücksburgDirekt-Zusammenfassung. Bei Holnis Drei und
-                Sandwig fließen Wetter, UV, DWD-Warnungen und die veröffentlichten amtlichen
-                Badegewässerdaten ein. Bei Quellental basiert die Ampel mangels separater amtlicher
-                Einstufung auf Wetter, UV, Wind, Regen und DWD-Warnungen. Aktuelle Sperrungen,
-                Warnschilder und Hinweise der Behörden vor Ort haben immer Vorrang.
+                Flensburg steht im Mittelpunkt: Solitüde und Ostseebad werden zuerst gezeigt,
+                Wassersleben ergänzt den westlichen Fördebereich, Sandwig und Holnis Drei bilden
+                den Glücksburg-Zusatz. Wetter, UV, DWD-Warnungen und veröffentlichte amtliche
+                Badegewässerdaten fließen in die Ampel ein. Hinweise und Sperrungen vor Ort haben
+                immer Vorrang.
               </p>
-            </section>
-
-            <section className={styles.featureSection} data-home-optional="true">
-              <div className={styles.sectionHeading}>
-                <div>
-                  <span className={styles.kicker}>Baustellen & Veränderungen</span>
-                  <h2>Was verändert sich in Glücksburg?</h2>
-                </div>
-                <a
-                  className={styles.sourceLink}
-                  href={data.planningSourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Bauleitpläne im DANord ↗
-                </a>
-              </div>
-
-              {data.changes.length ? (
-                <div className={styles.changeList}>
-                  {data.changes.map((item) => (
-                    <a
-                      className={styles.changeRow}
-                      href={item.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      key={item.id}
-                    >
-                      <span className={styles.changeIcon} aria-hidden="true">
-                        {item.category === "Bauleitplanung"
-                          ? "🏗️"
-                          : item.category === "Straße & Verkehr"
-                            ? "🚧"
-                            : "🏘️"}
-                      </span>
-                      <span className={styles.changeCopy}>
-                        <small>{item.category} · {formatDate(item.publishedAt)}</small>
-                        <strong>{item.title}</strong>
-                        <em>{item.sourceType}</em>
-                      </span>
-                      <span className={styles.changeArrow} aria-hidden="true">↗</span>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className={styles.dataEmpty}>
-                  <strong>Keine neuen passenden Meldungen gefunden.</strong>
-                  <span>
-                    Die amtlichen Bekanntmachungen werden automatisch nach Bauleitplanung,
-                    Baustellen, Straßensperrungen und Entwicklungsvorhaben gefiltert.
-                  </span>
-                </div>
-              )}
             </section>
 
             <section className={styles.sourceSection} data-home-section="sources">
               <div>
-                <span className={styles.kicker}>Transparente Datenquellen</span>
-                <h2>Woher kommen die Werte?</h2>
+                <span className={styles.kicker}>Datenquellen</span>
+                <h2>Live-Daten im Überblick</h2>
               </div>
               <div className={styles.sourceGrid}>
                 {data.sources.map((source) => (
@@ -746,7 +696,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
 
         {!embedded ? (
           <footer className={styles.footer}>
-            <span>GlücksburgDirekt · lokal, unabhängig und datenbasiert</span>
+            <span>FlensburgDirekt · lokal, unabhängig und datenbasiert</span>
           </footer>
         ) : (
           <div className={styles.homeEmbedFooter}>
