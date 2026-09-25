@@ -491,3 +491,34 @@
 @media(prefers-reduced-motion:reduce){
   .referralCard{transition:none}
 }
+
+.homeEmbed{
+  min-height:0;
+  background:transparent;
+  margin:0 0 28px;
+}
+.homeEmbed .shell{
+  width:100%;
+  max-width:none;
+  padding:0;
+}
+.homeEmbed .hero{
+  margin-top:0;
+}
+.homeEmbedFooter{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:14px;
+}
+.homeEmbedFooter a{
+  color:#176c73;
+  font-size:.82rem;
+  font-weight:900;
+  text-decoration:none;
+}
+.homeEmbedFooter a:hover{text-decoration:underline}
+@media(max-width:620px){
+  .homeEmbed{margin-bottom:20px}
+  .homeEmbed .shell{width:100%;padding:0}
+  .homeEmbedFooter{justify-content:flex-start;padding:0 2px}
+}
