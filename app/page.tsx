@@ -939,15 +939,6 @@ export default function HomePage() {
               </span>
             </button>
 
-            <a
-              className="header-live-button"
-              href="/live"
-              aria-label="Glücksburg Jetzt – Live-Daten öffnen"
-              title="Glücksburg Jetzt öffnen"
-            >
-              <span className="header-live-led" aria-hidden="true" />
-              <span>LIVE</span>
-            </a>
           </div>
         </header>
 
