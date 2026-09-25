@@ -968,7 +968,7 @@ export default function HomePage() {
                     </a>
                     {stay22AffiliateEnabled ? (
                       <small>
-                        Affiliate-Link über Stay22. Bei einer Buchung kann GlücksburgDirekt eine
+                        Affiliate-Link über Stay22. Bei einer Buchung kann FlensburgDirekt eine
                         Provision erhalten. Für dich entstehen dadurch keine zusätzlichen Kosten.
                       </small>
                     ) : (
@@ -1060,7 +1060,7 @@ export default function HomePage() {
                   </div>
 
                   <p className="travel-note">
-                    GlücksburgDirekt vermittelt keine Unterkünfte und ist nicht Vertragspartner
+                    FlensburgDirekt vermittelt keine Unterkünfte und ist nicht Vertragspartner
                     einer Buchung. Es gelten die Bedingungen des jeweiligen externen Anbieters.
                   </p>
                 </>
@@ -1225,7 +1225,7 @@ export default function HomePage() {
 
                 <h2>Privates und unabhängiges Informationsangebot</h2>
                 <p className="muted">
-                  GlücksburgDirekt ist ein privat betriebenes, unabhängiges Informationsangebot.
+                  FlensburgDirekt ist ein privat betriebenes, unabhängiges Informationsangebot.
                   Es handelt sich nicht um eine Website, App oder sonstige Veröffentlichung der
                   Stadt Glücksburg (Ostsee), des Amtes, des Kreises Schleswig-Flensburg, der ASF
                   oder anderer auf dieser Website genannter Stellen. Eine Zusammenarbeit,
@@ -1235,7 +1235,7 @@ export default function HomePage() {
 
                 <h2>Keine amtliche Auskunft</h2>
                 <p>
-                  Die auf GlücksburgDirekt dargestellten Inhalte dienen der schnellen Orientierung.
+                  Die auf FlensburgDirekt dargestellten Inhalte dienen der schnellen Orientierung.
                   Rechtlich verbindliche Auskünfte, amtliche Bekanntmachungen, Satzungen,
                   Bescheide, Fristen oder behördliche Veröffentlichungen werden ausschließlich
                   durch die jeweils zuständige Stelle herausgegeben. Bei Abweichungen ist stets
@@ -1263,7 +1263,7 @@ export default function HomePage() {
                   </li>
                   <li>
                     <strong>Rathaus und amtliche Bekanntmachungen:</strong> Die Darstellung auf
-                    GlücksburgDirekt ersetzt keine amtliche Veröffentlichung.
+                    FlensburgDirekt ersetzt keine amtliche Veröffentlichung.
                   </li>
                   <li>
                     <strong>Wetter:</strong> Wetterdaten dienen ausschließlich der allgemeinen
@@ -1283,7 +1283,7 @@ export default function HomePage() {
 
                 <h2>Externe Links</h2>
                 <p>
-                  GlücksburgDirekt enthält Links zu Websites Dritter. Auf deren Inhalte und
+                  FlensburgDirekt enthält Links zu Websites Dritter. Auf deren Inhalte und
                   zukünftige Änderungen besteht kein Einfluss. Für fremde Inhalte ist grundsätzlich
                   der jeweilige Anbieter verantwortlich. Bei Bekanntwerden konkreter
                   Rechtsverletzungen werden entsprechende Links nach Prüfung entfernt.
@@ -1357,14 +1357,14 @@ export default function HomePage() {
 
                 <h3>Reichweitenmessung mit Vercel Web Analytics</h3>
                 <p>
-                  GlücksburgDirekt nutzt Vercel Web Analytics zur Auswertung von Seitenaufrufen,
+                  FlensburgDirekt nutzt Vercel Web Analytics zur Auswertung von Seitenaufrufen,
                   Besucherzahlen, Referrern, Geräte- und Browserinformationen sowie ausgewählten
                   Interaktionen, beispielsweise dem Öffnen eines Bereichs oder dem Laden des
                   Müllkalenders. Straßennamen oder andere Adressangaben werden nicht als
                   Analyseereignisse an Vercel übermittelt.
                 </p>
                 <p>
-                  Vercel Web Analytics wird auf GlücksburgDirekt erst geladen, wenn du im
+                  Vercel Web Analytics wird auf FlensburgDirekt erst geladen, wenn du im
                   Datenschutz-Banner der Kategorie „Statistik“ zugestimmt hast. Die Einwilligung
                   kann jederzeit über die Schaltfläche „Datenschutz“ geändert oder widerrufen
                   werden. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO. Vercel beschreibt Web
@@ -1383,7 +1383,7 @@ export default function HomePage() {
 
                 <h3>Google Analytics 4</h3>
                 <p>
-                  GlücksburgDirekt nutzt Google Analytics 4 von Google zur Auswertung der Nutzung
+                  FlensburgDirekt nutzt Google Analytics 4 von Google zur Auswertung der Nutzung
                   dieser Website. Dabei können insbesondere aufgerufene Seiten, technische
                   Geräte- und Browserinformationen, ungefähre Standortinformationen sowie
                   Nutzungs- und Interaktionsdaten verarbeitet werden. Google Analytics 4 kann
@@ -1409,9 +1409,9 @@ export default function HomePage() {
 
                 <h3>Google AdSense und Werbeanzeigen</h3>
                 <p>
-                  Anbieter des Dienstes ist Google. Der AdSense-Code ist auf GlücksburgDirekt
+                  Anbieter des Dienstes ist Google. Der AdSense-Code ist auf FlensburgDirekt
                   technisch vorbereitet, derzeit aber deaktiviert; solange die Werbeeinbindung
-                  nicht aktiviert ist, werden über GlücksburgDirekt keine
+                  nicht aktiviert ist, werden über FlensburgDirekt keine
                   AdSense-Anzeigenanfragen ausgelöst.
                 </p>
                 <p>
@@ -1437,7 +1437,7 @@ export default function HomePage() {
                 </p>
                 <p>
                   Im Rahmen der Google-Publisher-Produkte handeln der Betreiber von
-                  GlücksburgDirekt und Google hinsichtlich bestimmter Verarbeitungen jeweils als
+                  FlensburgDirekt und Google hinsichtlich bestimmter Verarbeitungen jeweils als
                   eigenständig Verantwortliche. Weitere Informationen zur Datenverarbeitung durch
                   Google und zu Werbeeinstellungen finden sich hier:
                 </p>
@@ -1508,7 +1508,7 @@ export default function HomePage() {
                 <h3>Lokale Speicherung im Browser</h3>
                 <p>
                   Für die ausdrücklich gewünschte Funktion „Adresse und Mülltermine merken“ sowie
-                  zum Speichern deiner Datenschutz-Auswahl nutzt GlücksburgDirekt den Local Storage
+                  zum Speichern deiner Datenschutz-Auswahl nutzt FlensburgDirekt den Local Storage
                   des Browsers. Diese technisch erforderlichen Speicherungen dienen der
                   Bereitstellung der gewünschten Funktionen. Vercel Web Analytics wird erst nach
                   Zustimmung zur Kategorie „Statistik“ geladen. Google AdSense ist derzeit
@@ -1550,7 +1550,7 @@ export default function HomePage() {
 
                 <h3>Affiliate-Links über Stay22</h3>
                 <p>
-                  Im Bereich Unterkünfte verwendet GlücksburgDirekt Affiliate-Links des Anbieters
+                  Im Bereich Unterkünfte verwendet FlensburgDirekt Affiliate-Links des Anbieters
                   Stay22. Der Aufruf von Stay22 erfolgt erst, wenn ein entsprechend gekennzeichneter
                   Unterkunftslink bewusst angeklickt wird. Stay22 leitet anschließend zu einem
                   passenden externen Buchungsanbieter weiter. Dabei können technisch erforderliche
@@ -1617,8 +1617,8 @@ export default function HomePage() {
 
           <footer className="site-footer">
             <div className="footer-note">
-              <span>GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
-              <span>Kein offizielles Angebot der Stadt Glücksburg (Ostsee).</span>
+              <span>FlensburgDirekt ist ein privates, unabhängiges Informationsangebot.</span>
+              <span>Kein offizielles Angebot der Stadt Flensburg, der Gemeinde Harrislee oder der Stadt Glücksburg.</span>
               <button
                 type="button"
                 className="footer-link"
