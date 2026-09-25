@@ -48,9 +48,21 @@ type Beach = {
   officialBathingData: boolean;
 };
 
+type AreaCondition = {
+  id: string;
+  name: string;
+  role: "Fokus" | "Zusatz";
+  temperature: number;
+  windSpeed: number;
+  rainProbability: number;
+  weatherCode: number;
+  weatherLabel: string;
+};
+
 type LiveData = {
   generatedAt: string;
   location: { name: string; areas?: string[] };
+  areaConditions: AreaCondition[];
   weather: {
     temperature: number;
     apparentTemperature: number;
@@ -310,6 +322,30 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                 🌊 Pegel: <strong>{data.pegel ? data.pegel.trend : "—"}</strong>
               </span>
             </div>
+          </section>
+        ) : null}
+
+        {data?.areaConditions?.length ? (
+          <section className={styles.areaStrip} aria-label="Förde-Region im Live-Vergleich">
+            {data.areaConditions.map((area) => (
+              <article
+                className={styles.areaCard + (area.role === "Fokus" ? " " + styles.areaPrimary : "")}
+                key={area.id}
+              >
+                <div className={styles.areaHead}>
+                  <span>
+                    <small>{area.role === "Fokus" ? "Hauptgebiet" : "Ergänzung"}</small>
+                    <strong>{area.name}</strong>
+                  </span>
+                  <em>{area.weatherLabel}</em>
+                </div>
+                <div className={styles.areaMetrics}>
+                  <span>🌡️ <strong>{Math.round(area.temperature)}°</strong></span>
+                  <span>💨 <strong>{Math.round(area.windSpeed)} km/h</strong></span>
+                  <span>🌧️ <strong>{Math.round(area.rainProbability)}%</strong></span>
+                </div>
+              </article>
+            ))}
           </section>
         ) : null}
 
