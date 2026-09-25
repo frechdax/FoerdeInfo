@@ -211,7 +211,7 @@
   color: #fff;
 }
 
-.nextStep .foerde-kicker {
+.nextStep :global(.foerde-kicker) {
   color: #aee6dd;
 }
 
