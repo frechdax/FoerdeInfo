@@ -659,9 +659,26 @@ async function sensorThingsDiagnostics() {
 
 export async function GET(request: NextRequest) {
   if (request.nextUrl.searchParams.get("debug") === "sensor") {
+    const [diagnostics, envResponse] = await Promise.all([
+      sensorThingsDiagnostics(),
+      fetch("https://sensor.odi.schleswig-holstein.de/assets/env.js", {
+        headers: { "user-agent": "foerde.info sensor diagnostics" },
+        signal: AbortSignal.timeout(7000),
+        cache: "no-store",
+      }).then(async (response) => ({
+        status: response.status,
+        contentType: response.headers.get("content-type"),
+        text: (await response.text()).slice(0, 10000),
+      })).catch((error) => ({
+        status: 0,
+        contentType: null,
+        text: error instanceof Error ? error.message : String(error),
+      })),
+    ]);
     return NextResponse.json({
       checkedAt: new Date().toISOString(),
-      diagnostics: await sensorThingsDiagnostics(),
+      diagnostics,
+      env: envResponse,
     });
   }
 
