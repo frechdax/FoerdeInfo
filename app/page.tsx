@@ -107,12 +107,14 @@ function activityScores(weather: Weather): ActivityScore[] {
   const bestOutdoor = Math.max(walk, bike, beach);
   const indoor = clamp(55 + Math.max(0, 65 - bestOutdoor) * 0.75);
 
-  return [
+  const result: ActivityScore[] = [
     { id: "walk", label: "Spaziergang", icon: "🚶", score: walk, verdict: verdict(walk, weather.isDay, "walk") },
     { id: "bike", label: "Fahrrad", icon: "🚲", score: bike, verdict: verdict(bike, weather.isDay, "bike") },
     { id: "beach", label: "Strand", icon: "🏖️", score: beach, verdict: verdict(beach, weather.isDay, "beach") },
     { id: "indoor", label: "Indoor", icon: "🏛️", score: indoor, verdict: verdict(indoor, true, "indoor") },
-  ].sort((a, b) => b.score - a.score);
+  ];
+
+  return result.sort((a, b) => b.score - a.score);
 }
 
 function sourceTime(value: string | null | undefined) {
