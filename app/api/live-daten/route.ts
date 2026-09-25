@@ -6,6 +6,7 @@ import { getSmarteGrenzregionSnapshot, type SgrSnapshot } from "@/lib/smarte-gre
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
+// Production: regional live-data fallbacks enabled.
 
 type Region = (typeof regions)[number];
 
