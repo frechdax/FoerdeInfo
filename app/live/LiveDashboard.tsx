@@ -180,12 +180,52 @@ export default function LiveDashboard() {
 
   const beachScore = data?.scores.find((item) => item.id === "beach")?.score ?? 0;
   const walkScore = data?.scores.find((item) => item.id === "walk")?.score ?? 0;
-  const outdoorGood = beachScore >= 65 || walkScore >= 72;
-  const activityHref =
-    outdoorGood && affiliateLinks.activities.enabled
-      ? affiliateLinks.activities.url
-      : "/freizeit-gluecksburg";
-  const activityIsAffiliate = outdoorGood && affiliateLinks.activities.enabled;
+  const bikeScore = data?.scores.find((item) => item.id === "bike")?.score ?? 0;
+  const outdoorGood = beachScore >= 65 || walkScore >= 72 || bikeScore >= 72;
+
+  const dynamicOffers = data
+    ? [
+        ...(affiliateLinks.activities.enabled && beachScore >= 72 && data.weather.windSpeed <= 28
+          ? [{
+              id: "sailing",
+              icon: "⛵",
+              badge: "Werbung · Affiliate-Link",
+              title: "Segeltörn auf der Flensburger Förde",
+              description: `Passt heute besonders gut: Strand-Index ${beachScore}/100 · Wind ${Math.round(data.weather.windSpeed)} km/h.`,
+              href: affiliateLinks.activities.offers.sailing,
+              provider: affiliateLinks.activities.provider,
+              affiliate: true,
+            }]
+          : []),
+        ...(affiliateLinks.activities.enabled && walkScore >= 70
+          ? [{
+              id: "history-walk",
+              icon: "🚶",
+              badge: "Werbung · Affiliate-Link",
+              title: "Historischer Stadtrundgang in Flensburg",
+              description: `Gute Bedingungen für draußen: Spaziergang ${walkScore}/100 · Regenrisiko ${Math.round(data.weather.rainProbability3h)} %.`,
+              href: affiliateLinks.activities.offers.historyWalk,
+              provider: affiliateLinks.activities.provider,
+              affiliate: true,
+            }]
+          : []),
+      ].slice(0, 2)
+    : [];
+
+  const fallbackOffer = {
+    id: "fallback",
+    icon: outdoorGood ? "🚤" : "☔",
+    badge: "Redaktionell",
+    title: outdoorGood ? "Freizeit & Förde entdecken" : "Schietwetter? Indoor & Freizeit",
+    description: outdoorGood
+      ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
+      : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind.",
+    href: "/freizeit-gluecksburg",
+    provider: "GlücksburgDirekt",
+    affiliate: false,
+  };
+
+  const recommendedOffers = dynamicOffers.length ? dynamicOffers : [fallbackOffer];
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -422,40 +462,29 @@ export default function LiveDashboard() {
                   <em>Unterkünfte ansehen ↗</em>
                 </a>
 
-                <a
-                  className={styles.referralCard}
-                  href={activityHref}
-                  {...(activityIsAffiliate
-                    ? { target: "_blank", rel: "sponsored noreferrer" }
-                    : {})}
-                  onClick={() =>
-                    trackReferralClick(
-                      outdoorGood ? "Aktivitäten bei gutem Wetter" : "Schietwetter Freizeit",
-                      activityIsAffiliate ? affiliateLinks.activities.provider : "GlücksburgDirekt",
-                      activityIsAffiliate
-                    )
-                  }
-                >
-                  <span className={styles.referralIcon} aria-hidden="true">
-                    {outdoorGood ? "🚤" : "☔"}
-                  </span>
-                  <span className={styles.referralBadge + " " + (!activityIsAffiliate ? styles.editorialBadge : "")}>
-                    {activityIsAffiliate ? "Werbung · Affiliate-Link" : "Redaktionell"}
-                  </span>
-                  <strong>
-                    {outdoorGood
-                      ? activityIsAffiliate
-                        ? "Erlebnisse rund um Flensburg & Förde"
-                        : "Freizeit & Förde entdecken"
-                      : "Schietwetter? Indoor & Freizeit"}
-                  </strong>
-                  <p>
-                    {outdoorGood
-                      ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
-                      : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind."}
-                  </p>
-                  <em>{activityIsAffiliate ? "Aktivitäten ansehen ↗" : "Freizeitideen öffnen →"}</em>
-                </a>
+                {recommendedOffers.map((offer) => (
+                  <a
+                    className={styles.referralCard}
+                    href={offer.href}
+                    {...(offer.affiliate ? { target: "_blank", rel: "sponsored noreferrer" } : {})}
+                    onClick={() =>
+                      trackReferralClick(
+                        offer.title,
+                        offer.provider,
+                        offer.affiliate
+                      )
+                    }
+                    key={offer.id}
+                  >
+                    <span className={styles.referralIcon} aria-hidden="true">{offer.icon}</span>
+                    <span className={styles.referralBadge + " " + (!offer.affiliate ? styles.editorialBadge : "")}>
+                      {offer.badge}
+                    </span>
+                    <strong>{offer.title}</strong>
+                    <p>{offer.description}</p>
+                    <em>{offer.affiliate ? "Verfügbarkeit & Preis prüfen ↗" : "Freizeitideen öffnen →"}</em>
+                  </a>
+                ))}
 
                 <a
                   className={styles.referralCard}
