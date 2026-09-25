@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { track } from "@vercel/analytics";
 import { stay22AccommodationUrl, stay22AffiliateEnabled } from "@/lib/stay22";
+import LiveDashboard from "@/app/live/LiveDashboard";
 
 type View =
   | "home"
@@ -964,6 +965,7 @@ export default function HomePage() {
 
           {view === "home" && (
             <>
+              <LiveDashboard embedded />
               <div className="home-intro-grid">
                 <section className="welcome">
                   <div>
