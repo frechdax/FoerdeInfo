@@ -383,3 +383,107 @@
   font-size: .68rem;
   line-height: 1.4;
 }
+
+
+.liveSignalSection {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 15px;
+  border: 1px solid #d7e9e5;
+  border-radius: 15px;
+  background: #f4faf8;
+}
+
+.liveSignalHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.liveSignalHeading h3 {
+  margin: 3px 0 0;
+  font-size: 1.02rem;
+}
+
+.liveSignalHeading a {
+  align-self: flex-start;
+  color: #176c73;
+  font-size: .74rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.liveSignalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.liveSignalCard {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  border: 1px solid #dcebea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.liveSignalTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.liveSignalTop > span {
+  font-size: 1.05rem;
+}
+
+.liveSignalTop b {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #dff3e7;
+  color: #1e7048;
+  font-size: .58rem;
+  letter-spacing: .04em;
+}
+
+.liveSignalCard > strong {
+  font-size: .8rem;
+}
+
+.liveSignalCard > span {
+  color: #254f58;
+  font-size: .72rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.liveSignalCard > small,
+.liveSignalNote {
+  color: #6b8087;
+  font-size: .66rem;
+  line-height: 1.4;
+}
+
+.liveSignalNote {
+  margin: 0;
+}
+
+@media (min-width: 700px) {
+  .liveSignalHeading {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .liveSignalHeading a {
+    align-self: auto;
+  }
+
+  .liveSignalGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
