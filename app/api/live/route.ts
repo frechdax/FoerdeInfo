@@ -8,7 +8,6 @@ const FLENSBURG_PEGEL_UUID = "9e19c411-f728-4a43-a057-39d4155c71cc";
 const FLENSBURG_WARNCELL = "101001000";
 const SCHLESWIG_FLENSBURG_WARNCELL = "101059000";
 const BATHING_BASE = "https://efi2.schleswig-holstein.de/bg/opendata";
-const DANORD_URL = "https://danord.gdi-sh.de/viewer/resources/apps/BuFPlaene/index.html";
 
 type WeatherPayload = {
   current?: {
@@ -512,76 +511,6 @@ function buildBestTimes(
   });
 }
 
-async function loadChanges() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://wggtdpyzkeneyfywcume.supabase.co";
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    "sb_publishable_goBV5794K15cywyrAFSRpg_RdEpycrg";
-
-  const headers = {
-    apikey: supabaseKey,
-    Authorization: "Bearer " + supabaseKey,
-  };
-
-  const queries = [
-    fetch(
-      supabaseUrl +
-        "/rest/v1/official_notices?select=id,published_at,title,source_url&order=published_at.desc.nullslast&limit=80",
-      { headers, next: { revalidate: 900 } }
-    ).then((response) => (response.ok ? response.json() : [])),
-    fetch(
-      supabaseUrl +
-        "/rest/v1/rathaus_news?select=id,published_at,title,source_url&order=published_at.desc.nullslast&limit=80",
-      { headers, next: { revalidate: 900 } }
-    ).then((response) => (response.ok ? response.json() : [])),
-  ];
-
-  const [notices, news] = await Promise.all(queries);
-  const keywords =
-    /(bebauungsplan|bauleit|flächennutzungsplan|flaechennutzungsplan|baugebiet|baustell|straßenbau|strassenbau|sperrung|vollsperr|teilsperr|verkehr|sanierung|ausbau|erschließ|erschliess|planung|bauvorhaben|satzung)/i;
-
-  const sourceItems = [
-    ...(notices as Array<Record<string, unknown>>).map((item) => ({
-      ...item,
-      sourceType: "Amtliche Bekanntmachung",
-    })),
-    ...(news as Array<Record<string, unknown>>).map((item) => ({
-      ...item,
-      sourceType: "Rathaus",
-    })),
-  ] as Array<Record<string, unknown> & { sourceType: string }>;
-
-  const normalized = sourceItems
-    .filter((item) => keywords.test(String(item.title || "")))
-    .map((item) => {
-      const title = String(item.title || "");
-      const category = /bebauungsplan|bauleit|flächennutzungsplan|flaechennutzungsplan|satzung/i.test(title)
-        ? "Bauleitplanung"
-        : /sperrung|vollsperr|teilsperr|verkehr|straßenbau|strassenbau|baustell/i.test(title)
-          ? "Straße & Verkehr"
-          : "Bau & Entwicklung";
-
-      return {
-        id: String(item.sourceType || "") + "-" + String(item.id || title),
-        title,
-        publishedAt: item.published_at ? String(item.published_at) : null,
-        sourceUrl: String(item.source_url || DANORD_URL),
-        sourceType: String(item.sourceType || "Amtliche Quelle"),
-        category,
-      };
-    })
-    .sort((a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
-
-  const seen = new Set<string>();
-  return normalized.filter((item) => {
-    const key = item.title.toLocaleLowerCase("de").trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).slice(0, 6);
-}
-
 async function loadBeaches(
   beachWeatherScore: number,
   uvIndex: number,
@@ -713,7 +642,7 @@ export async function GET() {
     FLENSBURG_PEGEL_UUID +
     "/W";
 
-  const [weatherResult, currentPegelResult, pegelHistoryResult, warningsResult, changesResult] =
+  const [weatherResult, currentPegelResult, pegelHistoryResult, warningsResult] =
     await Promise.allSettled([
       fetch(weatherUrl, { next: { revalidate: 300 } }).then(async (response) => {
         if (!response.ok) throw new Error("Weather API unavailable");
@@ -737,7 +666,6 @@ export async function GET() {
         if (!response.ok) throw new Error("DWD warnings unavailable");
         return parseDwdJson(await response.text());
       }),
-      loadChanges(),
     ]);
 
   if (weatherResult.status === "rejected") {
@@ -929,8 +857,6 @@ export async function GET() {
     scores,
     bestTimes,
     beaches,
-    changes: changesResult.status === "fulfilled" ? changesResult.value : [],
-    planningSourceUrl: DANORD_URL,
     pegel,
     warnings,
     sources: [
@@ -958,11 +884,6 @@ export async function GET() {
         name: "Stadt Flensburg",
         purpose: "Badewasserqualität Solitüde und Ostseebad",
         url: "https://www.flensburg.de/Leben-Soziales/Gesundheitsdienste/Infektionsschutz/Hygiene-Umweltmedizin/Badewasserqualit%C3%A4t/",
-      },
-      {
-        name: "Digitaler Atlas Nord",
-        purpose: "Bauleitplanung Schleswig-Holstein",
-        url: DANORD_URL,
       },
     ],
   });
