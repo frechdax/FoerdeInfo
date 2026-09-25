@@ -20,6 +20,7 @@ type WeatherPayload = {
     wind_speed_10m?: number;
     wind_gusts_10m?: number;
     wind_direction_10m?: number;
+    is_day?: number;
   };
   hourly?: {
     time?: string[];
@@ -144,13 +145,15 @@ function activityVerdict(
   activity: ActivityId,
   score: number,
   isDay: boolean,
-  recentRainMm: number
+  recentRainMm: number,
+  localHour: number
 ) {
-  if (!isDay && activity === "beach") return "Für heute zu spät";
-  if (!isDay && activity === "playground") return "Für heute zu spät";
-  if (!isDay && activity === "bike") return "Nur mit guter Beleuchtung";
-  if (!isDay && activity === "walk") return "Okay, aber dunkel";
-  if (!isDay && activity === "outside") return "Abend / dunkel";
+  const beforeNoon = localHour < 12;
+  if (!isDay && activity === "beach") return beforeNoon ? "Noch zu früh / dunkel" : "Für heute zu spät";
+  if (!isDay && activity === "playground") return beforeNoon ? "Noch zu früh / dunkel" : "Für heute zu spät";
+  if (!isDay && activity === "bike") return beforeNoon ? "Noch dunkel · Licht nötig" : "Nur mit guter Beleuchtung";
+  if (!isDay && activity === "walk") return beforeNoon ? "Noch dunkel" : "Okay, aber dunkel";
+  if (!isDay && activity === "outside") return beforeNoon ? "Morgen / noch dunkel" : "Abend / dunkel";
   if (recentRainMm >= 0.3 && activity === "playground") return "Flächen wahrscheinlich nass";
   if (recentRainMm >= 0.3 && activity === "beach") return "Nass und eher ungemütlich";
   return scoreLabel(score);
@@ -720,6 +723,7 @@ export async function GET() {
       "wind_speed_10m",
       "wind_gusts_10m",
       "wind_direction_10m",
+      "is_day",
     ].join(","),
     hourly: [
       "temperature_2m",
@@ -796,7 +800,13 @@ export async function GET() {
     .slice(Math.max(0, currentIndex - 2), currentIndex + 1)
     .reduce((sum, value) => sum + Number(value || 0), 0);
   const currentUv = Number((hourly.uv_index ?? [])[currentIndex] ?? 0);
-  const currentIsDay = Number((hourly.is_day ?? [])[currentIndex] ?? 1) === 1;
+  // Für "jetzt" den minutengenauen aktuellen Tageslichtwert verwenden.
+  // Der stündliche Wert (z. B. 07:00) kann nach Sonnenaufgang noch "Nacht" melden.
+  const currentIsDay =
+    current.is_day !== undefined
+      ? Number(current.is_day) === 1
+      : Number((hourly.is_day ?? [])[currentIndex] ?? 1) === 1;
+  const currentLocalHour = Number(current.time?.slice(11, 13) ?? 12);
 
   let warnings: Array<{
     headline: string;
@@ -843,7 +853,7 @@ export async function GET() {
       label: meta.label,
       icon: meta.icon,
       score,
-      verdict: activityVerdict(id, score, currentIsDay, recentRainMm),
+      verdict: activityVerdict(id, score, currentIsDay, recentRainMm, currentLocalHour),
       tone: scoreTone(score),
     };
   });
@@ -928,6 +938,7 @@ export async function GET() {
       recentRainMm: Math.round(recentRainMm * 10) / 10,
       surfaceWet: recentRainMm >= 0.3,
       uvIndex: currentUv,
+      isDay: currentIsDay,
       observedAt: current.time ?? null,
     },
     scores,
