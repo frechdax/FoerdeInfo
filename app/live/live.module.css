@@ -571,7 +571,8 @@
   min-height:185px;
 }
 .homeEmbed [data-home-section="best-times"],
-.homeEmbed [data-home-section="beaches"]{
+.homeEmbed [data-home-section="beaches"],
+.homeEmbed [data-home-section="sources"]{
   grid-column:1 / -1;
   margin-top:0;
 }
@@ -623,6 +624,7 @@
   .homeEmbed .referralSection,
   .homeEmbed [data-home-section="best-times"],
   .homeEmbed [data-home-section="beaches"],
+  .homeEmbed [data-home-section="sources"],
   .homeEmbedFooter{
     grid-column:1;
   }
