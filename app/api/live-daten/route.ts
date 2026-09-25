@@ -45,6 +45,8 @@ type SensorObservation = {
 
 const ODI_BASES = [
   "https://sensor.odi.schleswig-holstein.de/FROST-Server/v1.1",
+  "https://sensor.odi.schleswig-holstein.de/FROST/v1.1",
+  "https://sensor.odi.schleswig-holstein.de/api/v1.1",
   "https://sensor.odi.schleswig-holstein.de/v1.1",
 ];
 
@@ -623,7 +625,46 @@ async function sharingModule(region: Region): Promise<LiveModule> {
   }
 }
 
+async function sensorThingsDiagnostics() {
+  return Promise.all(
+    ODI_BASES.map(async (base) => {
+      try {
+        const response = await fetch(base + "/Datastreams?$top=1", {
+          headers: {
+            accept: "application/json",
+            "user-agent": "foerde.info sensor diagnostics",
+          },
+          signal: AbortSignal.timeout(7000),
+          cache: "no-store",
+        });
+        const text = await response.text();
+        return {
+          base,
+          ok: response.ok,
+          status: response.status,
+          contentType: response.headers.get("content-type"),
+          sample: text.slice(0, 300),
+        };
+      } catch (error) {
+        return {
+          base,
+          ok: false,
+          status: 0,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    })
+  );
+}
+
 export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get("debug") === "sensor") {
+    return NextResponse.json({
+      checkedAt: new Date().toISOString(),
+      diagnostics: await sensorThingsDiagnostics(),
+    });
+  }
+
   const id = request.nextUrl.searchParams.get("ort") ?? "flensburg";
   const region = getRegion(id) ?? regions[0];
 
