@@ -722,3 +722,5 @@ export async function GET(request: NextRequest) {
 }
 
 // Keep production diagnostics deployable while SensorThings endpoint is verified.
+
+// Diagnostic merge trigger for production SensorThings endpoint verification.
