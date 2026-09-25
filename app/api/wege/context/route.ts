@@ -6,7 +6,7 @@ export async function GET() {
   const [weather, warnings, pegel] = await Promise.allSettled([
     fetch("https://api.open-meteo.com/v1/forecast?latitude=54.81&longitude=9.48&current=temperature_2m,precipitation,wind_speed_10m&hourly=precipitation_probability&forecast_hours=3&timezone=Europe%2FBerlin", { next: { revalidate: 300 } }).then(async r => { if (!r.ok) throw new Error(); return r.json(); }),
     fetch("https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json", { next: { revalidate: 300 } }).then(async r => { if (!r.ok) throw new Error(); const body = await r.text(); return JSON.parse(body.replace(/^[^(]*\(/, "").replace(/\);?\s*$/, "")); }),
-    fetch("https://pegelonline.wsv.de/webservices/rest-api/v2/stations/9e19c411-f728-4a43-a057-39d4155c71cc/currentmeasurement.json", { next: { revalidate: 300 } }).then(async r => { if (!r.ok) throw new Error(); return r.json(); }),
+    fetch("https://pegelonline.wsv.de/webservices/rest-api/v2/stations/9e19c411-f728-4a43-a057-39d4155c71cc/W/currentmeasurement.json", { next: { revalidate: 300 } }).then(async r => { if (!r.ok) throw new Error(); return r.json(); }),
   ]);
   const w = weather.status === "fulfilled" ? weather.value : null;
   const warningMap = warnings.status === "fulfilled" ? warnings.value?.warnings : null;
