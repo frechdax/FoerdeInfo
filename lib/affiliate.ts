@@ -4,7 +4,7 @@ import {
 } from "@/lib/stay22";
 
 const getYourGuidePartnerId =
-  process.env.NEXT_PUBLIC_GETYOURGUIDE_PARTNER_ID?.trim() || "";
+  process.env.NEXT_PUBLIC_GETYOURGUIDE_PARTNER_ID?.trim() || "XVPC5K2";
 
 function withPartnerId(url: string) {
   if (!getYourGuidePartnerId) return url;
