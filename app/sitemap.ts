@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified, changeFrequency: "daily", priority: 1 },
     { url: `${baseUrl}/live`, lastModified, changeFrequency: "hourly", priority: 0.95 },
+    { url: `${baseUrl}/wege`, lastModified, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/orte/flensburg`, lastModified, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/orte/wassersleben`, lastModified, changeFrequency: "daily", priority: 0.85 },
     { url: `${baseUrl}/orte/gluecksburg`, lastModified, changeFrequency: "daily", priority: 0.85 },

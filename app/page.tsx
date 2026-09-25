@@ -44,7 +44,7 @@ export default function HomePage() {
         <header className="foerde-header">
           <a href="/" className="foerde-brand" aria-label="Förde.info Startseite">⚓ <strong>förde.info</strong></a>
           <nav aria-label="Bereiche">
-            <a href="#orte">Orte</a><a href="/live">Live</a>
+            <a href="#orte">Orte</a><a href="/wege">Wegecheck</a><a href="/live">Live</a>
             <a href="/veranstaltungen">Veranstaltungen</a><a href="/urlaub">Entdecken</a>
             <a href="/gluecksburg#impressum">Impressum</a>
           </nav>
@@ -94,6 +94,7 @@ export default function HomePage() {
         </section>
 
         <section className="foerde-actions" aria-label="Praktische Informationen">
+          <article><span>🚶</span><h2>Komm ich da durch?</h2><p>Wege prüfen und Hindernisse in der Nachbarschaft melden.</p><a href="/wege">Wegecheck öffnen →</a></article>
           <article><span>📅</span><h2>Veranstaltungen</h2><p>Termine in der Region und Kalender der jeweiligen Veranstalter.</p><a href="/veranstaltungen">Termine ansehen →</a></article>
           <article><span>🏖️</span><h2>Strände in {region.name}</h2><p>Badestellen und veröffentlichte Einstufungen für deinen Ort ansehen.</p><a href={`/orte/${region.id}`}>Ort entdecken →</a></article>
           <article><span>🧭</span><h2>Freizeit & Urlaub</h2><p>Ideen und Originalquellen für alle vier Orte an der Förde.</p><a href="/urlaub">Region entdecken →</a></article>

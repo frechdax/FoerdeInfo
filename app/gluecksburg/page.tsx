@@ -1465,6 +1465,31 @@ export default function HomePage() {
                   Einwilligung geladen.
                 </p>
 
+                <h3>Wegecheck, Karte und freiwilliger Standort</h3>
+                <p>
+                  Im Wegecheck werden Kartenbilder direkt von OpenStreetMap geladen. Dabei erhält
+                  der Kartendienst technisch erforderliche Verbindungsdaten. Die Suche nach einem
+                  eingegebenen Ort verwendet Nominatim. Zur Routenberechnung werden Start und Ziel
+                  an den Routingdienst von FOSSGIS übermittelt. Eine Standortfreigabe über den
+                  Browser wird erst nach Tippen auf „Meinen Standort verwenden“ angefragt;
+                  alternativ können Start und Ziel manuell gesetzt werden. Die Position wird nicht
+                  als Standortverlauf gespeichert. FOSSGIS kann Routenanfragen protokollieren.
+                </p>
+                <p>
+                  Freiwillig eingereichte Hindernismeldungen einschließlich Beschreibung, Position
+                  und optionalem Foto sind für andere Nutzer öffentlich sichtbar. Meldungen und
+                  Bilder werden nach 48 Stunden ausgeblendet und durch einen stündlichen Job
+                  gelöscht. Ein zufällig erzeugter Kennwert im Local Storage verhindert, dass
+                  derselbe Browser dieselbe Meldung mehrfach bestätigt. Ohne Anmeldung ist eine
+                  eindeutige Prüfung verschiedener Personen nicht möglich. Bestätigungen entfernen
+                  deshalb keine Meldung. Bitte keine Personen,
+                  Kennzeichen oder privaten Informationen in Meldungen aufnehmen.
+                </p>
+                <p>
+                  <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap und Kartenlizenz ↗</a>
+                  {" · "}<a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noreferrer">FOSSGIS-Routing und Datenschutzhinweise ↗</a>
+                </p>
+
                 <h3>Wetterdaten von Open-Meteo</h3>
                 <p>
                   Für die Wetteranzeige wird die API der OpenMeteo GmbH, Hintere Schilligmatte 6,
@@ -1559,7 +1584,7 @@ export default function HomePage() {
                   Datenverarbeitungen, verwendete Dienste oder die maßgebliche Rechtslage ändern.
                 </p>
 
-                <p className="legal-updated">Stand: 22. September 2026 · ergänzt um Datenschutz-Einstellungen, Stay22, Google AdSense und Vercel Web Analytics</p>
+                <p className="legal-updated">Stand: 25. September 2026 · ergänzt um den Wegecheck</p>
               </section>
             </>
           )}
