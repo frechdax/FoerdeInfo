@@ -474,8 +474,8 @@ export default function HomePage() {
     async function loadWeather() {
       try {
         const params = new URLSearchParams({
-          latitude: "54.8357",
-          longitude: "9.5487",
+          latitude: "54.7937",
+          longitude: "9.4469",
           current: "temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,is_day",
           daily: "temperature_2m_max,temperature_2m_min",
           timezone: "Europe/Berlin",
@@ -523,7 +523,11 @@ export default function HomePage() {
         supabase
           .from("pharmacy_duty")
           .select("pharmacy_name,street,postal_code,city,duty_start,duty_end,distance_km,source_url,last_synced_at")
-          .eq("key", "gluecksburg")
+          .eq("city", "Flensburg")
+          .lte("duty_start", new Date().toISOString())
+          .gt("duty_end", new Date().toISOString())
+          .order("duty_start", { ascending: false })
+          .limit(1)
           .maybeSingle(),
       ]);
 
@@ -553,7 +557,7 @@ export default function HomePage() {
     const lines = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//GlücksburgDirekt//Veranstaltungen//DE",
+      "PRODID:-//FlensburgDirekt//Veranstaltungen//DE",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",
