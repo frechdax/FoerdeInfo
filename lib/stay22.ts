@@ -4,9 +4,9 @@ export const stay22AffiliateEnabled = true;
 
 const stay22Params = new URLSearchParams({
   aid: stay22Aid,
-  address: "Glücksburg, Schleswig-Holstein, Germany",
+  address: "Flensburg, Schleswig-Holstein, Germany",
   source: "direct",
-  campaign: "gluecksburg-unterkunft",
+  campaign: "flensburg-unterkunft",
 });
 
 export const stay22AccommodationUrl =
