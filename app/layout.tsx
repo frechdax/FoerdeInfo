@@ -11,29 +11,28 @@ const googleVerification =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "GlücksburgDirekt – Veranstaltungen, Freizeit, Urlaub und mehr",
-    template: "%s | GlücksburgDirekt",
+    default: "FlensburgDirekt – Wetter, Förde, Strände & aktuelle Tipps",
+    template: "%s | FlensburgDirekt",
   },
   description:
-    "Urlaubstipps, Veranstaltungen, Familienangebote, Rathaus-News und Müllkalender für Glücksburg (Ostsee) – lokal, kompakt und unabhängig.",
+    "Aktuelle Informationen für Flensburg mit Wassersleben und Glücksburg: Wetter, Fördepegel, Strandbedingungen, Warnungen und passende Tipps.",
   alternates: { canonical: "/" },
   keywords: [
+    "Flensburg",
+    "Flensburg Förde",
+    "Wetter Flensburg",
+    "Flensburg heute",
+    "Strand Flensburg",
+    "Solitüde",
+    "Ostseebad Flensburg",
+    "Wassersleben",
     "Glücksburg",
-    "Glücksburg Ostsee",
-    "Müllkalender Glücksburg",
-    "Müllabfuhr Glücksburg",
-    "Veranstaltungen Glücksburg",
-    "Was ist los in Glücksburg",
-    "Urlaub Glücksburg",
-    "Ferienwohnung Glücksburg",
-    "Hotel Glücksburg",
-    "Rathaus Glücksburg",
-    "Familie Glücksburg",
+    "Fördepegel Flensburg",
   ],
-  applicationName: "GlücksburgDirekt",
-  authors: [{ name: "GlücksburgDirekt" }],
-  creator: "GlücksburgDirekt",
-  publisher: "GlücksburgDirekt",
+  applicationName: "FlensburgDirekt",
+  authors: [{ name: "FlensburgDirekt" }],
+  creator: "FlensburgDirekt",
+  publisher: "FlensburgDirekt",
   category: "Lokales",
   other: {
     "google-adsense-account": "ca-pub-8846945812828956",
@@ -53,16 +52,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "de_DE",
     url: siteUrl,
-    siteName: "GlücksburgDirekt",
-    title: "GlücksburgDirekt – Veranstaltungen, Freizeit, Urlaub und mehr",
+    siteName: "FlensburgDirekt",
+    title: "FlensburgDirekt – Wetter, Förde, Strände & aktuelle Tipps",
     description:
-      "Urlaubstipps, Veranstaltungen, Freizeit, Familienangebote und Müllkalender für Glücksburg (Ostsee).",
+      "Wetter, Fördepegel, Strandbedingungen und aktuelle Tipps für Flensburg, Wassersleben und Glücksburg.",
   },
   twitter: {
     card: "summary",
-    title: "GlücksburgDirekt – Veranstaltungen, Freizeit, Urlaub und mehr",
+    title: "FlensburgDirekt – Wetter, Förde, Strände & aktuelle Tipps",
     description:
-      "Veranstaltungen, Freizeit, Urlaubstipps und lokale Informationen für Glücksburg.",
+      "Aktuelle lokale Informationen für Flensburg mit Wassersleben und Glücksburg.",
   },
   ...(googleVerification
     ? { verification: { google: googleVerification } }
@@ -73,10 +72,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const websiteStructuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "GlücksburgDirekt",
+    name: "FlensburgDirekt",
     url: siteUrl,
     description:
-      "Privates, unabhängiges Informationsangebot für Glücksburg (Ostsee).",
+      "Privates, unabhängiges Informationsangebot für Flensburg und die Flensburger Förderegion mit Wassersleben und Glücksburg.",
     inLanguage: "de-DE",
   };
 
