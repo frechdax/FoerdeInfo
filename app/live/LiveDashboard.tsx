@@ -293,7 +293,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               {loading
                 ? "Aktualisiere …"
                 : data
-                  ? "Aktualisiert " + formatTime(data.generatedAt) + " Uhr · ↻"
+                  ? "Stand " + formatTime(data.generatedAt) + " Uhr · ↻"
                   : "Live-Daten laden · ↻"}
             </span>
           </button>
