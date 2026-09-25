@@ -3,19 +3,47 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { inArea, pointToRouteMeters, type Point, type WayMode, type WayReport } from "@/lib/wege";
+import { affiliateLinks } from "@/lib/affiliate";
+import liveStyles from "../live/live.module.css";
 import styles from "./wege.module.css";
 
 const WegeMap = dynamic(() => import("./WegeMap"), { ssr: false, loading: () => <div className={styles.mapLoading}>Karte lädt …</div> });
 
 type Vote = { still: number; clear: number };
 type Route = { coordinates: [number, number][]; distance: number; duration: number; message: string | null };
-type WeatherContext = {
-  updatedAt: string;
-  weather: { temperature: number; wind: number; rain: number; rainNextHours: number; observedAt: string } | null;
-  warnings: { headline: string; endsAt?: number; region: string }[];
-  warningsAvailable: boolean;
-  pegel: { value: number; timestamp: string } | null;
-  sources: { weather: string; warnings: string; pegel: string; closures: string };
+type LiveScore = {
+  id: string;
+  label: string;
+  icon: string;
+  score: number;
+  verdict: string;
+  tone: "good" | "mixed" | "poor";
+};
+type BestTime = {
+  id: string;
+  label: string;
+  icon: string;
+  start: string | null;
+  end: string | null;
+  score: number | null;
+  rainProbability: number | null;
+  windSpeed: number | null;
+  uvIndex: number | null;
+  verdict: string;
+};
+type LiveData = {
+  generatedAt: string;
+  weather: {
+    windSpeed: number;
+    rainProbability3h: number;
+    uvIndex: number;
+  };
+  scores: LiveScore[];
+  bestTimes: BestTime[];
+  pegel: null | {
+    trend: "steigend" | "fallend" | "stabil";
+  };
+  warnings: Array<{ headline: string; level: number }>;
 };
 type Match = Point & { label: string };
 
@@ -60,7 +88,7 @@ export default function WegeApp() {
   const [reports, setReports] = useState<WayReport[]>([]);
   const [votes, setVotes] = useState<Record<string, Vote>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [context, setContext] = useState<WeatherContext | null>(null);
+  const [liveData, setLiveData] = useState<LiveData | null>(null);
   const [kind, setKind] = useState<WayReport["kind"]>("blocked");
   const [reportMode, setReportMode] = useState<WayReport["mode"]>("all");
   const [description, setDescription] = useState("");
@@ -84,10 +112,17 @@ export default function WegeApp() {
   useEffect(() => {
     reload();
     const poll = window.setInterval(reload, 30_000);
-    const fetchContext = () => fetch("/api/wege/context").then(r => r.ok ? r.json() : null).then(setContext).catch(() => {});
-    fetchContext();
-    const contextPoll = window.setInterval(fetchContext, 300_000);
-    return () => { window.clearInterval(poll); window.clearInterval(contextPoll); };
+    const fetchLiveData = () =>
+      fetch("/api/live", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((value) => setLiveData(value as LiveData | null))
+        .catch(() => {});
+    fetchLiveData();
+    const livePoll = window.setInterval(fetchLiveData, 300_000);
+    return () => {
+      window.clearInterval(poll);
+      window.clearInterval(livePoll);
+    };
   }, [reload]);
 
   const visible = reports;
@@ -178,6 +213,99 @@ export default function WegeApp() {
     if (pick === "report") { setReportPoint(point); setPick(null); setMessage(""); }
   }
 
+  const bestScore =
+    liveData?.scores?.length
+      ? liveData.scores.reduce((best, current) =>
+          current.score > best.score ? current : best
+        )
+      : null;
+  const beachScore =
+    liveData?.scores.find((item) => item.id === "beach")?.score ?? 0;
+  const walkScore =
+    liveData?.scores.find((item) => item.id === "walk")?.score ?? 0;
+  const bikeScore =
+    liveData?.scores.find((item) => item.id === "bike")?.score ?? 0;
+  const outdoorGood = beachScore >= 65 || walkScore >= 72 || bikeScore >= 72;
+
+  const dynamicOffers = liveData
+    ? [
+        ...(affiliateLinks.activities.enabled &&
+        beachScore >= 72 &&
+        liveData.weather.windSpeed <= 28
+          ? [
+              {
+                id: "sailing",
+                icon: "⛵",
+                badge: "Werbung · Affiliate-Link",
+                title: "Segeltörn auf der Flensburger Förde",
+                description:
+                  "Passt heute besonders gut: Strand-Index " +
+                  beachScore +
+                  "/100 · Wind " +
+                  Math.round(liveData.weather.windSpeed) +
+                  " km/h.",
+                href: affiliateLinks.activities.offers.sailing,
+                affiliate: true,
+              },
+            ]
+          : []),
+        ...(affiliateLinks.activities.enabled &&
+        beachScore >= 75 &&
+        liveData.weather.windSpeed <= 22
+          ? [
+              {
+                id: "e-boat",
+                icon: "🚤",
+                badge: "Werbung · Affiliate-Link",
+                title: "E-Boot auf der Flensburger Förde mieten",
+                description:
+                  "Sehr passend für ruhiges Fördewetter: Strand-Index " +
+                  beachScore +
+                  "/100 · Wind " +
+                  Math.round(liveData.weather.windSpeed) +
+                  " km/h.",
+                href: affiliateLinks.activities.offers.eBoat,
+                affiliate: true,
+              },
+            ]
+          : []),
+        ...(affiliateLinks.activities.enabled &&
+        walkScore >= 72 &&
+        liveData.weather.rainProbability3h <= 35
+          ? [
+              {
+                id: "running-tour",
+                icon: "🏃",
+                badge: "Werbung · Affiliate-Link",
+                title: "Running- & Sightseeing-Tour durch Flensburg",
+                description:
+                  "Gute Bedingungen für eine aktive Stadttour: Spaziergang " +
+                  walkScore +
+                  "/100 · Regenrisiko " +
+                  Math.round(liveData.weather.rainProbability3h) +
+                  " %.",
+                href: affiliateLinks.activities.offers.runningTour,
+                affiliate: true,
+              },
+            ]
+          : []),
+      ].slice(0, 2)
+    : [];
+
+  const fallbackOffer = {
+    id: "fallback",
+    icon: outdoorGood ? "🚤" : "☔",
+    badge: "Redaktionell",
+    title: outdoorGood ? "Freizeit & Förde entdecken" : "Schietwetter? Indoor & Freizeit",
+    description: outdoorGood
+      ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
+      : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind.",
+    href: "/freizeit-gluecksburg",
+    affiliate: false,
+  };
+
+  const recommendedOffers = dynamicOffers.length ? dynamicOffers : [fallbackOffer];
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
@@ -205,7 +333,161 @@ export default function WegeApp() {
 
         <section className={styles.list} aria-label="Aktuelle Hindernisse"><div className={styles.listTitle}><div><span className={styles.eyebrow}>Aus der Nachbarschaft</span><h2>{route ? "Meldungen an deinem Weg" : "Aktuelle Meldungen"}</h2></div><span>{relevant.length} {relevant.length === 1 ? "Stelle" : "Stellen"}</span></div>{relevant.length ? <div className={styles.reportGrid}>{relevant.map(r => <article key={r.id} className={`${styles.reportCard} ${selectedId === r.id ? styles.reportSelected : ""}`}><div className={styles.reportTop}><span>{kinds[r.kind]}</span><small>{time(r.created_at)} Uhr</small></div><p>{r.description}</p>{(votes[r.id]?.clear || 0) >= 2 && <small>Mehrfach als wieder frei gemeldet – bitte vor Ort prüfen.</small>}{r.photo_data && <a href={r.photo_data} target="_blank" rel="noopener noreferrer" aria-label="Foto der gemeldeten Stelle öffnen"><img src={r.photo_data} alt="Von Nutzern hochgeladenes Foto der gemeldeten Stelle" className={styles.reportPhoto} /></a>}<small>Betroffen: {r.mode === "all" ? "alle" : modes.find(m => m.id === r.mode)?.label} · läuft ab {time(r.expires_at)} Uhr</small><div className={styles.voteActions}><button type="button" onClick={() => vote(r.id, "still")}>Noch da {votes[r.id]?.still ? `(${votes[r.id].still})` : ""}</button><button type="button" onClick={() => vote(r.id, "clear")}>Wieder frei {votes[r.id]?.clear ? `(${votes[r.id].clear})` : ""}</button><button type="button" onClick={() => setSelectedId(r.id)}>Auf Karte</button></div></article>)}</div> : <p className={styles.empty}>{route ? "Für diese Route liegen derzeit keine aktiven Meldungen vor. Das bedeutet nicht, dass jeder Abschnitt frei ist." : "Zurzeit sind keine aktiven Hindernisse gemeldet. Du kannst eine Stelle auf der Karte hinzufügen."}</p>}<small>Bestätigungen ergänzen die Meldung, geben den Weg aber nicht verbindlich frei. Alle Meldungen sind unbestätigte Beobachtungen und verschwinden spätestens nach 48 Stunden.</small></section>
 
-        <aside className={styles.context} aria-label="Weitere aktuelle Informationen"><h2>Für deinen Weg beachten</h2><div className={styles.contextGrid}><div><strong>Wetter an der Förde</strong><p>{context?.weather ? `${Math.round(context.weather.temperature)} °C · Wind ${Math.round(context.weather.wind)} km/h · Regenrisiko nächste Stunden bis ${Math.round(context.weather.rainNextHours)} %` : "Wetterdaten gerade nicht verfügbar"}</p><a href={context?.sources.weather || "https://open-meteo.com/"}>Open-Meteo ↗</a></div><div><strong>Amtliche Wetterwarnungen</strong><p>{context ? !context.warningsAvailable ? "DWD-Warnungen derzeit nicht abrufbar" : context.warnings.length ? context.warnings.map(w => `${w.region}: ${w.headline}`).join(" · ") : "Keine aktuelle Warnung für Flensburg oder Schleswig-Flensburg in dieser Quelle" : "Warnungen werden geladen"}</p><a href={context?.sources.warnings || "https://www.dwd.de/"}>DWD ↗</a></div><div><strong>Fördepegel Flensburg</strong><p>{context?.pegel ? `${context.pegel.value} cm · Messung ${time(context.pegel.timestamp)} Uhr` : "Pegel derzeit nicht verfügbar"}</p><a href={context?.sources.pegel || "https://pegelonline.wsv.de/"}>PEGELONLINE ↗</a></div><div><strong>Amtliche Straßensperrungen</strong><p>Der Flensburger Verkehrsticker ergänzt Meldungen auf der Karte. Seine Einträge sind nicht automatisch als Gehweghindernis verortet.</p><a href={context?.sources.closures || "https://tbz-flensburg.de/de/verkehrsticker"} target="_blank" rel="noopener noreferrer">Verkehrsticker öffnen ↗</a></div></div></aside>
+        {liveData && bestScore ? (
+          <section className={liveStyles.nowSummary} aria-label="Beste Option gerade">
+            <div className={liveStyles.summaryLead}>
+              <span className={liveStyles.summaryIcon} aria-hidden="true">
+                {bestScore.icon}
+              </span>
+              <span>
+                <small>Beste Option gerade</small>
+                <strong>{bestScore.label} · {bestScore.score}/100</strong>
+              </span>
+            </div>
+            <div className={liveStyles.summaryFacts}>
+              <span>🌧️ 3 h: <strong>{Math.round(liveData.weather.rainProbability3h)} %</strong></span>
+              <span>💨 Wind: <strong>{Math.round(liveData.weather.windSpeed)} km/h</strong></span>
+              <span>☀️ UV: <strong>{liveData.weather.uvIndex.toFixed(1)}</strong></span>
+              <span>
+                {liveData.warnings.length ? "⚠️" : "✓"} Warnungen:{" "}
+                <strong>{liveData.warnings.length ? liveData.warnings.length : "keine"}</strong>
+              </span>
+              <span>
+                🌊 Pegel: <strong>{liveData.pegel ? liveData.pegel.trend : "—"}</strong>
+              </span>
+            </div>
+          </section>
+        ) : null}
+
+        {liveData ? (
+          <section className={liveStyles.referralSection} aria-label="Passend für heute">
+            <div className={liveStyles.sectionHeading}>
+              <div>
+                <span className={liveStyles.kicker}>Passend für heute</span>
+                <h2>Was heute besonders gut passt</h2>
+              </div>
+              <span className={liveStyles.updated}>situativ empfohlen</span>
+            </div>
+
+            <div className={liveStyles.referralGrid}>
+              <a
+                className={liveStyles.referralCard}
+                href={affiliateLinks.accommodation.url}
+                target="_blank"
+                rel="sponsored noreferrer"
+              >
+                <span className={liveStyles.referralIcon} aria-hidden="true">🏨</span>
+                <span className={liveStyles.referralBadge}>Werbung · Affiliate-Link</span>
+                <strong>Unterkunft in Glücksburg finden</strong>
+                <p>Hotels, Ferienwohnungen und weitere Übernachtungsmöglichkeiten vergleichen.</p>
+                <em>Unterkünfte ansehen ↗</em>
+              </a>
+
+              {recommendedOffers.map((offer) => (
+                <a
+                  className={liveStyles.referralCard}
+                  href={offer.href}
+                  {...(offer.affiliate
+                    ? { target: "_blank", rel: "sponsored noreferrer" }
+                    : {})}
+                  key={offer.id}
+                >
+                  <span className={liveStyles.referralIcon} aria-hidden="true">
+                    {offer.icon}
+                  </span>
+                  <span
+                    className={
+                      liveStyles.referralBadge +
+                      " " +
+                      (!offer.affiliate ? liveStyles.editorialBadge : "")
+                    }
+                  >
+                    {offer.badge}
+                  </span>
+                  <strong>{offer.title}</strong>
+                  <p>{offer.description}</p>
+                  <em>
+                    {offer.affiliate
+                      ? "Verfügbarkeit & Preis prüfen ↗"
+                      : "Freizeitideen öffnen →"}
+                  </em>
+                </a>
+              ))}
+
+              <a className={liveStyles.referralCard} href="/veranstaltungen">
+                <span className={liveStyles.referralIcon} aria-hidden="true">📅</span>
+                <span className={liveStyles.referralBadge + " " + liveStyles.editorialBadge}>
+                  Redaktionell
+                </span>
+                <strong>Was ist heute in Glücksburg los?</strong>
+                <p>Aktuelle Veranstaltungen und Termine mit dem Live-Check kombinieren.</p>
+                <em>Heute ansehen →</em>
+              </a>
+
+              <a className={liveStyles.referralCard} href="/partner">
+                <span className={liveStyles.referralIcon} aria-hidden="true">🤝</span>
+                <span className={liveStyles.referralBadge + " " + liveStyles.partnerBadge}>
+                  Für Betriebe
+                </span>
+                <strong>Lokaler Anbieter in Glücksburg?</strong>
+                <p>Mit einem passenden Angebot auf förde.info sichtbar werden.</p>
+                <em>Partner werden →</em>
+              </a>
+            </div>
+
+            <p className={liveStyles.affiliateNote}>
+              Affiliate-Hinweis: Bei einer Buchung über entsprechend gekennzeichnete Links kann
+              förde.info eine Provision erhalten. Für dich entstehen dadurch keine zusätzlichen
+              Kosten. Redaktionelle Empfehlungen sind davon unabhängig.
+            </p>
+          </section>
+        ) : null}
+
+        {liveData ? (
+          <section
+            className={liveStyles.featureSection}
+            aria-label="Beste Zeit heute"
+          >
+            <div className={liveStyles.sectionHeading}>
+              <div>
+                <span className={liveStyles.kicker}>Beste Zeit heute</span>
+                <h2>Wann lohnt es sich am meisten?</h2>
+              </div>
+              <span className={liveStyles.updated}>2-Stunden-Fenster · heute</span>
+            </div>
+
+            <div className={liveStyles.bestTimeGrid}>
+              {liveData.bestTimes.map((item) => (
+                <article className={liveStyles.bestTimeCard} key={item.id}>
+                  <div className={liveStyles.bestTimeTop}>
+                    <span className={liveStyles.scoreIcon}>{item.icon}</span>
+                    {item.score !== null ? (
+                      <span className={liveStyles.bestTimeScore}>{item.score}/100</span>
+                    ) : null}
+                  </div>
+                  <h3>{item.label}</h3>
+                  {item.start && item.end ? (
+                    <>
+                      <strong className={liveStyles.timeWindow}>
+                        {item.start}–{item.end} Uhr
+                      </strong>
+                      <span className={liveStyles.bestTimeVerdict}>{item.verdict}</span>
+                      <div className={liveStyles.bestTimeMeta}>
+                        <span>🌧️ {item.rainProbability ?? 0}%</span>
+                        <span>💨 {item.windSpeed ?? 0} km/h</span>
+                        <span>☀️ UV {item.uvIndex ?? 0}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <p className={liveStyles.muted}>
+                      Für heute ist kein sinnvoller Zeitraum mehr verfügbar.
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
         <footer className={styles.footer}><span>Routen: FOSSGIS / OpenStreetMap · Karte: OpenStreetMap-Mitwirkende. Routingdaten können älter sein als die angezeigten Meldungen.</span><a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Kartenfehler melden ↗</a><a href="/gluecksburg#impressum">Impressum & Datenschutz</a></footer>
       </div>
     </main>
