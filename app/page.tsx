@@ -185,7 +185,9 @@ function activityScores(
       icon: "🚶",
       score: walk,
       verdict: verdict(walk, weather.isDay, "walk"),
-      reason:\n        `${Math.round(weather.rainChance)} % Regen · gefühlt ${Math.round(weather.apparentTemperature)} °C` +\n        (live?.trafficFact ? " · " + live.trafficFact : ""),
+      reason:
+        `${Math.round(weather.rainChance)} % Regen · gefühlt ${Math.round(weather.apparentTemperature)} °C` +
+        (live?.trafficFact ? " · " + live.trafficFact : ""),
     },
     {
       id: "bike",
@@ -193,7 +195,9 @@ function activityScores(
       icon: "🚲",
       score: bike,
       verdict: verdict(bike, weather.isDay, "bike"),
-      reason:\n        `Wind ${Math.round(weather.windSpeed)} · Böen ${Math.round(weather.windGusts)} km/h` +\n        (live?.trafficFact ? " · " + live.trafficFact : ""),
+      reason:
+        `Wind ${Math.round(weather.windSpeed)} · Böen ${Math.round(weather.windGusts)} km/h` +
+        (live?.trafficFact ? " · " + live.trafficFact : ""),
     },
     {
       id: "beach",
@@ -254,8 +258,8 @@ function buildLiveRecommendationContext(
       item.label.toLocaleLowerCase("de").includes("solitüde")
     );
     if (solituede) {
-      const free = numberFrom(solituede.value, /(\\d+)\\s*frei/i);
-      const occupiedPercent = numberFrom(solituede.value, /(\\d+)\\s*%/i);
+      const free = numberFrom(solituede.value, /(\d+)\s*frei/i);
+      const occupiedPercent = numberFrom(solituede.value, /(\d+)\s*%/i);
       if (free !== null || occupiedPercent !== null) {
         activeFactors += 1;
         if (occupiedPercent !== null) {
@@ -278,8 +282,8 @@ function buildLiveRecommendationContext(
       item.label.toLocaleLowerCase("de").includes("solitüde")
     );
     if (solituede) {
-      const current = numberFrom(solituede.value, /(\\d+)\\s*aktuell/i);
-      const today = numberFrom(solituede.meta ?? "", /Heute bisher\\s*(\\d+)/i);
+      const current = numberFrom(solituede.value, /(\d+)\s*aktuell/i);
+      const today = numberFrom(solituede.meta ?? "", /Heute bisher\s*(\d+)/i);
       // 0/0 may also mean that the counter is inactive. Display it, but do not score it.
       if (current !== null && ((today ?? 0) > 0 || current > 0)) {
         activeFactors += 1;
@@ -300,7 +304,7 @@ function buildLiveRecommendationContext(
 
   const traffic = liveData.modules.traffic;
   if (isFreshLiveModule(traffic, 15)) {
-    const activeReports = numberFrom(traffic.value, /^(\\d+)\\s+aktive/i);
+    const activeReports = numberFrom(traffic.value, /^(\d+)\s+aktive/i);
     if (activeReports !== null && activeReports > 0) {
       activeFactors += 1;
       const penalty = Math.min(8, activeReports * 2);
