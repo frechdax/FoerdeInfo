@@ -53,6 +53,43 @@ type Feed = {
   sources: { weather: string; bathing: string; warnings: string; marine: string };
 };
 
+type LiveDataItem = {
+  label: string;
+  value: string;
+  meta?: string;
+};
+
+type LiveDataModule = {
+  status: "live" | "partial" | "unavailable";
+  value: string;
+  detail: string;
+  updatedAt: string | null;
+  source: string;
+  sourceUrl: string;
+  items?: LiveDataItem[];
+};
+
+type LiveDataFeed = {
+  updatedAt: string;
+  modules: {
+    parking: LiveDataModule;
+    visitors: LiveDataModule;
+    charging: LiveDataModule;
+    traffic: LiveDataModule;
+    transit: LiveDataModule;
+    sharing: LiveDataModule;
+  };
+};
+
+type LiveRecommendationContext = {
+  beachDelta: number;
+  walkDelta: number;
+  bikeDelta: number;
+  beachFact: string | null;
+  trafficFact: string | null;
+  activeFactors: number;
+};
+
 type ActivityScore = {
   id: "walk" | "bike" | "beach" | "indoor";
   label: string;
@@ -92,7 +129,8 @@ function verdict(score: number, isDay: boolean, id: ActivityScore["id"]) {
 function activityScores(
   weather: Weather,
   warningLevel: number,
-  marine: Marine | null
+  marine: Marine | null,
+  live: LiveRecommendationContext | null = null
 ): ActivityScore[] {
   const wet = weather.rainChance * 0.58 + Math.min(28, weather.precipitation * 16);
   const gust = Math.max(0, weather.windGusts - 35) * 0.75;
@@ -109,7 +147,8 @@ function activityScores(
       tempPenalty(weather.temperature, 16, 10) -
       Math.max(0, weather.uvIndex - 8) * 2 -
       warningPenalty -
-      (weather.isDay ? 0 : 30)
+      (weather.isDay ? 0 : 30) +
+      (live?.walkDelta ?? 0)
   );
 
   const bike = clamp(
@@ -119,7 +158,8 @@ function activityScores(
       gust * 1.2 -
       tempPenalty(weather.temperature, 17, 9) -
       warningPenalty -
-      (weather.isDay ? 0 : 55)
+      (weather.isDay ? 0 : 55) +
+      (live?.bikeDelta ?? 0)
   );
 
   const beach = clamp(
@@ -131,7 +171,8 @@ function activityScores(
       Math.max(0, weather.uvIndex - 7) * 2.5 -
       warningPenalty -
       wavePenalty -
-      (weather.isDay ? 0 : 85)
+      (weather.isDay ? 0 : 85) +
+      (weather.isDay ? live?.beachDelta ?? 0 : 0)
   );
 
   const bestOutdoor = Math.max(walk, bike, beach);
@@ -144,7 +185,7 @@ function activityScores(
       icon: "🚶",
       score: walk,
       verdict: verdict(walk, weather.isDay, "walk"),
-      reason: `${Math.round(weather.rainChance)} % Regen · gefühlt ${Math.round(weather.apparentTemperature)} °C`,
+      reason:\n        `${Math.round(weather.rainChance)} % Regen · gefühlt ${Math.round(weather.apparentTemperature)} °C` +\n        (live?.trafficFact ? " · " + live.trafficFact : ""),
     },
     {
       id: "bike",
@@ -152,7 +193,7 @@ function activityScores(
       icon: "🚲",
       score: bike,
       verdict: verdict(bike, weather.isDay, "bike"),
-      reason: `Wind ${Math.round(weather.windSpeed)} · Böen ${Math.round(weather.windGusts)} km/h`,
+      reason:\n        `Wind ${Math.round(weather.windSpeed)} · Böen ${Math.round(weather.windGusts)} km/h` +\n        (live?.trafficFact ? " · " + live.trafficFact : ""),
     },
     {
       id: "beach",
@@ -161,9 +202,10 @@ function activityScores(
       score: beach,
       verdict: verdict(beach, weather.isDay, "beach"),
       reason:
-        marine?.waveHeight != null
+        (marine?.waveHeight != null
           ? `Welle ${marine.waveHeight.toFixed(1)} m · Wind ${Math.round(weather.windSpeed)} km/h`
-          : `${Math.round(weather.rainChance)} % Regen · Wind ${Math.round(weather.windSpeed)} km/h`,
+          : `${Math.round(weather.rainChance)} % Regen · Wind ${Math.round(weather.windSpeed)} km/h`) +
+        (live?.beachFact ? " · " + live.beachFact : ""),
     },
     {
       id: "indoor",
@@ -181,6 +223,130 @@ function activityScores(
   return result.sort((a, b) => b.score - a.score);
 }
 
+function numberFrom(text: string, pattern: RegExp) {
+  const match = text.match(pattern);
+  if (!match?.[1]) return null;
+  const value = Number(match[1].replace(",", "."));
+  return Number.isFinite(value) ? value : null;
+}
+
+function isFreshLiveModule(module: LiveDataModule | undefined, maxAgeMinutes = 10) {
+  if (!module || module.status !== "live" || !module.updatedAt) return false;
+  const age = Date.now() - new Date(module.updatedAt).getTime();
+  return Number.isFinite(age) && age >= 0 && age <= maxAgeMinutes * 60_000;
+}
+
+function buildLiveRecommendationContext(
+  liveData: LiveDataFeed | null
+): LiveRecommendationContext | null {
+  if (!liveData) return null;
+
+  let beachDelta = 0;
+  let walkDelta = 0;
+  let bikeDelta = 0;
+  let beachFact: string | null = null;
+  let trafficFact: string | null = null;
+  let activeFactors = 0;
+
+  const parking = liveData.modules.parking;
+  if (isFreshLiveModule(parking)) {
+    const solituede = parking.items?.find((item) =>
+      item.label.toLocaleLowerCase("de").includes("solitüde")
+    );
+    if (solituede) {
+      const free = numberFrom(solituede.value, /(\\d+)\\s*frei/i);
+      const occupiedPercent = numberFrom(solituede.value, /(\\d+)\\s*%/i);
+      if (free !== null || occupiedPercent !== null) {
+        activeFactors += 1;
+        if (occupiedPercent !== null) {
+          if (occupiedPercent <= 45) beachDelta += 6;
+          else if (occupiedPercent >= 90) beachDelta -= 10;
+          else if (occupiedPercent >= 75) beachDelta -= 5;
+        }
+        if (free !== null) {
+          if (free >= 20) beachDelta += 4;
+          else if (free <= 5) beachDelta -= 5;
+          beachFact = "Solitüde " + Math.round(free) + " Parkplätze frei";
+        }
+      }
+    }
+  }
+
+  const visitors = liveData.modules.visitors;
+  if (isFreshLiveModule(visitors)) {
+    const solituede = visitors.items?.find((item) =>
+      item.label.toLocaleLowerCase("de").includes("solitüde")
+    );
+    if (solituede) {
+      const current = numberFrom(solituede.value, /(\\d+)\\s*aktuell/i);
+      const today = numberFrom(solituede.meta ?? "", /Heute bisher\\s*(\\d+)/i);
+      // 0/0 may also mean that the counter is inactive. Display it, but do not score it.
+      if (current !== null && ((today ?? 0) > 0 || current > 0)) {
+        activeFactors += 1;
+        if (current <= 15) beachDelta += 5;
+        else if (current <= 35) beachDelta += 2;
+        else if (current >= 80) beachDelta -= 8;
+        else if (current >= 50) beachDelta -= 4;
+        beachFact =
+          (beachFact ? beachFact + " · " : "") +
+          (current <= 15
+            ? "Besucheraufkommen ruhig"
+            : current >= 50
+              ? "Besucheraufkommen erhöht"
+              : "Besucheraufkommen normal");
+      }
+    }
+  }
+
+  const traffic = liveData.modules.traffic;
+  if (isFreshLiveModule(traffic, 15)) {
+    const activeReports = numberFrom(traffic.value, /^(\\d+)\\s+aktive/i);
+    if (activeReports !== null && activeReports > 0) {
+      activeFactors += 1;
+      const penalty = Math.min(8, activeReports * 2);
+      walkDelta -= penalty;
+      bikeDelta -= penalty;
+      trafficFact = activeReports + " Wege-Meldung" + (activeReports === 1 ? "" : "en");
+    }
+  }
+
+  if (!activeFactors) return null;
+  return { beachDelta, walkDelta, bikeDelta, beachFact, trafficFact, activeFactors };
+}
+
+function stableLiveSignals(liveData: LiveDataFeed | null) {
+  if (!liveData) return [];
+
+  const definitions: Array<{
+    key: keyof LiveDataFeed["modules"];
+    icon: string;
+    label: string;
+    maxAge: number;
+    requireItems?: boolean;
+  }> = [
+    { key: "parking", icon: "🚗", label: "Parken", maxAge: 10, requireItems: true },
+    { key: "visitors", icon: "👥", label: "Besucher", maxAge: 10, requireItems: true },
+    { key: "traffic", icon: "🚦", label: "Wege & Verkehr", maxAge: 15 },
+    { key: "transit", icon: "🚌", label: "ÖPNV", maxAge: 10, requireItems: true },
+    { key: "sharing", icon: "🚲", label: "Sharing", maxAge: 10, requireItems: true },
+  ];
+
+  return definitions.flatMap((definition) => {
+    const module = liveData.modules[definition.key];
+    if (!isFreshLiveModule(module, definition.maxAge)) return [];
+    if (definition.requireItems && !module.items?.length) return [];
+    return [{
+      key: definition.key,
+      icon: definition.icon,
+      label: definition.label,
+      value: module.value,
+      detail: module.items?.[0]
+        ? module.items[0].label + " · " + module.items[0].value
+        : module.detail,
+      updatedAt: module.updatedAt,
+    }];
+  });
+}
 function sourceTime(value: string | null | undefined) {
   if (!value) return null;
   const time = value.slice(11, 16);
@@ -249,6 +415,7 @@ function strandampelStatus(
 
 export default function HomePage() {
   const [feed, setFeed] = useState<Feed | null>(null);
+  const [liveData, setLiveData] = useState<LiveDataFeed | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -275,6 +442,34 @@ export default function HomePage() {
       window.clearInterval(timer);
     };
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const refresh = () =>
+      fetch("/api/live-daten?ort=flensburg", { signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) throw new Error("Live-Daten nicht erreichbar");
+          return response.json();
+        })
+        .then((value: LiveDataFeed) => setLiveData(value))
+        .catch((reason) => {
+          if (reason.name !== "AbortError") setLiveData(null);
+        });
+
+    refresh();
+    const timer = window.setInterval(refresh, 2 * 60 * 1000);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const liveRecommendation = useMemo(
+    () => buildLiveRecommendationContext(liveData),
+    [liveData]
+  );
+
+  const liveSignals = useMemo(() => stableLiveSignals(liveData), [liveData]);
 
   const regionalWeather = useMemo<Weather | null>(() => {
     const values = (feed?.places ?? [])
@@ -350,9 +545,14 @@ export default function HomePage() {
   const scores = useMemo(
     () =>
       regionalWeather
-        ? activityScores(regionalWeather, warningLevel, feed?.marine ?? null)
+        ? activityScores(
+            regionalWeather,
+            warningLevel,
+            feed?.marine ?? null,
+            liveRecommendation
+          )
         : [],
-    [regionalWeather, warningLevel, feed?.marine]
+    [regionalWeather, warningLevel, feed?.marine, liveRecommendation]
   );
   const best = scores[0];
 
@@ -512,6 +712,36 @@ export default function HomePage() {
               ) : null}
             </div>
 
+            {liveSignals.length ? (
+              <section className={styles.liveSignalSection} aria-label="Stabile Live-Signale">
+                <div className={styles.liveSignalHeading}>
+                  <div>
+                    <span className="foerde-kicker">Stabile Live-Quellen</span>
+                    <h3>Was gerade zusätzlich einfließt</h3>
+                  </div>
+                  <a href="/live-daten">Alle Live-Daten →</a>
+                </div>
+                <div className={styles.liveSignalGrid}>
+                  {liveSignals.slice(0, 4).map((signal) => (
+                    <article className={styles.liveSignalCard} key={signal.key}>
+                      <div className={styles.liveSignalTop}>
+                        <span aria-hidden="true">{signal.icon}</span>
+                        <b>LIVE</b>
+                      </div>
+                      <strong>{signal.label}</strong>
+                      <span>{signal.value}</span>
+                      <small>{signal.detail}</small>
+                    </article>
+                  ))}
+                </div>
+                <p className={styles.liveSignalNote}>
+                  Nur Quellen mit Live-Status und frischem Zeitstempel werden übernommen.
+                  Fällt eine Quelle aus oder ist sie zu alt, verschwindet sie hier und hat
+                  keinen Einfluss auf die Empfehlungen.
+                </p>
+              </section>
+            ) : null}
+
             <article className={styles.weatherSummary} aria-live="polite">
               <div className={styles.weatherTop}>
                 <span>🌤️ Wetter</span>
@@ -620,8 +850,11 @@ export default function HomePage() {
 
                 <p className={styles.scoreNote}>
                   Der Index kombiniert Tageslicht, Temperatur, Regenrisiko, Niederschlag,
-                  Wind, Böen, UV und vorhandene amtliche DWD-Warnungen. Er ist eine
-                  Orientierung von förde.info und keine amtliche Bewertung.
+                  Wind, Böen, UV und vorhandene amtliche DWD-Warnungen. Verfügbare frische
+                  Live-Signale wie Parkplatzbelegung, Besucheraufkommen oder Wege-Meldungen
+                  fließen mit begrenztem Gewicht ein. Fehlende Live-Daten werden nicht
+                  geschätzt und verändern den Score nicht. Er ist eine Orientierung von
+                  förde.info und keine amtliche Bewertung.
                 </p>
               </section>
             ) : null}
@@ -658,8 +891,10 @@ export default function HomePage() {
                 </div>
 
                 <p className={styles.scoreNote}>
-                  Die Auswahl berücksichtigt Wetter, Tageslicht, amtliche Warnungen und – falls
-                  verfügbar – Wellenhöhe. Buchung, Preise und freie Plätze kommen von
+                  Die Auswahl berücksichtigt Wetter, Tageslicht, amtliche Warnungen,
+                  Wellenhöhe und – nur wenn frisch verfügbar – stabile Live-Signale aus
+                  Parken, Besucheraufkommen und Wege-Meldungen. Ausgefallene Quellen werden
+                  nicht ersetzt oder geschätzt. Buchung, Preise und freie Plätze kommen von
                   GetYourGuide und werden dort aktuell angezeigt.
                 </p>
               </section>
