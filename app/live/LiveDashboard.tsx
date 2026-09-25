@@ -425,7 +425,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
             <section className={styles.scoreSection}>
               <div className={styles.sectionHeading}>
                 <div>
-                  <span className={styles.kicker}>Schnell orientiert</span>
+                  <span className={styles.kicker}>Für jetzt bewertet</span>
                   <h2>Was lohnt sich gerade?</h2>
                 </div>
                 <span className={styles.updated}>
@@ -729,16 +729,12 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                 {data.sources.map((source) => (
                   <a href={source.url} target="_blank" rel="noreferrer" key={source.name}>
                     <strong>{source.name}</strong>
-                    <span>{source.purpose}</span>
-                    <em>Quelle öffnen ↗</em>
+                    <em>{source.purpose} · ↗</em>
                   </a>
                 ))}
               </div>
               <p className={styles.sourceNote}>
-                PEGELONLINE stellt ungeprüfte Rohdaten der Wasserstraßen- und
-                Schifffahrtsverwaltung bereit. Wetterwarnungen stammen aus dem
-                Open-Data-Angebot des Deutschen Wetterdienstes. Die Badegewässerdaten stammen
-                aus dem Open-Data-Angebot des Landes Schleswig-Holstein.
+                Amtliche Warnungen: DWD · Pegel: WSV/PEGELONLINE · Badegewässer: Land Schleswig-Holstein.
               </p>
             </section>
           </>
