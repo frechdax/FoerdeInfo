@@ -460,17 +460,11 @@ export default function HomePage() {
   useEffect(() => {
     const validViews: View[] = [
       "home",
-      "street",
-      "waste",
       "events",
       "urlaub",
       "urlaub-unterkunft",
       "urlaub-essen",
       "urlaub-freizeit",
-      "family",
-      "rathaus",
-      "rathaus-news",
-      "official-notices",
       "impressum",
     ];
 
@@ -812,9 +806,6 @@ export default function HomePage() {
     { id: "home", label: "Start", symbol: "🏠", href: "/" },
     { id: "events", label: "Veranstaltungen", symbol: "📅", href: "/veranstaltungen" },
     { id: "urlaub", label: "Urlaub", symbol: "🌊", href: "/urlaub" },
-    { id: "family", label: "Familie", symbol: "👪", href: "/familie" },
-    { id: "rathaus", label: "Rathaus", symbol: "🏛️", href: "/rathaus" },
-    { id: "waste", label: "Müllabfuhr", symbol: "🗑️", href: "/muellabfuhr" },
     { id: "impressum", label: "Impressum", symbol: "📄", href: "/#impressum" },
   ];
 
@@ -824,14 +815,8 @@ export default function HomePage() {
     { id: "urlaub-freizeit", label: "Freizeit", symbol: "🎯" },
   ];
 
-  const rathausSubItems: Array<{ id: View; label: string }> = [
-    { id: "rathaus-news", label: "Aktuelles aus dem Rathaus" },
-    { id: "official-notices", label: "Amtl. Bekanntmachungen" },
-  ];
-
   const currentLabel =
     vacationSubItems.find((item) => item.id === view)?.label ||
-    rathausSubItems.find((item) => item.id === view)?.label ||
     navItems.find((item) => item.id === view)?.label ||
     "Start";
 
@@ -860,9 +845,7 @@ export default function HomePage() {
                   "nav-item " +
                   (view === item.id ||
                   (item.id === "urlaub" &&
-                    (view === "urlaub-unterkunft" || view === "urlaub-essen" || view === "urlaub-freizeit")) ||
-                  (item.id === "rathaus" &&
-                    (view === "rathaus-news" || view === "official-notices"))
+                    (view === "urlaub-unterkunft" || view === "urlaub-essen" || view === "urlaub-freizeit"))
                     ? "active"
                     : "")
                 }
@@ -892,20 +875,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {item.id === "rathaus" && (
-                <div className="nav-submenu">
-                  {rathausSubItems.map((subitem) => (
-                    <button
-                      key={subitem.id}
-                      className={"nav-subitem " + (view === subitem.id ? "active" : "")}
-                      onClick={() => navigate(subitem.id)}
-                    >
-                      <span className="nav-subline" />
-                      <span>{subitem.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+
             </div>
           ))}
         </nav>
@@ -939,6 +909,30 @@ export default function HomePage() {
               </span>
             </button>
 
+            {pharmacyDuty ? (
+              <a
+                className="header-pharmacy"
+                href={pharmacyDuty.source_url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
+              >
+                <span className="header-pharmacy-icon" aria-hidden="true">💊</span>
+                <span className="header-pharmacy-copy">
+                  <small>Notfallapotheke · jetzt im Dienst</small>
+                  <strong>{pharmacyDuty.pharmacy_name}</strong>
+                  <em>bis {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr</em>
+                </span>
+              </a>
+            ) : (
+              <div className="header-pharmacy header-pharmacy--loading">
+                <span className="header-pharmacy-icon" aria-hidden="true">💊</span>
+                <span className="header-pharmacy-copy">
+                  <small>Notfallapotheke</small>
+                  <strong>Aktueller Dienst wird geprüft</strong>
+                </span>
+              </div>
+            )}
           </div>
         </header>
 
@@ -955,384 +949,7 @@ export default function HomePage() {
           )}
 
           {view === "home" && (
-            <>
-              <LiveDashboard embedded />
-              <div className="home-intro-grid">
-                <section className="welcome">
-                  <div>
-                    <div className="eyebrow">Moin aus Glücksburg</div>
-                    <h1>Alles Wichtige für deinen Alltag in Glücksburg <span className="wave">👋</span></h1>
-                    <p>Dein Glücksburg – Alltag, Familie und Freizeit auf einen Blick.</p>
-                  </div>
-                </section>
-
-                <article className="home-rathaus-mini home-rathaus-mini--intro" aria-label="Rathaus Glücksburg">
-                  <div className="home-rathaus-mini-heading">
-                    <div>
-                      <span className="dashboard-kicker">Stadt Glücksburg</span>
-                      <h2>Rathaus</h2>
-                    </div>
-                    <span className="home-rathaus-mini-icon" aria-hidden="true">🏛️</span>
-                  </div>
-
-                  <div className="home-rathaus-mini-hours">
-                    <div>
-                      <strong>Montag</strong>
-                      <span>{civic?.data?.opening_hours?.monday || "—"}</span>
-                    </div>
-                    <div>
-                      <strong>Dienstag</strong>
-                      <span>{civic?.data?.opening_hours?.tuesday || "—"}</span>
-                    </div>
-                    <div>
-                      <strong>Freitag</strong>
-                      <span>{civic?.data?.opening_hours?.friday || "—"}</span>
-                    </div>
-                  </div>
-
-                  <div className="home-rathaus-mini-footer">
-                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
-                    <button className="text-button" onClick={() => navigate("rathaus")}>
-                      Rathaus öffnen →
-                    </button>
-                  </div>
-
-                  {pharmacyDuty ? (
-                    <a
-                      className="home-rathaus-mini-pharmacy"
-                      href={pharmacyDuty.source_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`Aktuelle Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
-                    >
-                      <div className="home-rathaus-mini-pharmacy-head">
-                        <span aria-hidden="true">💊</span>
-                        <strong>Notfallapotheke</strong>
-                        <span className="home-rathaus-mini-pharmacy-live">Jetzt im Dienst</span>
-                      </div>
-                      <span className="home-rathaus-mini-pharmacy-name">
-                        {pharmacyDuty.pharmacy_name}
-                      </span>
-                      <span className="home-rathaus-mini-pharmacy-meta">
-                        {pharmacyDuty.street} · {pharmacyDuty.postal_code} {pharmacyDuty.city}
-                      </span>
-                      <span className="home-rathaus-mini-pharmacy-time">
-                        Notdienst: {formatDutyDateTime(pharmacyDuty.duty_start)} – {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
-                      </span>
-                    </a>
-                  ) : (
-                    <div className="home-rathaus-mini-pharmacy home-rathaus-mini-pharmacy--empty">
-                      <div className="home-rathaus-mini-pharmacy-head">
-                        <span aria-hidden="true">💊</span>
-                        <strong>Notfallapotheke</strong>
-                      </div>
-                      <span className="home-rathaus-mini-pharmacy-time">
-                        Aktueller Dienst wird geprüft.
-                      </span>
-                    </div>
-                  )}
-                </article>
-              </div>
-
-              {!selectedStreet && (
-                <section className="onboard-banner">
-                  <div>
-                    <strong>Richte deine Adresse ein</strong>
-                    <p>Wähle deine Straße, damit dein persönlicher Abfallkalender automatisch geladen wird.</p>
-                  </div>
-                  <button className="button primary" onClick={() => navigate("street")}>
-                    Adresse wählen
-                  </button>
-                </section>
-              )}
-
-              <section className="home-discovery-section" aria-labelledby="home-discovery-title">
-                <div className="home-discovery-heading">
-                  <div>
-                    <span className="dashboard-kicker">Neu entdecken</span>
-                    <h2 id="home-discovery-title">Glücksburg entdecken</h2>
-                    <p>Aktuelle Termine, Wochenendtipps und die wichtigsten Ziele für deinen Aufenthalt.</p>
-                  </div>
-                </div>
-
-                <div className="home-discovery-grid">
-                  <a className="home-discovery-card" href="/live">
-                    <span className="home-discovery-icon" aria-hidden="true">🌤️</span>
-                    <span>
-                      <small>Live</small>
-                      <strong>Glücksburg Jetzt</strong>
-                      <em>Wetter, Warnungen & Fördepegel →</em>
-                    </span>
-                  </a>
-
-                  <a className="home-discovery-card" href="/heute-in-gluecksburg">
-                    <span className="home-discovery-icon" aria-hidden="true">📍</span>
-                    <span>
-                      <small>Aktuell</small>
-                      <strong>Heute in Glücksburg</strong>
-                      <em>Was heute los ist →</em>
-                    </span>
-                  </a>
-
-                  <a className="home-discovery-card" href="/wochenende-in-gluecksburg">
-                    <span className="home-discovery-icon" aria-hidden="true">📅</span>
-                    <span>
-                      <small>Planen</small>
-                      <strong>Dieses Wochenende</strong>
-                      <em>Freitag bis Sonntag →</em>
-                    </span>
-                  </a>
-
-                  <a className="home-discovery-card" href="/sehenswuerdigkeiten-gluecksburg">
-                    <span className="home-discovery-icon" aria-hidden="true">🏰</span>
-                    <span>
-                      <small>Entdecken</small>
-                      <strong>Sehenswürdigkeiten</strong>
-                      <em>Die Highlights der Stadt →</em>
-                    </span>
-                  </a>
-
-                  <a className="home-discovery-card" href="/straende-gluecksburg">
-                    <span className="home-discovery-icon" aria-hidden="true">🏖️</span>
-                    <span>
-                      <small>Ostsee</small>
-                      <strong>Strände in Glücksburg</strong>
-                      <em>Sandwig, Holnis & Quellental →</em>
-                    </span>
-                  </a>
-
-                  <a className="home-discovery-card" href="/freizeit-gluecksburg">
-                    <span className="home-discovery-icon" aria-hidden="true">🎯</span>
-                    <span>
-                      <small>Familie & Aktiv</small>
-                      <strong>Freizeit in Glücksburg</strong>
-                      <em>Ideen für Sonne & Schietwetter →</em>
-                    </span>
-                  </a>
-                </div>
-              </section>
-
-              <section className="home-dashboard-grid">
-                {/* Besucherbox anstelle der früheren großen Rathaus-Kachel. */}
-                <article className="dashboard-panel visitor-dashboard-card" aria-label="Urlaub in Glücksburg">
-                  <div className="dashboard-panel-heading">
-                    <div>
-                      <span className="dashboard-kicker">Zu Besuch in Glücksburg?</span>
-                      <h2>Unterkünfte, Ausflüge & Urlaubstipps</h2>
-                    </div>
-                    <span className="dashboard-main-icon" aria-hidden="true">🌊</span>
-                  </div>
-
-                  <p className="visitor-dashboard-copy">
-                    Finde Ferienwohnungen und Hotels und entdecke passende Veranstaltungen
-                    für deinen Aufenthalt an der Flensburger Förde.
-                  </p>
-
-                  <div className="visitor-dashboard-links" aria-label="Urlaub Unterbereiche">
-                    {vacationSubItems.map((subitem) => (
-                      <button
-                        className="visitor-dashboard-link"
-                        key={subitem.id}
-                        onClick={() => navigate(subitem.id)}
-                      >
-                        <span className="visitor-dashboard-link-icon" aria-hidden="true">
-                          {subitem.symbol}
-                        </span>
-                        <span>{subitem.label}</span>
-                        <span aria-hidden="true">›</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="visitor-dashboard-footer">
-                    <button className="button visitor-teaser-button" onClick={() => navigate("urlaub")}>
-                      Urlaub planen →
-                    </button>
-                  </div>
-                </article>
-
-                <article className="home-rathaus-mini home-rathaus-mini--mobile-dashboard" aria-label="Rathaus Glücksburg">
-                  <div className="home-rathaus-mini-heading">
-                    <div>
-                      <span className="dashboard-kicker">Stadt Glücksburg</span>
-                      <h2>Rathaus</h2>
-                    </div>
-                    <span className="home-rathaus-mini-icon" aria-hidden="true">🏛️</span>
-                  </div>
-
-                  <div className="home-rathaus-mini-hours">
-                    <div>
-                      <strong>Montag</strong>
-                      <span>{civic?.data?.opening_hours?.monday || "—"}</span>
-                    </div>
-                    <div>
-                      <strong>Dienstag</strong>
-                      <span>{civic?.data?.opening_hours?.tuesday || "—"}</span>
-                    </div>
-                    <div>
-                      <strong>Freitag</strong>
-                      <span>{civic?.data?.opening_hours?.friday || "—"}</span>
-                    </div>
-                  </div>
-
-                  <div className="home-rathaus-mini-footer">
-                    <span>Bürgerbüro · Öffnungszeiten & Kontakt</span>
-                    <button className="text-button" onClick={() => navigate("rathaus")}>
-                      Rathaus öffnen →
-                    </button>
-                  </div>
-
-                  {pharmacyDuty ? (
-                    <a
-                      className="home-rathaus-mini-pharmacy"
-                      href={pharmacyDuty.source_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`Aktuelle Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
-                    >
-                      <div className="home-rathaus-mini-pharmacy-head">
-                        <span aria-hidden="true">💊</span>
-                        <strong>Notfallapotheke</strong>
-                        <span className="home-rathaus-mini-pharmacy-live">Jetzt im Dienst</span>
-                      </div>
-                      <span className="home-rathaus-mini-pharmacy-name">
-                        {pharmacyDuty.pharmacy_name}
-                      </span>
-                      <span className="home-rathaus-mini-pharmacy-meta">
-                        {pharmacyDuty.street} · {pharmacyDuty.postal_code} {pharmacyDuty.city}
-                      </span>
-                      <span className="home-rathaus-mini-pharmacy-time">
-                        Notdienst: {formatDutyDateTime(pharmacyDuty.duty_start)} – {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr
-                      </span>
-                    </a>
-                  ) : (
-                    <div className="home-rathaus-mini-pharmacy home-rathaus-mini-pharmacy--empty">
-                      <div className="home-rathaus-mini-pharmacy-head">
-                        <span aria-hidden="true">💊</span>
-                        <strong>Notfallapotheke</strong>
-                      </div>
-                      <span className="home-rathaus-mini-pharmacy-time">
-                        Aktueller Dienst wird geprüft.
-                      </span>
-                    </div>
-                  )}
-                </article>
-
-                <section className="dashboard-panel">
-                  <div className="dashboard-panel-heading">
-                    <div>
-                      <span className="dashboard-kicker">Aktuell</span>
-                      <h2>Neues aus dem Rathaus</h2>
-                    </div>
-                    <button className="text-button" onClick={() => navigate("rathaus-news")}>
-                      Alle ansehen →
-                    </button>
-                  </div>
-
-                  <div className="dashboard-list">
-                    {rathausNews.slice(0, 4).map((item) => (
-                      <a
-                        className="dashboard-list-row"
-                        href={item.source_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        key={item.id}
-                      >
-                        <div>
-                          <small>{item.published_at ? formatDate(item.published_at) : "Rathaus"}</small>
-                          <strong>{item.title}</strong>
-                        </div>
-                        <span>›</span>
-                      </a>
-                    ))}
-                  </div>
-
-                  {!rathausNews.length && (
-                    <div className="dashboard-empty">Aktuell sind keine Rathaus-Meldungen geladen.</div>
-                  )}
-                </section>
-
-                <section className="dashboard-panel">
-                  <div className="dashboard-panel-heading">
-                    <div>
-                      <span className="dashboard-kicker">Kalender</span>
-                      <h2>Veranstaltungen</h2>
-                    </div>
-                    <button className="text-button" onClick={() => navigate("events")}>
-                      Alle Termine →
-                    </button>
-                  </div>
-
-                  <div className="dashboard-list">
-                    {currentEvents.slice(0, 4).map((event) => (
-                      <a
-                        className="dashboard-list-row event-dashboard-row"
-                        href={event.source_url || "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        key={event.id}
-                      >
-                        <div className="date-tile">
-                          <span>{monthShort(event.date)}</span>
-                          <strong>{dayNumber(event.date)}</strong>
-                        </div>
-                        <div>
-                          <strong>{event.title}</strong>
-                          <small>
-                            {event.time ? event.time + " Uhr · " : ""}
-                            {event.location || "Glücksburg"}
-                          </small>
-                        </div>
-                        <span>›</span>
-                      </a>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="dashboard-panel">
-                  <div className="dashboard-panel-heading">
-                    <div>
-                      <span className="dashboard-kicker">ASF-Abfallkalender</span>
-                      <h2>Müllabfuhr</h2>
-                    </div>
-                    <button
-                      className="text-button"
-                      onClick={() => wasteEvents.length ? navigate("waste") : navigate("street")}
-                    >
-                      {wasteEvents.length ? "Alle Termine →" : "Adresse wählen →"}
-                    </button>
-                  </div>
-
-                  {wasteEvents.length ? (
-                    <div className="dashboard-list">
-                      {wasteEvents.slice(0, 4).map((entry, index) => (
-                        <button
-                          className="dashboard-list-row waste-dashboard-row"
-                          onClick={() => navigate("waste")}
-                          key={entry.date + entry.type + index}
-                        >
-                          <span className={"waste-mini-icon " + wasteTone(entry.type)}>{wasteIcon(entry.type)}</span>
-                          <div>
-                            <small>{formatDate(entry.date)}</small>
-                            <strong>{entry.type}</strong>
-                          </div>
-                          <span>›</span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="dashboard-empty">
-                      <strong>Noch keine Abfuhrtermine geladen</strong>
-                      <span>Wähle einmal deine Adresse, dann erscheinen hier die nächsten Termine.</span>
-                      <button className="button primary" onClick={() => navigate("street")}>
-                        Adresse auswählen
-                      </button>
-                    </div>
-                  )}
-                </section>
-              </section>
-
-            </>
+            <LiveDashboard embedded />
           )}
 
           {view === "street" && (
