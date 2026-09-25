@@ -440,18 +440,9 @@ const vacationLeisureMore = [
 export default function HomePage() {
   const supabase = useMemo(() => getSupabase(), []);
   const [view, setView] = useState<View>("home");
-  const [streets, setStreets] = useState<Street[]>([]);
-  const [selectedStreet, setSelectedStreet] = useState("");
-  const [wasteEvents, setWasteEvents] = useState<WasteEvent[]>([]);
   const [events, setEvents] = useState<EventRow[]>([]);
-  const [officialNotices, setOfficialNotices] = useState<OfficialNotice[]>([]);
-  const [rathausNews, setRathausNews] = useState<RathausNews[]>([]);
-  const [civic, setCivic] = useState<CivicInfo | null>(null);
   const [pharmacyDuty, setPharmacyDuty] = useState<PharmacyDuty | null>(null);
-  const [loadingStreet, setLoadingStreet] = useState(false);
-  const [loadingWaste, setLoadingWaste] = useState(false);
   const [notice, setNotice] = useState("");
-  const [streetSearch, setStreetSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
   const [eventDateFilter, setEventDateFilter] = useState<EventDateFilter>("all");
   const [eventMonthFilter, setEventMonthFilter] = useState("all");
@@ -479,22 +470,6 @@ export default function HomePage() {
     syncViewFromHash();
     window.addEventListener("hashchange", syncViewFromHash);
 
-    try {
-      const saved = JSON.parse(localStorage.getItem("gluecksburg-direkt-address") || "{}");
-      if (saved.streetId) setSelectedStreet(saved.streetId);
-
-      const cachedWaste = JSON.parse(
-        localStorage.getItem("gluecksburg-direkt-waste") || "{}"
-      );
-      if (
-        cachedWaste.streetId === saved.streetId &&
-        Array.isArray(cachedWaste.events)
-      ) {
-        setWasteEvents(
-          (cachedWaste.events as WasteEvent[]).filter((entry) => entry.date >= today())
-        );
-      }
-    } catch {}
 
     return () => window.removeEventListener("hashchange", syncViewFromHash);
   }, []);
@@ -543,50 +518,22 @@ export default function HomePage() {
     if (!supabase) return;
 
     async function loadBaseData() {
-      const [
-        { data: streetRows },
-        { data: eventRows },
-        { data: civicRows },
-        { data: pharmacyRows },
-        { data: noticeRows },
-        { data: rathausRows },
-      ] = await Promise.all([
-          supabase
-            .from("streets")
-            .select("id,name,asf_ort_number,asf_street_number")
-            .order("name"),
-          supabase
-            .from("events")
-            .select("id,title,description,category,date,end_date,time,location,organizer,family_friendly,source_url")
-            .eq("status", "published")
-            .gte("date", today())
-            .order("date")
-            .limit(300),
-          supabase
-            .from("civic_info")
-            .select("title,data,source_url")
-            .eq("key", "buergerbuero")
-            .maybeSingle(),
-          supabase
-            .from("pharmacy_duty")
-            .select("pharmacy_name,street,postal_code,city,duty_start,duty_end,distance_km,source_url,last_synced_at")
-            .eq("key", "gluecksburg")
-            .maybeSingle(),
-          supabase
-            .from("official_notices")
-            .select("id,published_at,title,source_url")
-            .order("published_at", { ascending: false, nullsFirst: false })
-            .limit(30),
-          supabase
-            .from("rathaus_news")
-            .select("id,published_at,title,source_url")
-            .order("published_at", { ascending: false, nullsFirst: false })
-            .limit(30),
-        ]);
+      const [{ data: eventRows }, { data: pharmacyRows }] = await Promise.all([
+        supabase
+          .from("events")
+          .select("id,title,description,category,date,end_date,time,location,organizer,family_friendly,source_url")
+          .eq("status", "published")
+          .gte("date", today())
+          .order("date")
+          .limit(300),
+        supabase
+          .from("pharmacy_duty")
+          .select("pharmacy_name,street,postal_code,city,duty_start,duty_end,distance_km,source_url,last_synced_at")
+          .eq("key", "gluecksburg")
+          .maybeSingle(),
+      ]);
 
-      setStreets((streetRows ?? []) as Street[]);
       setEvents((eventRows ?? []) as EventRow[]);
-      setCivic((civicRows ?? null) as CivicInfo | null);
 
       const currentPharmacy = (pharmacyRows ?? null) as PharmacyDuty | null;
       const now = Date.now();
@@ -596,72 +543,10 @@ export default function HomePage() {
         now < new Date(currentPharmacy.duty_end).getTime();
 
       setPharmacyDuty(dutyIsCurrent ? currentPharmacy : null);
-      setOfficialNotices((noticeRows ?? []) as OfficialNotice[]);
-      setRathausNews((rathausRows ?? []) as RathausNews[]);
     }
 
     loadBaseData();
   }, [supabase]);
-
-  useEffect(() => {
-    if (!selectedStreet || !streets.length) return;
-    const streetName = streets.find((street) => street.id === selectedStreet)?.name;
-    if (streetName) setStreetSearch(streetName);
-  }, [selectedStreet, streets]);
-
-  useEffect(() => {
-    if (!selectedStreet) return;
-    try {
-      localStorage.setItem(
-        "gluecksburg-direkt-address",
-        JSON.stringify({ streetId: selectedStreet })
-      );
-    } catch {}
-  }, [selectedStreet]);
-
-  useEffect(() => {
-    if (!supabase || !selectedStreet) return;
-
-    let cancelled = false;
-
-    async function restoreWasteCalendar() {
-      setLoadingWaste(true);
-      const { data, error } = await supabase.functions.invoke("sync-waste", {
-        body: { street_id: selectedStreet },
-      });
-
-      if (!cancelled && !error) {
-        const rows = (data?.events ?? []) as WasteEvent[];
-        setWasteEvents(rows);
-
-        try {
-          localStorage.setItem(
-            "gluecksburg-direkt-waste",
-            JSON.stringify({
-              streetId: selectedStreet,
-              events: rows,
-              savedAt: new Date().toISOString(),
-            })
-          );
-        } catch {}
-      }
-
-      if (!cancelled && error) {
-        setWasteEvents([]);
-        setNotice(
-          "Für diese Straße konnte kein eindeutiger straßenweiter ASF-Abfallkalender geladen werden."
-        );
-      }
-
-      if (!cancelled) setLoadingWaste(false);
-    }
-
-    restoreWasteCalendar();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedStreet, supabase]);
 
   function navigate(next: View) {
     trackUsageEvent("App section opened", { section: next });
@@ -738,51 +623,6 @@ export default function HomePage() {
     trackUsageEvent("Event calendar downloaded");
   }
 
-  async function loadWaste(targetView: View = "waste") {
-    if (!supabase || !selectedStreet) {
-      setNotice("Bitte zuerst eine Straße auswählen.");
-      navigate("street");
-      return;
-    }
-
-    setLoadingWaste(true);
-    setNotice("");
-
-    const { data, error } = await supabase.functions.invoke("sync-waste", {
-      body: { street_id: selectedStreet },
-    });
-
-    if (error) {
-      setWasteEvents([]);
-      setNotice(
-        "Für diese Straße konnte kein eindeutiger straßenweiter ASF-Abfallkalender geladen werden."
-      );
-    } else {
-      const rows = (data?.events ?? []) as WasteEvent[];
-      setWasteEvents(rows);
-
-      try {
-        localStorage.setItem(
-          "gluecksburg-direkt-waste",
-          JSON.stringify({
-            streetId: selectedStreet,
-            events: rows,
-            savedAt: new Date().toISOString(),
-          })
-        );
-      } catch {}
-
-      setNotice("Abfuhrtermine wurden direkt bei ASF aktualisiert.");
-      trackUsageEvent("Waste calendar loaded");
-      if (targetView) navigate(targetView);
-    }
-
-    setLoadingWaste(false);
-  }
-
-  const selectedStreetName = streets.find((street) => street.id === selectedStreet)?.name;
-  const addressLabel = selectedStreetName || "Noch keine Straße gewählt";
-
   const eventMonths = Array.from(
     new Set(events.map((event) => event.date.slice(0, 7)))
   ).sort();
@@ -799,7 +639,6 @@ export default function HomePage() {
       .includes(q);
   });
 
-  const nextWaste = wasteEvents[0];
   const currentEvents = events.slice(0, 4);
 
   const navItems: Array<{ id: View; label: string; symbol: string; href: string }> = [
