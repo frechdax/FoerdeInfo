@@ -168,7 +168,7 @@ function trackReferralClick(
   } catch {}
 }
 
-export default function LiveDashboard() {
+export default function LiveDashboard({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<LiveData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -260,23 +260,24 @@ export default function LiveDashboard() {
   }, [load]);
 
   return (
-    <main className={styles.page}>
+    <section className={styles.page + (embedded ? " " + styles.homeEmbed : "")}>
       <div className={styles.shell}>
-        <header className={styles.topbar}>
+        {!embedded ? <header className={styles.topbar}>
           <a className={styles.brand} href="/" aria-label="Zurück zu GlücksburgDirekt">
             <span className={styles.brandMark}>⚓</span>
             <span>Glücksburg<strong>DIREKT</strong></span>
           </a>
           <a className={styles.back} href="/">← Zur Startseite</a>
-        </header>
+        </header> : null}
 
         <section className={styles.hero}>
           <div>
             <span className={styles.eyebrow}>Live · automatisch aktualisiert</span>
             <h1>Glücksburg Jetzt</h1>
             <p>
-              Öffentliche Daten verständlich zusammengefasst: Wetter, beste Zeit für draußen,
-              Strandbedingungen, Fördepegel, amtliche Warnungen und lokale Veränderungen.
+              {embedded
+                ? "Was sich heute in Glücksburg lohnt – Wetter, beste Zeit für draußen, Strandbedingungen und passende Empfehlungen auf einen Blick."
+                : "Öffentliche Daten verständlich zusammengefasst: Wetter, beste Zeit für draußen, Strandbedingungen, Fördepegel, amtliche Warnungen und lokale Veränderungen."}
             </p>
           </div>
           <div className={styles.liveBadge}>
@@ -756,13 +757,19 @@ export default function LiveDashboard() {
           </section>
         ) : null}
 
-        <footer className={styles.footer}>
-          <span>GlücksburgDirekt · lokal, unabhängig und datenbasiert</span>
-          <button onClick={load} disabled={loading}>
-            {loading ? "Aktualisiere …" : "Daten aktualisieren"}
-          </button>
-        </footer>
+        {!embedded ? (
+          <footer className={styles.footer}>
+            <span>GlücksburgDirekt · lokal, unabhängig und datenbasiert</span>
+            <button onClick={load} disabled={loading}>
+              {loading ? "Aktualisiere …" : "Daten aktualisieren"}
+            </button>
+          </footer>
+        ) : (
+          <div className={styles.homeEmbedFooter}>
+            <a href="/live">Alle Live-Details & Datenquellen öffnen →</a>
+          </div>
+        )}
       </div>
-    </main>
+    </section>
   );
 }
