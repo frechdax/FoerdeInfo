@@ -180,8 +180,7 @@ async function renderDashboard() {
           const text = document.body?.innerText ?? "";
           if (!text.includes("Parkplatz Deutsches Haus")) return false;
           return (
-            /\d+\s*\/\s*\d+/.test(text) ||
-            /Aktuelle Besucheranzahl\s*\d+/i.test(text) ||
+            /Trend der Parkplatzbelegung/i.test(text) ||
             /Heute wurden bis jetzt\s*\d+\s*Besucher/i.test(text) ||
             /Keine Live-Daten verfügbar/i.test(text)
           );
