@@ -425,7 +425,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
             <section className={styles.scoreSection}>
               <div className={styles.sectionHeading}>
                 <div>
-                  <span className={styles.kicker}>Entscheidung statt Rohdaten</span>
+                  <span className={styles.kicker}>Schnell orientiert</span>
                   <h2>Was lohnt sich gerade?</h2>
                 </div>
                 <span className={styles.updated}>
@@ -720,28 +720,6 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               )}
             </section>
 
-            <section className={styles.seoInfo} data-home-optional="true">
-              <span className={styles.kicker}>Glücksburg live im Überblick</span>
-              <h2>Wetter, Strand-Ampel, Fördepegel und Baustellen für Glücksburg</h2>
-              <p>
-                Auf GlücksburgDirekt findest du aktuelle Informationen für Glücksburg an der Ostsee:
-                Wetter und Regenrisiko, amtliche DWD-Warnungen, den Fördepegel bei Flensburg,
-                Strandbedingungen für Holnis Drei, Sandwig und Quellental sowie Hinweise zu Bauleitplanung,
-                Baustellen und Veränderungen im Stadtgebiet.
-              </p>
-              <p>
-                Die Live-Ansicht verbindet mehrere öffentliche Datenquellen und übersetzt sie in
-                verständliche Hinweise für Strand, Spaziergang, Fahrrad und Spielplatz. So siehst du
-                nicht nur Messwerte, sondern auch, wann sich Aktivitäten heute sinnvoll anbieten.
-              </p>
-              <nav className={styles.seoLinks} aria-label="Verwandte Inhalte in Glücksburg">
-                <a href="/straende-gluecksburg">Strände in Glücksburg</a>
-                <a href="/heute-in-gluecksburg">Heute in Glücksburg</a>
-                <a href="/veranstaltungen">Veranstaltungen in Glücksburg</a>
-                <a href="/rathaus">Rathaus & amtliche Informationen</a>
-              </nav>
-            </section>
-
             <section className={styles.sourceSection} data-home-optional="true">
               <div>
                 <span className={styles.kicker}>Transparente Datenquellen</span>
@@ -773,9 +751,6 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
         {!embedded ? (
           <footer className={styles.footer}>
             <span>GlücksburgDirekt · lokal, unabhängig und datenbasiert</span>
-            <button onClick={load} disabled={loading}>
-              {loading ? "Aktualisiere …" : "Daten aktualisieren"}
-            </button>
           </footer>
         ) : (
           <div className={styles.homeEmbedFooter}>
