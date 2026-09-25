@@ -640,3 +640,29 @@
 @media(max-width:620px){
   .sourceGrid{grid-template-columns:1fr}
 }
+
+/* Mobile first reading and touch targets for the live dashboard. */
+@media (max-width:700px){
+  .homeEmbed .shell{width:100%;padding:0}
+  .homeEmbed .hero{padding:18px;gap:14px}
+  .homeEmbed .hero h1{font-size:1.8rem;line-height:1.08}
+  .homeEmbed .hero p{font-size:.95rem;line-height:1.5}
+  .homeEmbed .eyebrow{font-size:.75rem}
+  .homeEmbed .liveBadge{min-height:44px;font-size:.875rem}
+  .homeEmbed .nowSummary{padding:16px}
+  .summaryLead small,.summaryFacts span,.facts span,.muted,.updated{font-size:.8125rem}
+  .summaryLead strong,.allClear span{font-size:.95rem}
+  .weatherCard,.pegelCard,.warningCard{padding:17px}
+  .scoreGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .scoreCard{padding:13px;min-width:0}
+  .scoreCard h3{font-size:.95rem;margin:10px 0 6px}
+  .verdict,.sourceGrid strong,.sourceGrid em{font-size:.75rem}
+  .explainer,.sourceNote{font-size:.75rem!important;line-height:1.45!important}
+  .sourceGrid a{padding:12px;min-height:44px}
+  .sourceGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .homeEmbedFooter a{display:inline-flex;align-items:center;min-height:44px;font-size:.875rem}
+}
+@media (max-width:390px){
+  .summaryFacts{grid-template-columns:1fr}
+  .scoreGrid,.sourceGrid{grid-template-columns:1fr}
+}
