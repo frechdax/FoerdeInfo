@@ -138,16 +138,10 @@ function sourceTime(value: string | null | undefined) {
 }
 
 export default function HomePage() {
-  const [selected, setSelected] = useState<RegionId>("flensburg");
   const [feed, setFeed] = useState<Feed | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (regions.some((region) => region.id === hash)) {
-      setSelected(hash as RegionId);
-    }
-
     const controller = new AbortController();
     const refresh = () =>
       fetch("/api/foerde", { signal: controller.signal })
@@ -172,22 +166,71 @@ export default function HomePage() {
     };
   }, []);
 
-  const region = regions.find((item) => item.id === selected)!;
-  const live = feed?.places.find((item) => item.id === selected);
+  const regionalWeather = useMemo<Weather | null>(() => {
+    const values = (feed?.places ?? [])
+      .map((place) => place.weather)
+      .filter((value): value is Weather => Boolean(value));
 
-  const warningLevel = live?.warnings?.reduce(
-    (max, item) => Math.max(max, Number(item.level) || 0),
-    0
-  ) ?? 0;
+    if (!values.length) return null;
+
+    const average = (pick: (value: Weather) => number) =>
+      values.reduce((sum, value) => sum + pick(value), 0) / values.length;
+
+    return {
+      temperature: average((value) => value.temperature),
+      apparentTemperature: average((value) => value.apparentTemperature),
+      precipitation: Math.max(...values.map((value) => value.precipitation)),
+      weatherCode: values[0].weatherCode,
+      windSpeed: average((value) => value.windSpeed),
+      windGusts: Math.max(...values.map((value) => value.windGusts)),
+      rainChance: Math.max(...values.map((value) => value.rainChance)),
+      uvIndex: Math.max(...values.map((value) => value.uvIndex)),
+      isDay: values.some((value) => value.isDay),
+      observedAt:
+        values
+          .map((value) => value.observedAt)
+          .filter((value): value is string => Boolean(value))
+          .sort()
+          .at(-1) ?? null,
+    };
+  }, [feed]);
+
+  const regionalWarnings = useMemo(() => {
+    const seen = new Set<string>();
+    return (feed?.places ?? []).flatMap((place) =>
+      (place.warnings ?? []).filter((warning) => {
+        const key = warning.event + "|" + warning.headline + "|" + warning.start;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+    );
+  }, [feed]);
+
+  const warningLevel =
+    regionalWarnings.reduce(
+      (max, item) => Math.max(max, Number(item.level) || 0),
+      0
+    ) ?? 0;
+
+  const beaches = useMemo(
+    () =>
+      (feed?.places ?? []).flatMap((place) => {
+        const regionName =
+          regions.find((region) => region.id === place.id)?.name ?? place.id;
+        return place.beaches.map((beach) => ({ ...beach, regionName }));
+      }),
+    [feed]
+  );
 
   const scores = useMemo(
-    () => (live?.weather ? activityScores(live.weather, warningLevel) : []),
-    [live?.weather, warningLevel]
+    () => (regionalWeather ? activityScores(regionalWeather, warningLevel) : []),
+    [regionalWeather, warningLevel]
   );
   const best = scores[0];
 
   const activityOffers = useMemo(() => {
-    const weather = live?.weather;
+    const weather = regionalWeather;
     if (!weather || !affiliateLinks.activities.enabled) return [];
 
     const walk = scores.find((item) => item.id === "walk")?.score ?? 0;
@@ -211,7 +254,12 @@ export default function HomePage() {
         id: "sailing",
         icon: "⛵",
         title: "Segeltörn auf der Flensburger Förde",
-        detail: `Passt zu den aktuellen Bedingungen: Strand ${beach}/100 · Wind ${Math.round(weather.windSpeed)} km/h.`,
+        detail:
+          "Passt zu den aktuellen Bedingungen: Strand " +
+          beach +
+          "/100 · Wind " +
+          Math.round(weather.windSpeed) +
+          " km/h.",
         href: affiliateLinks.activities.offers.sailing,
       });
     }
@@ -221,7 +269,12 @@ export default function HomePage() {
         id: "eboat",
         icon: "🚤",
         title: "E-Boot auf der Förde",
-        detail: `Ruhigeres Wetter: Strand ${beach}/100 · Regenrisiko ${Math.round(weather.rainChance)} %.`,
+        detail:
+          "Ruhigeres Wetter: Strand " +
+          beach +
+          "/100 · Regenrisiko " +
+          Math.round(weather.rainChance) +
+          " %.",
         href: affiliateLinks.activities.offers.eBoat,
       });
     }
@@ -231,7 +284,12 @@ export default function HomePage() {
         id: "running",
         icon: "🏃",
         title: "Running- & Sightseeing-Tour in Flensburg",
-        detail: `Draußen gerade gut machbar: Spaziergang ${walk}/100 · gefühlt ${Math.round(weather.apparentTemperature)} °C.`,
+        detail:
+          "Draußen gerade gut machbar: Spaziergang " +
+          walk +
+          "/100 · gefühlt " +
+          Math.round(weather.apparentTemperature) +
+          " °C.",
         href: affiliateLinks.activities.offers.runningTour,
       });
     }
@@ -251,7 +309,7 @@ export default function HomePage() {
     }
 
     return offers.slice(0, 2);
-  }, [live?.weather, scores, best?.id]);
+  }, [regionalWeather, scores, best?.id]);
 
   return (
     <main className="foerde-page" id="content">
@@ -261,11 +319,9 @@ export default function HomePage() {
             ⚓ <strong>förde.info</strong>
           </a>
           <nav aria-label="Bereiche">
-            <a href="#orte">Orte</a>
+            <a href="#live">Live</a>
             <a href="/wege">Wegecheck</a>
-            <a href="/live">Live</a>
             <a href="/veranstaltungen">Veranstaltungen</a>
-            <a href="/urlaub">Entdecken</a>
             <a href="/gluecksburg#impressum">Impressum</a>
           </nav>
         </header>
@@ -279,77 +335,70 @@ export default function HomePage() {
           </p>
         </section>
 
-        <section className="foerde-live" id="orte" aria-label="Ort auswählen und aktuelle Daten ansehen">
-          <div className="foerde-tabs" role="group" aria-label="Ort auswählen">
-            {regions.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={selected === item.id ? "active" : ""}
-                aria-pressed={selected === item.id}
-                onClick={() => {
-                  setSelected(item.id);
-                  window.history.replaceState(null, "", `#${item.id}`);
-                }}
-              >
-                {item.name}
-              </button>
-            ))}
-          </div>
-
+        <section className="foerde-live" id="live" aria-label="Aktuelle Lage an der Flensburger Förde">
           <div className="foerde-location">
-            <div className="foerde-location-head">
+            <div className={styles.overviewHeader}>
               <div>
-                <span className="foerde-kicker">Dein Ort</span>
-                <h2>{region.name}</h2>
-                <p>{region.detail}</p>
+                <span className="foerde-kicker">Live an der Förde</span>
+                <h2>Was lohnt sich gerade?</h2>
+                <p>Wetter, passende Aktivitäten und Badestellen kompakt zusammengefasst.</p>
               </div>
-              <a href={`/orte/${region.id}`} className="foerde-detail-link">
-                Ort entdecken ↗
-              </a>
+              {feed?.updatedAt ? (
+                <small>
+                  Aktualisiert {sourceTime(feed.updatedAt) ?? "gerade"} Uhr
+                </small>
+              ) : null}
             </div>
 
-            <div className="foerde-stat-grid" aria-live="polite">
-              <article className="foerde-stat">
+            <article className={styles.weatherSummary} aria-live="polite">
+              <div className={styles.weatherTop}>
                 <span>🌤️ Wetter</span>
                 <strong>
-                  {live?.weather ? `${Math.round(live.weather.temperature)} °C` : "—"}
+                  {regionalWeather ? Math.round(regionalWeather.temperature) + " °C" : "—"}
                 </strong>
-                <p>
-                  {live?.weather
-                    ? `${weatherLabel(live.weather.weatherCode)} · gefühlt ${Math.round(
-                        live.weather.apparentTemperature
-                      )} °C · Wind ${Math.round(live.weather.windSpeed)} km/h${
-                        sourceTime(live.weather.observedAt)
-                          ? ` · Stand ${sourceTime(live.weather.observedAt)} Uhr`
-                          : ""
-                      }`
-                    : error || feed
-                      ? "Wetterdaten momentan nicht erreichbar"
-                      : "Wetterdaten werden geladen"}
-                </p>
-              </article>
-              <article className="foerde-stat">
+              </div>
+              <p>
+                {regionalWeather
+                  ? weatherLabel(regionalWeather.weatherCode) +
+                    " · gefühlt " +
+                    Math.round(regionalWeather.apparentTemperature) +
+                    " °C · Wind " +
+                    Math.round(regionalWeather.windSpeed) +
+                    " km/h" +
+                    (sourceTime(regionalWeather.observedAt)
+                      ? " · Stand " + sourceTime(regionalWeather.observedAt) + " Uhr"
+                      : "")
+                  : error || feed
+                    ? "Wetterdaten momentan nicht erreichbar"
+                    : "Wetterdaten werden geladen"}
+              </p>
+              <div className={styles.weatherDivider} />
+              <div className={styles.rainRow}>
                 <span>🌧️ Regenrisiko · nächste 3 Stunden</span>
                 <strong>
-                  {live?.weather ? `${Math.round(live.weather.rainChance)} %` : "—"}
+                  {regionalWeather ? Math.round(regionalWeather.rainChance) + " %" : "—"}
                 </strong>
-                <p>
-                  {live?.weather
-                    ? `Böen ${Math.round(live.weather.windGusts)} km/h · UV max. ${live.weather.uvIndex.toFixed(
-                        1
-                      )}`
-                    : `Prognose von Open-Meteo für ${region.name}`}
-                </p>
-              </article>
-            </div>
+              </div>
+              <p>
+                {regionalWeather
+                  ? "Böen " +
+                    Math.round(regionalWeather.windGusts) +
+                    " km/h · UV max. " +
+                    regionalWeather.uvIndex.toFixed(1)
+                  : "Kurzfristprognose von Open-Meteo"}
+              </p>
+              <small className={styles.regionalNote}>
+                Regional zusammengefasst: Temperatur und Wind werden gemittelt; bei
+                Regenrisiko, Böen und UV wird der höchste Kurzfristwert der vier Orte gezeigt.
+              </small>
+            </article>
 
-            {live?.warnings?.length ? (
+            {regionalWarnings.length ? (
               <aside className={styles.warningBox} role="status">
                 <span aria-hidden="true">⚠️</span>
                 <span>
-                  <strong>Amtliche DWD-Warnung für {region.name}</strong>
-                  <small>{live.warnings[0].headline}</small>
+                  <strong>Amtliche DWD-Warnung für die Region</strong>
+                  <small>{regionalWarnings[0].headline}</small>
                 </span>
                 <a
                   href={feed?.sources.warnings ?? "https://www.dwd.de/"}
@@ -361,11 +410,11 @@ export default function HomePage() {
               </aside>
             ) : null}
 
-            {live?.weather ? (
+            {regionalWeather ? (
               <section className={styles.nowSection} aria-label="Was kann ich gerade machen?">
                 <div className={styles.sectionHeading}>
                   <div>
-                    <span className="foerde-kicker">Entscheidung statt Rohdaten</span>
+                    <span className="foerde-kicker">Direkt entscheiden</span>
                     <h3>Was kann ich gerade machen?</h3>
                   </div>
                   {best ? (
@@ -434,9 +483,9 @@ export default function HomePage() {
               </section>
             ) : null}
 
-            <section className="foerde-beaches" aria-label={`Badestellen bei ${region.name}`}>
+            <section className="foerde-beaches" id="badestellen" aria-label="Badestellen an der Flensburger Förde">
               <div className="foerde-section-head">
-                <h3>Badestellen</h3>
+                <h3>Badestellen an der Förde</h3>
                 <a
                   href={
                     feed?.sources.bathing ??
@@ -448,15 +497,19 @@ export default function HomePage() {
                   Amtliche Quelle ↗
                 </a>
               </div>
-              {live?.beaches.length ? (
+              {beaches.length ? (
                 <div className="foerde-beach-list">
-                  {live.beaches.map((beach) => (
-                    <div className="foerde-beach" key={beach.name}>
+                  {beaches.map((beach) => (
+                    <div className="foerde-beach" key={beach.regionName + "-" + beach.name}>
                       <strong>{beach.name}</strong>
                       <span>
+                        {beach.regionName}
                         {beach.quality
-                          ? `Einstufung ${beach.period ?? ""}: ${beach.quality}`
-                          : "Keine Einstufung verfügbar"}
+                          ? " · Einstufung " +
+                            (beach.period ?? "") +
+                            ": " +
+                            beach.quality
+                          : " · Keine Einstufung verfügbar"}
                       </span>
                     </div>
                   ))}
@@ -489,18 +542,6 @@ export default function HomePage() {
             <p>Termine mit Details, Originalquelle und iCal-Aktion.</p>
             <a href="/veranstaltungen">Termine ansehen →</a>
           </article>
-          <article>
-            <span>🏖️</span>
-            <h2>Strände in {region.name}</h2>
-            <p>Badestellen und veröffentlichte Einstufungen für deinen Ort ansehen.</p>
-            <a href={`/orte/${region.id}`}>Ort entdecken →</a>
-          </article>
-          <article>
-            <span>🧭</span>
-            <h2>Freizeit & Urlaub</h2>
-            <p>Ideen und Originalquellen für alle vier Orte an der Förde.</p>
-            <a href="/urlaub">Region entdecken →</a>
-          </article>
         </section>
 
         <footer className="foerde-footer">
@@ -514,5 +555,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-// regional-live-deploy
