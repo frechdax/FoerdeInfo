@@ -637,8 +637,6 @@ export default function HomePage() {
 
   const navItems: Array<{ id: View; label: string; symbol: string; href: string }> = [
     { id: "home", label: "Start", symbol: "🏠", href: "/" },
-    { id: "events", label: "Veranstaltungen", symbol: "📅", href: "/veranstaltungen" },
-    { id: "urlaub", label: "Urlaub", symbol: "🌊", href: "/urlaub" },
     { id: "impressum", label: "Impressum", symbol: "📄", href: "/#impressum" },
   ];
 
@@ -663,12 +661,12 @@ export default function HomePage() {
         <button className="brand" onClick={() => navigate("home")}>
           <span className="brand-mark">⚓</span>
           <span>
-            Glücksburg
+            Flensburg
             <span className="brand-direct">DIREKT</span>
           </span>
         </button>
 
-        <div className="sidebar-location">⌖ GLÜCKSBURG (OSTSEE)</div>
+        <div className="sidebar-location">⌖ FLENSBURG · WASSERSLEBEN · GLÜCKSBURG</div>
 
         <nav>
           {navItems.map((item) => (
@@ -724,7 +722,7 @@ export default function HomePage() {
       <div className="app-shell">
         <header className="topbar">
           <div className="breadcrumb">
-            <span>Glücksburg Direkt</span>
+            <span>Flensburg Direkt</span>
             <span>›</span>
             <strong>{currentLabel}</strong>
           </div>
@@ -732,12 +730,12 @@ export default function HomePage() {
           <div className="header-live-cluster">
             <button
               className="topbar-brand"
-              aria-label="Glücksburg Direkt – Startseite"
+              aria-label="Flensburg Direkt – Startseite"
               onClick={() => navigate("home")}
             >
               <span className="topbar-brand-mark" aria-hidden="true">⚓</span>
               <span className="topbar-brand-text">
-                <strong>Glücksburg</strong>
+                <strong>Flensburg</strong>
                 <small>DIREKT</small>
               </span>
             </button>
@@ -745,7 +743,7 @@ export default function HomePage() {
             {pharmacyDuty ? (
               <a
                 className="header-pharmacy"
-                href={pharmacyDuty.source_url}
+                href="https://www.aponet.de/notdienstsuche/24937-Flensburg"
                 target="_blank"
                 rel="noreferrer"
                 aria-label={`Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
@@ -789,7 +787,7 @@ export default function HomePage() {
             <>
               <section className="page-heading">
                 <h1>Veranstaltungen</h1>
-                <p>Aktuelle Termine in Glücksburg – mit direktem Detail-Link und iCalendar-Download (.ics).</p>
+                <p>Aktuelle Termine in der Förderegion – Flensburg steht künftig im Mittelpunkt.</p>
               </section>
 
               <div className="event-filter-bar" aria-label="Veranstaltungen nach Zeitraum filtern">
@@ -859,7 +857,7 @@ export default function HomePage() {
                       <h3>{event.title}</h3>
                       <p>
                         {event.time ? event.time + " Uhr · " : ""}
-                        {event.location || "Glücksburg"}
+                        {event.location || "Flensburg"}
                       </p>
                     </a>
 
