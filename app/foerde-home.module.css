@@ -1,12 +1,86 @@
+.overviewHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.overviewHeader h2 {
+  margin: 4px 0 0;
+  font-size: 1.55rem;
+}
+
+.overviewHeader p {
+  margin: 4px 0 0;
+  color: #58717b;
+}
+
+.overviewHeader > small {
+  color: #60767d;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.weatherSummary {
+  display: grid;
+  gap: 7px;
+  padding: 16px;
+  border: 1px solid #dbe7e8;
+  border-radius: 15px;
+  background: #eef5f5;
+}
+
+.weatherTop,
+.rainRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.weatherTop > span,
+.rainRow > span {
+  color: #365b63;
+  font-weight: 800;
+}
+
+.weatherTop > strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.rainRow > strong {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.weatherSummary p {
+  margin: 0;
+  color: #536c74;
+  font-size: .88rem;
+  line-height: 1.45;
+}
+
+.weatherDivider {
+  height: 1px;
+  margin: 4px 0;
+  background: #d5e4e5;
+}
+
+.regionalNote {
+  margin-top: 3px;
+  color: #6b8087;
+  font-size: .69rem;
+  line-height: 1.4;
+}
+
 .nowSection,
 .offerSection {
   display: grid;
   gap: 12px;
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px solid #dbe7e8;
-  border-radius: 16px;
-  background: #fff;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #dbe7e8;
 }
 
 .sectionHeading {
@@ -123,11 +197,6 @@
 }
 
 @media (min-width: 700px) {
-  .nowSection,
-  .offerSection {
-    padding: 19px;
-  }
-
   .sectionHeading {
     flex-direction: row;
     align-items: flex-end;
@@ -198,5 +267,17 @@
   .warningBox a {
     grid-column: auto;
     white-space: nowrap;
+  }
+}
+
+@media (min-width: 700px) {
+  .overviewHeader {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .weatherSummary {
+    padding: 18px 20px;
   }
 }
