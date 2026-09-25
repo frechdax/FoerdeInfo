@@ -54,12 +54,12 @@ Die erweiterte Live-Logik in `/api/live` bewertet kurzfristige Zeitfenster für 
 
 ## Live-Daten-Labor – Produktion
 
-Die ortsbezogene Aggregation ist produktiv in `/api/live-daten?ort=...` umgesetzt. Parkplatz- und Besucher-Messwerte werden über die öffentliche OGC SensorThings API (FROST) der Open Data Infrastruktur Schleswig-Holstein gesucht. Die API prüft mehrere bekannte ODI-FROST-Pfade, filtert Messreihen nach Entfernung und Bedeutung und lädt nur reale aktuelle Observations.
+Die ortsbezogene Aggregation ist produktiv in `/api/live-daten?ort=...` umgesetzt. Für Flensburg liest förde.info die öffentlich sichtbaren Park- und Besucherwerte aus dem Dashboard der Smarten Grenzregion nach dessen clientseitigem Laden aus. Dafür wird die öffentliche Dashboard-Seite serverseitig in einem Headless-Chromium gerendert; es werden ausschließlich dort tatsächlich angezeigte Werte übernommen. Die SensorThings-Abfrage bleibt als Fallback für weitere Orte bestehen.
 
 | Modul | Quelle | Status / Einschränkung |
 | --- | --- | --- |
-| Parkplatzbelegung | öffentliche SensorThings-Infrastruktur Schleswig-Holstein | passende Messreihen werden im Umkreis gesucht; wenn keine passende Messreihe existiert, Ausgabe `unavailable` |
-| Besucherzählung | öffentliche SensorThings-Infrastruktur Schleswig-Holstein | nur reale gefundene Zähl-/Frequenzmesswerte; keine Hochrechnung |
+| Parkplatzbelegung | Smarte Grenzregion – öffentliches Dashboard; SensorThings als Fallback | Flensburg: echte Dashboard-Werte für verfügbare Sensor-Parkplätze; fehlende Messwerte werden nicht geschätzt |
+| Besucherzählung | Smarte Grenzregion – öffentliches Dashboard; SensorThings als Fallback | Flensburg: anonymisierte aktuelle Zählwerte der öffentlich angezeigten Messstellen; keine Hochrechnung |
 | E-Ladesäulen | OpenStreetMap / Overpass | aktuelle erfasste Standorte/Kapazitäten; **keine verlässliche Live-Belegung frei/belegt** über diese Quelle |
 | Verkehr | eigene aktive Wegecheck-Meldungen aus Supabase | live bezüglich eigener Meldungen; keine vollständige amtliche Straßenverkehrslage |
 | ÖPNV | `v6.db.transport.rest` | nächste verfügbare Abfahrten mit vorhandenen Realtime-/Verspätungsdaten; Datenabdeckung abhängig von Haltestelle/Verkehrsunternehmen |

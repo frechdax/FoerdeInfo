@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicServerSupabase } from "@/lib/supabase-public-server";
 import { getRegion, regions } from "@/lib/regions";
+import { getSmarteGrenzregionSnapshot, type SgrSnapshot } from "@/lib/smarte-grenzregion-live";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 type Region = (typeof regions)[number];
 
@@ -273,6 +275,70 @@ async function sensorModule(
     updatedAt: null,
     source: "Open Data Infrastruktur Schleswig-Holstein",
     sourceUrl: "https://sensor.odi.schleswig-holstein.de/",
+  };
+}
+
+
+function dashboardParkingModule(snapshot: SgrSnapshot): LiveModule {
+  const rows = snapshot.parking;
+  return {
+    status: "live",
+    value: rows.length + " Live-" + (rows.length === 1 ? "Parkplatz" : "Parkplätze"),
+    detail:
+      "Echte aktuelle Belegungswerte aus dem öffentlichen Dashboard der Smarten Grenzregion. Der Zeitstempel zeigt den Abruf durch förde.info.",
+    updatedAt: snapshot.fetchedAt,
+    source: "Smarte Grenzregion – öffentliches Dashboard",
+    sourceUrl: "https://portal.smarte-grenzregion.de/dashboard",
+    items: rows.map((row) => {
+      const free =
+        row.capacity !== null && row.occupied !== null
+          ? Math.max(0, row.capacity - row.occupied)
+          : null;
+      const value =
+        free !== null && row.capacity !== null && row.occupied !== null
+          ? free +
+            " frei · " +
+            row.occupied +
+            "/" +
+            row.capacity +
+            " belegt" +
+            (row.percent !== null ? " (" + row.percent + "%)" : "")
+          : row.percent !== null
+            ? row.percent + "% belegt"
+            : row.occupied !== null
+              ? row.occupied + " belegt"
+              : "Live-Wert";
+      return { label: row.name, value };
+    }),
+  };
+}
+
+function dashboardVisitorsModule(snapshot: SgrSnapshot): LiveModule {
+  const rows = snapshot.visitors;
+  return {
+    status: "live",
+    value:
+      rows.length +
+      " aktive " +
+      (rows.length === 1 ? "Besucherzählung" : "Besucherzählungen"),
+    detail:
+      "Echte anonymisierte Zählwerte aus dem öffentlichen Dashboard der Smarten Grenzregion. Einzelne Messstellen können zeitweise keine Daten liefern.",
+    updatedAt: snapshot.fetchedAt,
+    source: "Smarte Grenzregion – öffentliches Dashboard",
+    sourceUrl: "https://portal.smarte-grenzregion.de/dashboard",
+    items: rows.map((row) => ({
+      label: row.name,
+      value:
+        row.current !== null
+          ? row.current + " aktuell"
+          : row.today !== null
+            ? row.today + " heute"
+            : "Live-Wert",
+      meta:
+        row.today !== null && row.current !== null
+          ? "Heute bisher " + row.today + " erfasst"
+          : undefined,
+    })),
   };
 }
 
@@ -625,75 +691,28 @@ async function sharingModule(region: Region): Promise<LiveModule> {
   }
 }
 
-async function sensorThingsDiagnostics() {
-  return Promise.all(
-    ODI_BASES.map(async (base) => {
-      try {
-        const response = await fetch(base + "/Datastreams?$top=1", {
-          headers: {
-            accept: "application/json",
-            "user-agent": "foerde.info sensor diagnostics",
-          },
-          signal: AbortSignal.timeout(7000),
-          cache: "no-store",
-        });
-        const text = await response.text();
-        return {
-          base,
-          ok: response.ok,
-          status: response.status,
-          contentType: response.headers.get("content-type"),
-          sample: text.slice(0, 5000),
-        };
-      } catch (error) {
-        return {
-          base,
-          ok: false,
-          status: 0,
-          error: error instanceof Error ? error.message : String(error),
-        };
-      }
-    })
-  );
-}
-
 export async function GET(request: NextRequest) {
-  if (request.nextUrl.searchParams.get("debug") === "sensor") {
-    const [diagnostics, envResponse] = await Promise.all([
-      sensorThingsDiagnostics(),
-      fetch("https://sensor.odi.schleswig-holstein.de/assets/env.js", {
-        headers: { "user-agent": "foerde.info sensor diagnostics" },
-        signal: AbortSignal.timeout(7000),
-        cache: "no-store",
-      }).then(async (response) => ({
-        status: response.status,
-        contentType: response.headers.get("content-type"),
-        text: (await response.text()).slice(0, 10000),
-      })).catch((error) => ({
-        status: 0,
-        contentType: null,
-        text: error instanceof Error ? error.message : String(error),
-      })),
-    ]);
-    return NextResponse.json({
-      checkedAt: new Date().toISOString(),
-      diagnostics,
-      env: envResponse,
-    });
-  }
-
   const id = request.nextUrl.searchParams.get("ort") ?? "flensburg";
   const region = getRegion(id) ?? regions[0];
 
-  const [parking, visitors, charging, traffic, transit, sharing] =
-    await Promise.all([
-      sensorModule(region, "parking"),
-      sensorModule(region, "visitors"),
-      chargingModule(region),
-      trafficModule(region),
-      transitModule(region),
-      sharingModule(region),
-    ]);
+  const [dashboard, charging, traffic, transit, sharing] = await Promise.all([
+    region.id === "flensburg"
+      ? getSmarteGrenzregionSnapshot()
+      : Promise.resolve(null),
+    chargingModule(region),
+    trafficModule(region),
+    transitModule(region),
+    sharingModule(region),
+  ]);
+
+  const parking =
+    dashboard?.parking.length
+      ? dashboardParkingModule(dashboard)
+      : await sensorModule(region, "parking");
+  const visitors =
+    dashboard?.visitors.length
+      ? dashboardVisitorsModule(dashboard)
+      : await sensorModule(region, "visitors");
 
   return NextResponse.json(
     {
@@ -721,6 +740,4 @@ export async function GET(request: NextRequest) {
   );
 }
 
-// Keep production diagnostics deployable while SensorThings endpoint is verified.
 
-// Diagnostic merge trigger for production SensorThings endpoint verification.
