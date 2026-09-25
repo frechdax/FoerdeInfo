@@ -33,6 +33,12 @@ export const affiliateLinks = {
       runningTour: withPartnerId(
         "https://www.getyourguide.com/flensburg-l101640/flensburg-running-tour-with-insider-tip-guarantee-t729641/"
       ),
+      walkingTour: withPartnerId(
+        "https://www.getyourguide.com/flensburg-l101640/flensburg-private-guided-walking-tour-t457495/"
+      ),
+      escapeGame: withPartnerId(
+        "https://www.getyourguide.com/flensburg-l101640/flensburg-extraordinary-escape-game-true-crime-stories-and-city-tour-t1344488/"
+      ),
     },
   },
 } as const;

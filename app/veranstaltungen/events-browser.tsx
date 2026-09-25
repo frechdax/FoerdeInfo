@@ -6,6 +6,7 @@ import styles from "./events.module.css";
 export type CalendarEvent = {
   key: string;
   title: string;
+  description: string | null;
   date: string;
   endDate: string | null;
   time: string | null;
@@ -14,6 +15,8 @@ export type CalendarEvent = {
   region: string;
   sourceUrl: string | null;
   calendarUrl: string;
+  detailUrl: string;
+  detailExternal: boolean;
   sourceLabel: string;
 };
 
@@ -195,24 +198,32 @@ export default function EventsBrowser({
                     {event.time ? `${String(event.time).slice(0, 5)} Uhr` : "Uhrzeit siehe Quelle"}
                     {event.location ? ` · ${event.location}` : ""}
                   </p>
+                  {event.description ? (
+                    <p className={styles.description}>{event.description}</p>
+                  ) : null}
                   <small>
                     {event.organizer ? `${event.organizer} · ` : ""}
                     {event.sourceLabel}
                   </small>
                 </div>
                 <div className={styles.eventActions}>
-                  {event.sourceUrl ? (
+                  <a
+                    href={event.detailUrl}
+                    target={event.detailExternal ? "_blank" : undefined}
+                    rel={event.detailExternal ? "noopener noreferrer" : undefined}
+                  >
+                    Details{event.detailExternal ? " ↗" : " →"}
+                  </a>
+                  {event.sourceUrl && !event.detailExternal ? (
                     <a
                       href={event.sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Details ↗
+                      Originalquelle ↗
                     </a>
-                  ) : (
-                    <span className={styles.noSource}>Keine Originalseite hinterlegt</span>
-                  )}
-                  <a href={event.calendarUrl}>📅 iCal</a>
+                  ) : null}
+                  <a href={event.calendarUrl} download>📅 iCalendar</a>
                 </div>
               </article>
             ))}

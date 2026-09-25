@@ -32,6 +32,13 @@ type DwdWarning = {
   end: number;
 };
 
+type Marine = {
+  waveHeight: number | null;
+  wavePeriod: number | null;
+  windWaveHeight: number | null;
+  observedAt: string | null;
+};
+
 type RegionData = {
   id: RegionId;
   weather: Weather | null;
@@ -41,8 +48,9 @@ type RegionData = {
 
 type Feed = {
   updatedAt: string;
+  marine: Marine | null;
   places: RegionData[];
-  sources: { weather: string; bathing: string; warnings: string };
+  sources: { weather: string; bathing: string; warnings: string; marine: string };
 };
 
 type ActivityScore = {
@@ -51,6 +59,7 @@ type ActivityScore = {
   icon: string;
   score: number;
   verdict: string;
+  reason: string;
 };
 
 function weatherLabel(code: number) {
@@ -80,11 +89,17 @@ function verdict(score: number, isDay: boolean, id: ActivityScore["id"]) {
   return "Gerade eher nicht";
 }
 
-function activityScores(weather: Weather, warningLevel: number): ActivityScore[] {
+function activityScores(
+  weather: Weather,
+  warningLevel: number,
+  marine: Marine | null
+): ActivityScore[] {
   const wet = weather.rainChance * 0.58 + Math.min(28, weather.precipitation * 16);
   const gust = Math.max(0, weather.windGusts - 35) * 0.75;
   const warningPenalty =
     warningLevel >= 4 ? 70 : warningLevel === 3 ? 45 : warningLevel === 2 ? 25 : warningLevel === 1 ? 12 : 0;
+  const wavePenalty =
+    marine?.waveHeight != null ? Math.max(0, marine.waveHeight - 0.45) * 28 : 0;
 
   const walk = clamp(
     100 -
@@ -115,6 +130,7 @@ function activityScores(weather: Weather, warningLevel: number): ActivityScore[]
       tempPenalty(weather.temperature, 22, 7) -
       Math.max(0, weather.uvIndex - 7) * 2.5 -
       warningPenalty -
+      wavePenalty -
       (weather.isDay ? 0 : 85)
   );
 
@@ -122,10 +138,44 @@ function activityScores(weather: Weather, warningLevel: number): ActivityScore[]
   const indoor = clamp(55 + Math.max(0, 65 - bestOutdoor) * 0.75);
 
   const result: ActivityScore[] = [
-    { id: "walk", label: "Spaziergang", icon: "🚶", score: walk, verdict: verdict(walk, weather.isDay, "walk") },
-    { id: "bike", label: "Fahrrad", icon: "🚲", score: bike, verdict: verdict(bike, weather.isDay, "bike") },
-    { id: "beach", label: "Strand", icon: "🏖️", score: beach, verdict: verdict(beach, weather.isDay, "beach") },
-    { id: "indoor", label: "Indoor", icon: "🏛️", score: indoor, verdict: verdict(indoor, true, "indoor") },
+    {
+      id: "walk",
+      label: "Spaziergang",
+      icon: "🚶",
+      score: walk,
+      verdict: verdict(walk, weather.isDay, "walk"),
+      reason: `${Math.round(weather.rainChance)} % Regen · gefühlt ${Math.round(weather.apparentTemperature)} °C`,
+    },
+    {
+      id: "bike",
+      label: "Fahrrad",
+      icon: "🚲",
+      score: bike,
+      verdict: verdict(bike, weather.isDay, "bike"),
+      reason: `Wind ${Math.round(weather.windSpeed)} · Böen ${Math.round(weather.windGusts)} km/h`,
+    },
+    {
+      id: "beach",
+      label: "Strand & Wasser",
+      icon: "🏖️",
+      score: beach,
+      verdict: verdict(beach, weather.isDay, "beach"),
+      reason:
+        marine?.waveHeight != null
+          ? `Welle ${marine.waveHeight.toFixed(1)} m · Wind ${Math.round(weather.windSpeed)} km/h`
+          : `${Math.round(weather.rainChance)} % Regen · Wind ${Math.round(weather.windSpeed)} km/h`,
+    },
+    {
+      id: "indoor",
+      label: "Drinnen",
+      icon: "🏛️",
+      score: indoor,
+      verdict: verdict(indoor, true, "indoor"),
+      reason:
+        weather.rainChance >= 45
+          ? `Gute Ausweichoption bei ${Math.round(weather.rainChance)} % Regenrisiko`
+          : "Wetterunabhängig und jederzeit planbar",
+    },
   ];
 
   return result.sort((a, b) => b.score - a.score);
@@ -224,8 +274,11 @@ export default function HomePage() {
   );
 
   const scores = useMemo(
-    () => (regionalWeather ? activityScores(regionalWeather, warningLevel) : []),
-    [regionalWeather, warningLevel]
+    () =>
+      regionalWeather
+        ? activityScores(regionalWeather, warningLevel, feed?.marine ?? null)
+        : [],
+    [regionalWeather, warningLevel, feed?.marine]
   );
   const best = scores[0];
 
@@ -235,6 +288,8 @@ export default function HomePage() {
 
     const walk = scores.find((item) => item.id === "walk")?.score ?? 0;
     const beach = scores.find((item) => item.id === "beach")?.score ?? 0;
+    const indoor = scores.find((item) => item.id === "indoor")?.score ?? 0;
+    const waveHeight = feed?.marine?.waveHeight;
 
     const offers: Array<{
       id: string;
@@ -245,71 +300,104 @@ export default function HomePage() {
     }> = [];
 
     if (
-      beach >= 68 &&
+      beach >= 64 &&
       weather.windSpeed >= 4 &&
-      weather.windSpeed <= 28 &&
-      weather.rainChance <= 35
+      weather.windSpeed <= 30 &&
+      weather.rainChance <= 35 &&
+      (waveHeight == null || waveHeight <= 1.2)
     ) {
       offers.push({
         id: "sailing",
         icon: "⛵",
         title: "Segeltörn auf der Flensburger Förde",
         detail:
-          "Passt zu den aktuellen Bedingungen: Strand " +
-          beach +
-          "/100 · Wind " +
+          "Jetzt passend: Wind " +
           Math.round(weather.windSpeed) +
-          " km/h.",
+          " km/h · Regen " +
+          Math.round(weather.rainChance) +
+          " %" +
+          (waveHeight != null ? " · Welle " + waveHeight.toFixed(1) + " m" : "") +
+          ".",
         href: affiliateLinks.activities.offers.sailing,
       });
     }
 
-    if (beach >= 72 && weather.windSpeed <= 22 && weather.rainChance <= 30) {
+    if (
+      beach >= 68 &&
+      weather.windSpeed <= 22 &&
+      weather.rainChance <= 30 &&
+      (waveHeight == null || waveHeight <= 0.65)
+    ) {
       offers.push({
         id: "eboat",
         icon: "🚤",
         title: "E-Boot auf der Förde",
         detail:
-          "Ruhigeres Wetter: Strand " +
-          beach +
-          "/100 · Regenrisiko " +
+          "Ruhige Bedingungen: Wind " +
+          Math.round(weather.windSpeed) +
+          " km/h · Regen " +
           Math.round(weather.rainChance) +
-          " %.",
+          " %" +
+          (waveHeight != null ? " · Welle " + waveHeight.toFixed(1) + " m" : "") +
+          ".",
         href: affiliateLinks.activities.offers.eBoat,
       });
     }
 
-    if (walk >= 65 && weather.rainChance <= 40) {
+    if (walk >= 68 && weather.rainChance <= 35 && weather.isDay) {
       offers.push({
         id: "running",
         icon: "🏃",
-        title: "Running- & Sightseeing-Tour in Flensburg",
+        title: "Running- & Sightseeing-Tour",
         detail:
-          "Draußen gerade gut machbar: Spaziergang " +
-          walk +
-          "/100 · gefühlt " +
+          "Draußen gerade gut: gefühlt " +
           Math.round(weather.apparentTemperature) +
-          " °C.",
+          " °C · Regen " +
+          Math.round(weather.rainChance) +
+          " %.",
         href: affiliateLinks.activities.offers.runningTour,
+      });
+    } else if (walk >= 48 && weather.rainChance <= 50 && weather.isDay) {
+      offers.push({
+        id: "walking",
+        icon: "🚶",
+        title: "Private Stadtführung in Flensburg",
+        detail:
+          "Für eine ruhigere Tour: gefühlt " +
+          Math.round(weather.apparentTemperature) +
+          " °C · Wind " +
+          Math.round(weather.windSpeed) +
+          " km/h.",
+        href: affiliateLinks.activities.offers.walkingTour,
       });
     }
 
-    if (!offers.length) {
+    if (indoor >= 62 || weather.rainChance > 45 || !weather.isDay) {
+      offers.push({
+        id: "escape",
+        icon: "🕵️",
+        title: "True-Crime-Stadtabenteuer",
+        detail:
+          !weather.isDay
+            ? "Eine buchbare Alternative für den späteren Tagesverlauf."
+            : "Passt als Alternative bei wechselhaftem Wetter; Teile der Tour finden draußen statt.",
+        href: affiliateLinks.activities.offers.escapeGame,
+      });
+    }
+
+    if (offers.length < 3) {
       offers.push({
         id: "browse",
         icon: best?.id === "indoor" ? "☔" : "🧭",
-        title:
-          best?.id === "indoor"
-            ? "Indoor- und Schietwetter-Ideen ansehen"
-            : "Aktivitäten an der Förde ansehen",
+        title: "Weitere Aktivitäten an der Förde",
         detail:
-          "GetYourGuide zeigt verfügbare Aktivitäten und Preise auf der Anbieterseite.",
+          "Termine, aktuelle Preise und freie Plätze direkt bei GetYourGuide prüfen.",
         href: affiliateLinks.activities.url,
       });
     }
 
-    return offers.slice(0, 2);
-  }, [regionalWeather, scores, best?.id]);
+    return offers.slice(0, 3);
+  }, [regionalWeather, scores, best?.id, feed?.marine]);
 
   return (
     <main className="foerde-page" id="content">
@@ -341,7 +429,7 @@ export default function HomePage() {
               <div>
                 <span className="foerde-kicker">Live an der Förde</span>
                 <h2>Was lohnt sich gerade?</h2>
-                <p>Wetter, passende Aktivitäten und Badestellen kompakt zusammengefasst.</p>
+                <p>Aktuelle API-Daten werden in konkrete Empfehlungen für genau jetzt übersetzt.</p>
               </div>
               {feed?.updatedAt ? (
                 <small>
@@ -391,6 +479,24 @@ export default function HomePage() {
                 Regional zusammengefasst: Temperatur und Wind werden gemittelt; bei
                 Regenrisiko, Böen und UV wird der höchste Kurzfristwert der vier Orte gezeigt.
               </small>
+              {feed?.marine?.waveHeight != null ? (
+                <>
+                  <div className={styles.weatherDivider} />
+                  <div className={styles.rainRow}>
+                    <span>🌊 Fördebedingungen</span>
+                    <strong>{feed.marine.waveHeight.toFixed(1)} m</strong>
+                  </div>
+                  <p>
+                    Wellenhöhe
+                    {feed.marine.wavePeriod != null
+                      ? " · Periode " + feed.marine.wavePeriod.toFixed(1) + " s"
+                      : ""}
+                    {sourceTime(feed.marine.observedAt)
+                      ? " · Stand " + sourceTime(feed.marine.observedAt) + " Uhr"
+                      : ""}
+                  </p>
+                </>
+              ) : null}
             </article>
 
             {regionalWarnings.length ? (
@@ -433,6 +539,7 @@ export default function HomePage() {
                       </div>
                       <h4>{item.label}</h4>
                       <p>{item.verdict}</p>
+                      <small className={styles.scoreReason}>{item.reason}</small>
                     </article>
                   ))}
                 </div>
@@ -449,8 +556,8 @@ export default function HomePage() {
               <section className={styles.offerSection} aria-label="Passende buchbare Aktivitäten">
                 <div className={styles.sectionHeading}>
                   <div>
-                    <span className="foerde-kicker">Passend zu den Bedingungen</span>
-                    <h3>Aktivitäten mit GetYourGuide</h3>
+                    <span className="foerde-kicker">Auf Basis der Live-Daten</span>
+                    <h3>Jetzt passende Aktivitäten</h3>
                   </div>
                   <span className={styles.adLabel}>Werbung · Affiliate-Links</span>
                 </div>
@@ -477,8 +584,9 @@ export default function HomePage() {
                 </div>
 
                 <p className={styles.scoreNote}>
-                  Preise und tatsächliche Verfügbarkeit kommen von GetYourGuide und werden
-                  nach dem Öffnen der Anbieterseite angezeigt.
+                  Die Auswahl berücksichtigt Wetter, Tageslicht, amtliche Warnungen und – falls
+                  verfügbar – Wellenhöhe. Buchung, Preise und freie Plätze kommen von
+                  GetYourGuide und werden dort aktuell angezeigt.
                 </p>
               </section>
             ) : null}

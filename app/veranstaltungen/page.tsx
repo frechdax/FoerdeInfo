@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 type ImportedEvent = {
   id: string;
   title: string;
+  description: string | null;
   date: string;
   end_date: string | null;
   time: string | null;
@@ -142,7 +143,7 @@ export default async function EventsPage() {
   const [{ data }, taffEvents] = await Promise.all([
     supabase
       .from("events")
-      .select("id,title,date,end_date,time,location,organizer,source_url")
+      .select("id,title,description,date,end_date,time,location,organizer,source_url")
       .eq("status", "published")
       .or(`date.gte.${current},end_date.gte.${current}`)
       .order("date")
@@ -159,6 +160,7 @@ export default async function EventsPage() {
     ...imported.map((event) => ({
       key: `stored-${event.id}`,
       title: event.title,
+      description: event.description,
       date: event.date,
       endDate: event.end_date,
       time: event.time,
@@ -167,11 +169,14 @@ export default async function EventsPage() {
       region: classifyRegion(event),
       sourceUrl: event.source_url,
       calendarUrl: `/api/calendar/${event.id}`,
+      detailUrl: `/veranstaltungen/${event.id}`,
+      detailExternal: false,
       sourceLabel: "förde.info / Originalquelle",
     })),
     ...visibleTaff.map((event) => ({
       key: `taff-${event.key}`,
       title: event.title,
+      description: null,
       date: event.date,
       endDate: event.endDate,
       time: null,
@@ -180,6 +185,8 @@ export default async function EventsPage() {
       region: classifyRegion({ title: event.title }),
       sourceUrl: event.sourceUrl,
       calendarUrl: externalCalendarHref(event),
+      detailUrl: event.sourceUrl,
+      detailExternal: true,
       sourceLabel: "Tourismus Agentur Flensburger Förde / verlinkte Quelle",
     })),
   ].sort((a, b) => {
@@ -206,7 +213,8 @@ export default async function EventsPage() {
           <h1>Veranstaltungen an der Förde</h1>
           <p>
             Suche nach Veranstaltungen und filtere nach Zeitraum oder Ort. Der
-            Details-Link öffnet direkt die jeweilige Original-Veranstaltungsseite.
+            Öffne alle verfügbaren Details, prüfe die Originalquelle und übernimm
+            passende Termine direkt per iCalendar.
           </p>
         </section>
 

@@ -147,6 +147,14 @@
   line-height: 1.45;
 }
 
+.scoreReason {
+  display: block;
+  margin-top: 7px;
+  color: #71858b;
+  font-size: .68rem;
+  line-height: 1.4;
+}
+
 .offerGrid {
   display: grid;
   gap: 9px;
@@ -267,6 +275,12 @@
   .warningBox a {
     grid-column: auto;
     white-space: nowrap;
+  }
+}
+
+@media (min-width: 980px) {
+  .offerGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

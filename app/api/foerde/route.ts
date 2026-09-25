@@ -21,6 +21,17 @@ type Forecast = {
   };
 };
 
+type MarineForecast = {
+  hourly?: {
+    time?: string[];
+    wave_height?: Array<number | null>;
+    wave_period?: Array<number | null>;
+    wind_wave_height?: Array<number | null>;
+  };
+};
+
+const FOERDE_MARINE_POINT = { latitude: 54.84, longitude: 9.64 };
+
 const bathingBase = "https://efi2.schleswig-holstein.de/bg/opendata/";
 const DWD_WARNINGS_URL = "https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json";
 const FLENSBURG_WARNCELL = "101001000";
@@ -60,6 +71,50 @@ function normalizeWarnings(payload: unknown, warncell: string): DwdWarning[] {
 function maxFinite(values: Array<number | undefined>) {
   const finite = values.filter((value): value is number => Number.isFinite(value));
   return finite.length ? Math.max(...finite) : 0;
+}
+
+function finiteOrNull(value: number | null | undefined) {
+  return Number.isFinite(value) ? Number(value) : null;
+}
+
+async function marineForFoerde() {
+  const params = new URLSearchParams({
+    latitude: String(FOERDE_MARINE_POINT.latitude),
+    longitude: String(FOERDE_MARINE_POINT.longitude),
+    hourly: "wave_height,wave_period,wind_wave_height",
+    timezone: "Europe/Berlin",
+    forecast_days: "1",
+  });
+
+  const response = await fetch(`https://marine-api.open-meteo.com/v1/marine?${params}`, {
+    next: { revalidate: 300 },
+  });
+  if (!response.ok) throw new Error("Fördebedingungen nicht erreichbar");
+
+  const data = (await response.json()) as MarineForecast;
+  const times = data.hourly?.time ?? [];
+  if (!times.length) throw new Error("Fördebedingungen fehlen");
+
+  const now = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+  })
+    .format(new Date())
+    .replace(" ", "T");
+
+  const firstFuture = times.findIndex((value) => value.slice(0, 13) >= now.slice(0, 13));
+  const index = firstFuture >= 0 ? firstFuture : times.length - 1;
+
+  return {
+    waveHeight: finiteOrNull(data.hourly?.wave_height?.[index]),
+    wavePeriod: finiteOrNull(data.hourly?.wave_period?.[index]),
+    windWaveHeight: finiteOrNull(data.hourly?.wind_wave_height?.[index]),
+    observedAt: times[index] ?? null,
+  };
 }
 
 async function weatherFor(region: (typeof regions)[number]) {
@@ -168,7 +223,7 @@ async function officialBeaches() {
 }
 
 export async function GET() {
-  const [forecastResults, beachesResult, warningsResult] = await Promise.all([
+  const [forecastResults, beachesResult, warningsResult, marineResult] = await Promise.all([
     Promise.allSettled(regions.map(weatherFor)),
     officialBeaches().catch(() => null),
     fetch(DWD_WARNINGS_URL, { next: { revalidate: 120 } })
@@ -177,10 +232,12 @@ export async function GET() {
         return parseDwdJson(await response.text());
       })
       .catch(() => null),
+    marineForFoerde().catch(() => null),
   ]);
 
   return NextResponse.json({
     updatedAt: new Date().toISOString(),
+    marine: marineResult,
     places: regions.map((region, index) => ({
       id: region.id,
       weather:
@@ -204,6 +261,7 @@ export async function GET() {
       bathing:
         "https://opendata.schleswig-holstein.de/collection/badegewasser-stammdaten/aktuell",
       warnings: "https://www.dwd.de/",
+      marine: "https://open-meteo.com/en/docs/marine-weather-api",
     },
   });
 }
