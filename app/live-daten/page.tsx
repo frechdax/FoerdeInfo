@@ -38,7 +38,7 @@ export default function LiveDataPage() {
           </p>
         </section>
 
-        <LiveDataDashboard />
+        <LiveDataDashboard />\n\n        {/* Production: ODI SensorThings + regional live-data aggregation */}
 
         <section className={styles.nextStep}>
           <span className="foerde-kicker">Später für die Startseite</span>
