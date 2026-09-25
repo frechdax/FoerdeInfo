@@ -197,14 +197,26 @@ export default function LiveDashboard() {
               affiliate: true,
             }]
           : []),
-        ...(affiliateLinks.activities.enabled && walkScore >= 70
+        ...(affiliateLinks.activities.enabled && beachScore >= 75 && data.weather.windSpeed <= 22
           ? [{
-              id: "history-walk",
-              icon: "🚶",
+              id: "e-boat",
+              icon: "🚤",
               badge: "Werbung · Affiliate-Link",
-              title: "Historischer Stadtrundgang in Flensburg",
-              description: `Gute Bedingungen für draußen: Spaziergang ${walkScore}/100 · Regenrisiko ${Math.round(data.weather.rainProbability3h)} %.`,
-              href: affiliateLinks.activities.offers.historyWalk,
+              title: "E-Boot auf der Flensburger Förde mieten",
+              description: `Sehr passend für ruhiges Fördewetter: Strand-Index ${beachScore}/100 · Wind ${Math.round(data.weather.windSpeed)} km/h.`,
+              href: affiliateLinks.activities.offers.eBoat,
+              provider: affiliateLinks.activities.provider,
+              affiliate: true,
+            }]
+          : []),
+        ...(affiliateLinks.activities.enabled && walkScore >= 72 && data.weather.rainProbability3h <= 35
+          ? [{
+              id: "running-tour",
+              icon: "🏃",
+              badge: "Werbung · Affiliate-Link",
+              title: "Running- & Sightseeing-Tour durch Flensburg",
+              description: `Gute Bedingungen für eine aktive Stadttour: Spaziergang ${walkScore}/100 · Regenrisiko ${Math.round(data.weather.rainProbability3h)} %.`,
+              href: affiliateLinks.activities.offers.runningTour,
               provider: affiliateLinks.activities.provider,
               affiliate: true,
             }]
