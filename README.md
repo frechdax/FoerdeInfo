@@ -1,33 +1,183 @@
 # förde.info
 
-Privates, unabhängiges Informationsangebot für Flensburg, Wassersleben (Harrislee), Glücksburg und Langballig an der Flensburger Förde.
+**förde.info** ist ein privates, unabhängiges Informationsangebot für die Flensburger Förde mit Fokus auf **Flensburg, Wassersleben, Glücksburg und Langballig**.
 
-## Seiten
+Die Anwendung bündelt öffentliche Datenquellen, lokale Inhalte und eigene Entscheidungslogik zu einer mobilen Regionalübersicht: Wetter, DWD-Warnungen, Fördebedingungen, Aktivitäten, Veranstaltungen, Strandinformationen, Wegecheck und künftig weitere ortsbezogene Live-Daten.
 
-- `/` und `/live`: mobile Ortswahl mit Live-Wetter von Open-Meteo, amtlichen DWD-Warnungen, Badegewässer-Einstufung und einem daraus berechneten „Was kann ich gerade machen?“-Index. Passende GetYourGuide-Links werden wetterabhängig als Werbung gekennzeichnet ausgespielt.
-- `/orte/flensburg`, `/orte/wassersleben`, `/orte/gluecksburg`, `/orte/langballig`: örtliche Informationen, Badestellen und Links zu Originalquellen.
-- `/veranstaltungen`: vorhandene förde.info-Termine aus Supabase sowie öffentlich sichtbare Event-Highlights der Tourismus Agentur Flensburger Förde; Einträge bieten Originalquelle und iCalendar-Aktion.
-- `/urlaub`: Ausflugs- und Freizeitübersicht.
-- `/gluecksburg`: ausführliche Glücksburger Ansicht. Dazu gehören `/gluecksburg/live`, `/gluecksburg/veranstaltungen` und `/gluecksburg/urlaub`.
-- `/partner`: Kontakt für regionale Kooperationen.
-- `/wege`: mobile Wegprüfung mit freiwilligem GPS-Start, Fuß-/Fahrradrouting, Ortsuche und zeitlich begrenzten Nachbarschaftsmeldungen.
+> Der GitHub-Repositoryname `GlucksburgDirekt` und der interne Vercel-Projektname `gluecksburg-direkt` sind historische technische Bezeichner. Das Produkt und die öffentliche Website heißen **förde.info**.
 
-Die Anwendung enthält keinen Müllkalender. Externe Veranstaltungskalender werden nicht vollständig gespiegelt; öffentlich sichtbare Highlights werden ergänzend eingelesen und die Originalkalender bleiben verlinkt. Badegewässer-Einstufungen sind keine aktuelle Messung der Wassertemperatur oder Besucherzahl.
+## Aktueller Funktionsumfang
 
-## Wegecheck
+### Startseite und Live-Übersicht
 
-`/wege` zeigt gemeldete Hindernisse nahe einer berechneten Route (40 m Korridor), nicht die tatsächliche Passierbarkeit des gesamten Wegs. Fußrouten für Kinderwagen oder Rollstuhl sind **nicht** auf Barrierefreiheit geprüft. Die Karte und Routen stammen aus OpenStreetMap, die Fuß- und Fahrradrouten vom FOSSGIS-Routingdienst. Die Geokodierung über Nominatim wird nur nach einer expliziten Suche aufgerufen. Standortfreigabe erfolgt ausschließlich nach Tippen auf den entsprechenden Button.
+`/` und `/live` zeigen eine gemeinsame regionale Live-Ansicht für die Flensburger Förde.
 
-Die Tabellen `way_reports` und `way_report_votes` werden durch `supabase/migrations/20260925102500_way_reports.sql` angelegt. Meldungen sind öffentlich, nicht amtlich geprüft, verschwinden nach 48 Stunden aus der öffentlichen Abfrage und benötigen keinen Account. Ein stündlicher Datenbankjob löscht abgelaufene Meldungen samt Fotos und Bestätigungen. Hochgeladene Fotos werden auf eine kleine JPEG-Datei reduziert und als Teil des öffentlichen Datensatzes gespeichert. „Wieder frei“-Stimmen ergänzen den Hinweis, entfernen ihn aber nicht, da Stimmen ohne Anmeldung nicht sicher einer Person zugeordnet werden können. Die Eingabebeschränkung im API-Handler gilt nur pro Serverinstanz; für starkes Aufkommen braucht es zusätzliche Missbrauchsprävention und eine unabhängige Moderation. Die genutzten öffentlichen Routing-/Geocoding-Dienste haben Nutzungsgrenzen.
+Enthalten sind:
+
+- regional zusammengefasstes Wetter aus Open-Meteo
+- Regenrisiko der nächsten Stunden, Wind, Böen und UV
+- Förde-/Wellenbedingungen
+- amtliche DWD-Warnungen
+- eigener Aktivitätsindex für Spaziergang, Fahrrad, Strand/Wasser und Indoor
+- wetterabhängige Aktivitätsempfehlungen
+- gekennzeichnete GetYourGuide-Affiliate-Links
+- Badestellen bzw. deren veröffentlichte amtliche Badegewässer-Einstufungen
+- Links zu Wegecheck und Veranstaltungen
+
+Die frühere manuelle Ortsauswahl auf der Startseite wurde entfernt. Die regionale Übersicht aggregiert die Daten für Flensburg, Wassersleben, Glücksburg und Langballig.
+
+### Veranstaltungen
+
+`/veranstaltungen` bündelt vorhandene veröffentlichte Termine aus Supabase und öffentlich sichtbare Event-Highlights der Tourismus Agentur Flensburger Förde.
+
+Die Oberfläche bietet:
+
+- Freitextsuche
+- Filter **Heute**
+- Filter **Morgen**
+- Filter **Wochenende**
+- Filter **Nächste Woche**
+- Ortsfilter
+- iCalendar-Download
+- Originalquellen
+
+Mehrtagestermine werden bei den Zeitraumfiltern berücksichtigt. Für in Supabase gespeicherte Termine existieren aktuell eigene Detailseiten unter `/veranstaltungen/[id]`; externe Highlights führen direkt zur jeweiligen externen Quelle.
+
+### Wegecheck
+
+`/wege` ist eine mobile Wegprüfung für Flensburg, Wassersleben, Glücksburg und Langballig.
+
+Funktionen:
+
+- optionaler Gerätestandort erst nach ausdrücklicher Freigabe
+- Orts-/Adresssuche
+- Fuß- und Fahrradrouting
+- Karte auf OpenStreetMap-Basis
+- zeitlich begrenzte Nachbarschaftsmeldungen zu Hindernissen
+- Meldungsarten u. a. Sperrung, Baustelle, Oberfläche und Überflutung
+- Bestätigung „noch da“ / „wieder frei“
+- Live-Entscheidungshilfen aus `/api/live`
+- „Beste Option gerade“
+- kontextuelle Affiliate-/Freizeitkarten
+- 2-Stunden-Vorschau „Beste Zeit heute“
+
+Wegmeldungen sind **nicht amtlich geprüft** und ersetzen keine verbindliche Aussage zur Passierbarkeit oder Barrierefreiheit.
+
+### Live-Daten-Labor
+
+`/live-daten` ist eine bewusst nicht indexierte Pilotseite für zusätzliche Echtzeitinformationen.
+
+Die aktuell produktive Version zeigt die vorgesehenen Module für:
+
+- Parkplatzbelegung
+- Besucherzählung
+- E-Ladesäulen
+- Verkehr
+- ÖPNV
+- Sharing
+
+Die nächste Ausbaustufe befindet sich auf dem Branch `feature/live-data-sources-strandampel-20260925`. Dort ist bereits eine ortsbezogene Live-API für Flensburg, Wassersleben, Glücksburg und Langballig umgesetzt. Sie versucht reale Daten aus öffentlichen Quellen abzurufen und zeigt ausdrücklich **keinen erfundenen Ersatzwert**, wenn eine Quelle für den gewählten Ort nichts liefert.
+
+Details: [Projektstatus](docs/PROJECT-STATUS.md) und [Datenquellen](docs/DATA-SOURCES.md).
+
+### Strandampel – in Entwicklung
+
+Auf `feature/live-data-sources-strandampel-20260925` wurde die bisherige Badestellenübersicht zu einer **Strandampel** weiterentwickelt.
+
+Die Ampelfarbe kombiniert:
+
+- aktuelle Wetterlage
+- Tageslicht
+- DWD-Warnstufe
+- Förde-/Wellenbedingungen
+- veröffentlichte amtliche Badegewässer-Einstufung
+
+Die Ampel ist eine **eigene Orientierung von förde.info**. Sie ist keine amtliche Badefreigabe, keine Live-Messung der Wasserqualität und keine Messung der Strandauslastung.
+
+## Region
+
+Die zentrale Ortskonfiguration liegt in `lib/regions.ts`:
+
+- Flensburg
+- Wassersleben
+- Glücksburg
+- Langballig
+
+Dort werden Koordinaten, regionale Metadaten und die Kennungen der amtlichen Badestellen gepflegt.
+
+## Monetarisierung
+
+Das Projekt unterstützt gekennzeichnete Affiliate-Vermittlung. Aktuell werden insbesondere GetYourGuide-Aktivitäten abhängig von der jeweiligen Wetter-/Aktivitätslage ausgewählt.
+
+Affiliate-Inhalte sind in der Oberfläche als Werbung gekennzeichnet. Redaktionelle Hinweise und externe Originalquellen werden davon getrennt behandelt.
+
+Google AdSense ist technisch vorbereitet und wird über die dafür vorgesehenen Umgebungsvariablen gesteuert.
 
 ## Technik
 
-Next.js 16 (App Router), React 19, Supabase für bestehende Glücksburger Inhalte, Open-Meteo und offizielle Badegewässerdaten des Landes Schleswig-Holstein. Der Produktions-Build läuft mit `npm run build`.
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Supabase
+- Leaflet / OpenStreetMap
+- Vercel
+- Node.js >= 22
 
-## Domain und Veröffentlichung
+Lokaler Start:
 
-Die Website ist für [förde.info](https://xn--frde-5qa.info) konfiguriert (`xn--frde-5qa.info` in IDN/Punycode). Siehe [Deployment](docs/DEPLOYMENT.md).
+```bash
+npm install
+npm run dev
+```
 
-## Quellen und Hinweise
+Produktions-Build:
 
-Siehe [Datenquellen](docs/DATA-SOURCES.md) und [Architektur](docs/ARCHITECTURE.md). Für verbindliche Angaben gelten die Originalquellen. Das Projekt ist keine offizielle Veröffentlichung der genannten Städte oder Gemeinden.
+```bash
+npm run build
+```
+
+## Wichtige API-Routen
+
+| Route | Zweck |
+| --- | --- |
+| `/api/foerde` | Regionales Wetter, DWD-Warnungen, Fördebedingungen und amtliche Badegewässerdaten |
+| `/api/live` | Erweiterte Live-Entscheidungslogik, Scores und 2-Stunden-Fenster |
+| `/api/live-daten` | Ortsbezogene Pilotaggregation zusätzlicher Echtzeitquellen; aktuell im Feature-Branch |
+| `/api/wege/reports` | Aktive Nachbarschaftsmeldungen |
+| `/api/wege/route` | Weg-/Routingfunktionen |
+| `/api/wege/geocode` | Adress-/Ortssuche |
+| `/api/calendar/[id]` | iCalendar für gespeicherte Veranstaltungen |
+| `/api/calendar/external` | iCalendar für externe Veranstaltungshighlights |
+
+## Domain und Deployment
+
+Öffentliche Hauptdomain:
+
+**https://förde.info**  
+Technisch als IDN/Punycode: `https://xn--frde-5qa.info`
+
+Deployment läuft über Vercel. Details stehen in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+## Datenqualität und Transparenz
+
+förde.info unterscheidet bewusst zwischen:
+
+- echten Live-/Realtime-Daten
+- kurzfristigen Prognosen
+- veröffentlichten amtlichen Klassifikationen
+- Community-Meldungen
+- eigenen Scores/Entscheidungshilfen
+- redaktionellen bzw. Affiliate-Empfehlungen
+
+Wenn eine Quelle keinen verlässlichen Wert liefert, soll **kein plausibel klingender Ersatzwert erfunden werden**.
+
+Die Anwendung enthält **keinen Müllkalender**.
+
+Für verbindliche Angaben, Warnungen, Terminänderungen und amtliche Informationen gelten immer die jeweiligen Originalquellen.
+
+## Dokumentation
+
+- [Architektur](docs/ARCHITECTURE.md)
+- [Datenquellen](docs/DATA-SOURCES.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Projektstatus und umgesetzte Funktionen](docs/PROJECT-STATUS.md)
