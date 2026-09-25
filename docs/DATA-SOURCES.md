@@ -52,9 +52,9 @@ Die erweiterte Live-Logik in `/api/live` bewertet kurzfristige Zeitfenster für 
 
 `/live-daten` ist derzeit eine nicht indexierte Pilotseite. In der produktiven Version sind die vorgesehenen Kategorien sichtbar, aber noch nicht alle mit echten Livequellen verbunden.
 
-## Live-Daten-Labor – Entwicklungsbranch
+## Live-Daten-Labor – Produktion
 
-Auf `feature/live-data-sources-strandampel-20260925` ist die ortsbezogene Aggregation in `/api/live-daten?ort=...` umgesetzt.
+Die ortsbezogene Aggregation ist produktiv in `/api/live-daten?ort=...` umgesetzt. Parkplatz- und Besucher-Messwerte werden über die öffentliche OGC SensorThings API (FROST) der Open Data Infrastruktur Schleswig-Holstein gesucht. Die API prüft mehrere bekannte ODI-FROST-Pfade, filtert Messreihen nach Entfernung und Bedeutung und lädt nur reale aktuelle Observations.
 
 | Modul | Quelle | Status / Einschränkung |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ Auf `feature/live-data-sources-strandampel-20260925` ist die ortsbezogene Aggreg
 
 Die vier auswählbaren Regionen sind Flensburg, Wassersleben, Glücksburg und Langballig. Der Client aktualisiert die Pilotdaten regelmäßig.
 
-## Strandampel – Entwicklungsbranch
+## Strandampel – Produktion
 
 Die Strandampel kombiniert:
 
