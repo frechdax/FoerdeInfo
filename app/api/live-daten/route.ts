@@ -55,6 +55,25 @@ const ODI_BASES = [
 const DONKEY_GBFS =
   "https://stables.donkey.bike/api/public/gbfs/3.0/donkey_schleswig/gbfs.json";
 
+// The public Smarte-Grenzregion dashboard currently exposes the nearest
+// continuously updated parking/visitor sensors for the Förde region at Solitüde.
+// For places without their own public counter we show this explicitly as a
+// nearby regional reference instead of pretending it is a local measurement.
+const SGR_REFERENCE_POINTS: Record<
+  string,
+  { latitude: number; longitude: number }
+> = {
+  "Parkplatz Solitüde": { latitude: 54.82272, longitude: 9.48875 },
+  "Strandbad Solitüde": { latitude: 54.82272, longitude: 9.48875 },
+};
+
+const SGR_REGIONAL_RADIUS_KM: Record<Region["id"], number> = {
+  flensburg: 20,
+  wassersleben: 8,
+  gluecksburg: 8,
+  langballig: 12,
+};
+
 function asNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
@@ -279,54 +298,116 @@ async function sensorModule(
 }
 
 
-function dashboardParkingModule(snapshot: SgrSnapshot): LiveModule {
-  const rows = snapshot.parking;
+function regionalSgrRows<T extends { name: string }>(
+  rows: T[],
+  region: Region
+) {
+  if (region.id === "flensburg") {
+    return rows.map((row) => ({ row, distance: 0 }));
+  }
+
+  return rows
+    .map((row) => {
+      const point = SGR_REFERENCE_POINTS[row.name];
+      return {
+        row,
+        distance: point ? distanceKm(region, point) : Number.POSITIVE_INFINITY,
+      };
+    })
+    .filter(({ distance }) => distance <= SGR_REGIONAL_RADIUS_KM[region.id])
+    .sort((a, b) => a.distance - b.distance);
+}
+
+function regionalMeasurementMeta(region: Region, distance: number) {
+  if (region.id === "flensburg") return undefined;
+  return (
+    "Nächste öffentliche Live-Messung · " +
+    distance.toFixed(1).replace(".", ",") +
+    " km Luftlinie"
+  );
+}
+
+function dashboardParkingModule(
+  snapshot: SgrSnapshot,
+  region: Region
+): LiveModule | null {
+  const matches = regionalSgrRows(snapshot.parking, region);
+  if (!matches.length) return null;
+
+  const items = matches.map(({ row, distance }) => {
+    const free =
+      row.capacity !== null && row.occupied !== null
+        ? Math.max(0, row.capacity - row.occupied)
+        : null;
+    const value =
+      free !== null && row.capacity !== null && row.occupied !== null
+        ? free +
+          " frei · " +
+          row.occupied +
+          "/" +
+          row.capacity +
+          " belegt" +
+          (row.percent !== null ? " (" + row.percent + "%)" : "")
+        : row.percent !== null
+          ? row.percent + "% belegt"
+          : row.occupied !== null
+            ? row.occupied + " belegt"
+            : "Live-Wert";
+    return {
+      label: row.name,
+      value,
+      meta: regionalMeasurementMeta(region, distance),
+    };
+  });
+
+  const nearest = matches[0];
+  const isRegional = region.id !== "flensburg";
+
   return {
     status: "live",
-    value: rows.length + " Live-" + (rows.length === 1 ? "Parkplatz" : "Parkplätze"),
-    detail:
-      "Echte aktuelle Belegungswerte aus dem öffentlichen Dashboard der Smarten Grenzregion. Der Zeitstempel zeigt den Abruf durch förde.info.",
+    value: isRegional
+      ? "Nächste Live-Belegung: " + nearest.row.name
+      : matches.length +
+        " Live-" +
+        (matches.length === 1 ? "Parkplatz" : "Parkplätze"),
+    detail: isRegional
+      ? "Für " +
+        region.name +
+        " ist aktuell kein eigener öffentlicher Parkplatzsensor verfügbar. Deshalb zeigt förde.info transparent die nächstgelegene echte Messung aus Solitüde als regionale Orientierung."
+      : "Echte aktuelle Belegungswerte aus dem öffentlichen Dashboard der Smarten Grenzregion. Der Zeitstempel zeigt den Abruf durch förde.info.",
     updatedAt: snapshot.fetchedAt,
     source: "Smarte Grenzregion – öffentliches Dashboard",
     sourceUrl: "https://portal.smarte-grenzregion.de/dashboard",
-    items: rows.map((row) => {
-      const free =
-        row.capacity !== null && row.occupied !== null
-          ? Math.max(0, row.capacity - row.occupied)
-          : null;
-      const value =
-        free !== null && row.capacity !== null && row.occupied !== null
-          ? free +
-            " frei · " +
-            row.occupied +
-            "/" +
-            row.capacity +
-            " belegt" +
-            (row.percent !== null ? " (" + row.percent + "%)" : "")
-          : row.percent !== null
-            ? row.percent + "% belegt"
-            : row.occupied !== null
-              ? row.occupied + " belegt"
-              : "Live-Wert";
-      return { label: row.name, value };
-    }),
+    items,
   };
 }
 
-function dashboardVisitorsModule(snapshot: SgrSnapshot): LiveModule {
-  const rows = snapshot.visitors;
+function dashboardVisitorsModule(
+  snapshot: SgrSnapshot,
+  region: Region
+): LiveModule | null {
+  const matches = regionalSgrRows(snapshot.visitors, region);
+  if (!matches.length) return null;
+
+  const isRegional = region.id !== "flensburg";
+  const nearest = matches[0];
+
   return {
     status: "live",
-    value:
-      rows.length +
-      " aktive " +
-      (rows.length === 1 ? "Besucherzählung" : "Besucherzählungen"),
-    detail:
-      "Echte anonymisierte Zählwerte aus dem öffentlichen Dashboard der Smarten Grenzregion. Einzelne Messstellen können zeitweise keine Daten liefern.",
+    value: isRegional
+      ? "Nächste Live-Zählung: " + nearest.row.name
+      : matches.length +
+        " aktive " +
+        (matches.length === 1 ? "Besucherzählung" : "Besucherzählungen"),
+    detail: isRegional
+      ? "Für " +
+        region.name +
+        " ist aktuell kein eigener öffentlicher Besucherzähler verfügbar. Angezeigt wird daher die nächstgelegene echte anonymisierte Zählung in Solitüde – inklusive Entfernung."
+      : "Echte anonymisierte Zählwerte aus dem öffentlichen Dashboard der Smarten Grenzregion. Einzelne Messstellen können zeitweise keine Daten liefern.",
     updatedAt: snapshot.fetchedAt,
     source: "Smarte Grenzregion – öffentliches Dashboard",
     sourceUrl: "https://portal.smarte-grenzregion.de/dashboard",
-    items: rows.map((row) => ({
+    items: matches.map(({ row, distance }) => ({
       label: row.name,
       value:
         row.current !== null
@@ -334,10 +415,14 @@ function dashboardVisitorsModule(snapshot: SgrSnapshot): LiveModule {
           : row.today !== null
             ? row.today + " heute"
             : "Live-Wert",
-      meta:
+      meta: [
         row.today !== null && row.current !== null
           ? "Heute bisher " + row.today + " erfasst"
-          : undefined,
+          : null,
+        regionalMeasurementMeta(region, distance),
+      ]
+        .filter(Boolean)
+        .join(" · ") || undefined,
     })),
   };
 }
@@ -696,23 +781,24 @@ export async function GET(request: NextRequest) {
   const region = getRegion(id) ?? regions[0];
 
   const [dashboard, charging, traffic, transit, sharing] = await Promise.all([
-    region.id === "flensburg"
-      ? getSmarteGrenzregionSnapshot()
-      : Promise.resolve(null),
+    getSmarteGrenzregionSnapshot(),
     chargingModule(region),
     trafficModule(region),
     transitModule(region),
     sharingModule(region),
   ]);
 
+  const regionalParking = dashboard
+    ? dashboardParkingModule(dashboard, region)
+    : null;
+  const regionalVisitors = dashboard
+    ? dashboardVisitorsModule(dashboard, region)
+    : null;
+
   const parking =
-    dashboard?.parking.length
-      ? dashboardParkingModule(dashboard)
-      : await sensorModule(region, "parking");
+    regionalParking ?? (await sensorModule(region, "parking"));
   const visitors =
-    dashboard?.visitors.length
-      ? dashboardVisitorsModule(dashboard)
-      : await sensorModule(region, "visitors");
+    regionalVisitors ?? (await sensorModule(region, "visitors"));
 
   return NextResponse.json(
     {
