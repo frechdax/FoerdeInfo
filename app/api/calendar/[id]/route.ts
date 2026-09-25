@@ -76,11 +76,11 @@ export async function GET(_request: Request, { params }: RouteContext) {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//GlücksburgDirekt//Veranstaltungen//DE",
+    "PRODID:-//foerde.info//Veranstaltungen//DE",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
-    `UID:${event.id}@xn--glcksburg-direkt-kzb.de`,
+    `UID:${event.id}@xn--frde-5qa.info`,
     `DTSTAMP:${new Date()
       .toISOString()
       .replace(/[-:]/g, "")

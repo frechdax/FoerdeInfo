@@ -1,0 +1,71 @@
+import { NextResponse } from "next/server";
+import { regions } from "@/lib/regions";
+
+export const revalidate = 300;
+
+type Forecast = {
+  current?: { temperature_2m?: number; weather_code?: number; wind_speed_10m?: number; is_day?: number; time?: string };
+  hourly?: { precipitation_probability?: number[]; time?: string[] };
+};
+
+const bathingBase = "https://efi2.schleswig-holstein.de/bg/opendata/";
+
+async function weatherFor(region: (typeof regions)[number]) {
+  const params = new URLSearchParams({
+    latitude: String(region.latitude), longitude: String(region.longitude),
+    current: "temperature_2m,weather_code,wind_speed_10m,is_day",
+    hourly: "precipitation_probability", timezone: "Europe/Berlin", forecast_days: "1",
+  });
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, { next: { revalidate: 300 } });
+  if (!response.ok) throw new Error("Wetterquelle nicht erreichbar");
+  const data = await response.json() as Forecast;
+  if (!data.current || !Number.isFinite(data.current.temperature_2m)) throw new Error("Wetterdaten fehlen");
+  const hour = data.current.time?.slice(0, 13);
+  const index = Math.max(0, data.hourly?.time?.findIndex((value) => value.slice(0, 13) === hour) ?? 0);
+  return {
+    temperature: data.current.temperature_2m,
+    weatherCode: data.current.weather_code ?? -1,
+    windSpeed: data.current.wind_speed_10m ?? 0,
+    rainChance: Math.max(0, ...(data.hourly?.precipitation_probability ?? []).slice(index, index + 3)),
+    isDay: data.current.is_day === 1,
+    observedAt: data.current.time ?? null,
+  };
+}
+
+async function officialBeaches() {
+  const [master, classifications] = await Promise.all([
+    fetch(bathingBase + "v_badegewaesser_odata.csv", { next: { revalidate: 21600 } }),
+    fetch(bathingBase + "v_einstufung_odata.csv", { next: { revalidate: 21600 } }),
+  ]);
+  if (!master.ok || !classifications.ok) throw new Error("Badegewässerdaten nicht erreichbar");
+  const [masterText, classText] = await Promise.all([
+    master.arrayBuffer().then((bytes) => new TextDecoder("iso-8859-1").decode(bytes)),
+    classifications.arrayBuffer().then((bytes) => new TextDecoder("iso-8859-1").decode(bytes)),
+  ]);
+  const masterRows = masterText.split(/\r?\n/).filter((row) => row.startsWith("DESH_PR_")).map((row) => row.split("|"));
+  const classRows = classText.split(/\r?\n/).filter((row) => row.startsWith("DESH_PR_")).map((row) => row.split("|"));
+  return Object.fromEntries(regions.flatMap((region) => region.beaches.map((id) => {
+    const row = masterRows.find((entry) => entry[0] === id);
+    const matching = classRows.filter((entry) => entry[0] === id);
+    const latest = matching.sort((a, b) => Number(b[2] || 0) - Number(a[2] || 0))[0];
+    const quality = latest?.[3]?.match(/^(ausgezeichnet|gut|ausreichend|mangelhaft)/i)?.[1] ?? null;
+    return [id, row ? { name: row[3] || row[2], quality, period: latest ? `${latest[1]}–${latest[2]}` : null, source: "Land Schleswig-Holstein" } : null] as const;
+  })));
+}
+
+export async function GET() {
+  const [forecastResults, beachesResult] = await Promise.all([
+    Promise.allSettled(regions.map(weatherFor)),
+    officialBeaches().catch(() => null),
+  ]);
+
+  return NextResponse.json({
+    updatedAt: new Date().toISOString(),
+    places: regions.map((region, index) => ({
+      id: region.id,
+      weather: forecastResults[index].status === "fulfilled" ? forecastResults[index].value : null,
+      beaches: region.beaches.map((id) => beachesResult?.[id]).filter(Boolean),
+    })),
+    sources: { weather: "https://open-meteo.com/", bathing: "https://opendata.schleswig-holstein.de/collection/badegewasser-stammdaten/aktuell" },
+  });
+}

@@ -233,7 +233,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
       ? "Passende Ausflüge und Aktivitäten für die aktuellen Bedingungen entdecken."
       : "Alternative Ideen für einen Tag, an dem Strand und Spielplatz weniger passend sind.",
     href: "/freizeit-gluecksburg",
-    provider: "GlücksburgDirekt",
+    provider: "förde.info",
     affiliate: false,
   };
 
@@ -263,11 +263,11 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
     <section className={styles.page + (embedded ? " " + styles.homeEmbed : "")}>
       <div className={styles.shell}>
         {!embedded ? <header className={styles.topbar}>
-          <a className={styles.brand} href="/" aria-label="Zurück zu GlücksburgDirekt">
+          <a className={styles.brand} href="/gluecksburg" aria-label="Zurück zu förde.info">
             <span className={styles.brandMark}>⚓</span>
-            <span>Glücksburg<strong>DIREKT</strong></span>
+            <span>förde.info<strong> · Glücksburg</strong></span>
           </a>
-          <a className={styles.back} href="/">← Zur Startseite</a>
+          <a className={styles.back} href="/gluecksburg">← Zu Glücksburg</a>
         </header> : null}
 
         <section className={styles.hero}>
@@ -453,7 +453,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
 
               <p className={styles.explainer}>
                 Der Index kombiniert Temperatur, Regenrisiko, Wind, Böen, UV, Tageslicht und
-                amtliche Wetterwarnungen. Er ist eine Orientierung von GlücksburgDirekt und keine
+                amtliche Wetterwarnungen. Er ist eine Orientierung von förde.info und keine
                 amtliche Bewertung.
               </p>
             </section>
@@ -516,7 +516,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                   className={styles.referralCard}
                   href="/heute-in-gluecksburg"
                   onClick={() =>
-                    trackReferralClick("Heute in Glücksburg", "GlücksburgDirekt", false)
+                    trackReferralClick("Heute in Glücksburg", "förde.info", false)
                   }
                 >
                   <span className={styles.referralIcon} aria-hidden="true">📅</span>
@@ -530,20 +530,20 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                   className={styles.referralCard}
                   href="/partner"
                   onClick={() =>
-                    trackReferralClick("Lokaler Partner werden", "GlücksburgDirekt", false)
+                    trackReferralClick("Lokaler Partner werden", "förde.info", false)
                   }
                 >
                   <span className={styles.referralIcon} aria-hidden="true">🤝</span>
                   <span className={styles.referralBadge + " " + styles.partnerBadge}>Für Betriebe</span>
                   <strong>Lokaler Anbieter in Glücksburg?</strong>
-                  <p>Mit einem passenden Angebot auf GlücksburgDirekt sichtbar werden.</p>
+                  <p>Mit einem passenden Angebot auf förde.info sichtbar werden.</p>
                   <em>Partner werden →</em>
                 </a>
               </div>
 
               <p className={styles.affiliateNote}>
                 Affiliate-Hinweis: Bei einer Buchung über entsprechend gekennzeichnete Links kann
-                GlücksburgDirekt eine Provision erhalten. Für dich entstehen dadurch keine
+                förde.info eine Provision erhalten. Für dich entstehen dadurch keine
                 zusätzlichen Kosten. Redaktionelle Empfehlungen sind davon unabhängig.
               </p>
             </section>
@@ -659,7 +659,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               )}
 
               <p className={styles.explainer}>
-                Die Ampelfarbe ist eine GlücksburgDirekt-Zusammenfassung. Bei Holnis Drei und
+                Die Ampelfarbe ist eine förde.info-Zusammenfassung. Bei Holnis Drei und
                 Sandwig fließen Wetter, UV, DWD-Warnungen und die veröffentlichten amtlichen
                 Badegewässerdaten ein. Bei Quellental basiert die Ampel mangels separater amtlicher
                 Einstufung auf Wetter, UV, Wind, Regen und DWD-Warnungen. Aktuelle Sperrungen,
@@ -746,11 +746,11 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
 
         {!embedded ? (
           <footer className={styles.footer}>
-            <span>GlücksburgDirekt · lokal, unabhängig und datenbasiert</span>
+            <span>förde.info · lokal, unabhängig und datenbasiert</span>
           </footer>
         ) : (
           <div className={styles.homeEmbedFooter}>
-            <a href="/live">Alle Live-Details öffnen →</a>
+            <a href="/gluecksburg/live">Alle Live-Details öffnen →</a>
           </div>
         )}
       </div>

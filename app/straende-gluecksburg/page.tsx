@@ -50,7 +50,7 @@ export default function StraendeGluecksburgPage() {
         "Offizielle Informationen direkt verlinkt",
       ]}
       ctaLabel="Freizeitbereich öffnen"
-      ctaHref="/#urlaub"
+      ctaHref="/gluecksburg#urlaub"
       canonicalPath="/straende-gluecksburg"
     >
       <section className="seo-card">

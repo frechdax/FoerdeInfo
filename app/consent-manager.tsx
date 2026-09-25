@@ -178,10 +178,10 @@ export default function ConsentManager() {
             <span className="consent-kicker">Datenschutz</span>
             <h2 id="consent-title">Deine Auswahl zählt</h2>
             <p id="consent-description">
-              Notwendige Speicherungen sorgen dafür, dass GlücksburgDirekt funktioniert.
+              Notwendige Speicherungen sorgen dafür, dass förde.info funktioniert.
               Statistik und Marketing werden nur mit deiner Zustimmung geladen. Deine Auswahl
               kannst du jederzeit ändern.{" "}
-              <a href="/#impressum">Mehr erfahren</a>
+              <a href="/gluecksburg#impressum">Mehr erfahren</a>
             </p>
           </div>
 

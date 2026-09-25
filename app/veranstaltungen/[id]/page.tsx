@@ -29,7 +29,7 @@ function formatDate(value: string) {
 }
 
 function descriptionFor(event: { title: string; description?: string | null; date: string }) {
-  const fallback = `${event.title} am ${formatDate(event.date)} in Glücksburg: alle verfügbaren Informationen zu Termin, Ort und Veranstalter.`;
+  const fallback = `${event.title} am ${formatDate(event.date)}: alle verfügbaren Informationen zu Termin, Ort und Veranstalter.`;
   const value = event.description?.trim() || fallback;
   return value.length > 155 ? `${value.slice(0, 152).trimEnd()}…` : value;
 }
@@ -67,9 +67,9 @@ export default async function VeranstaltungDetailPage({ params }: PageProps) {
     <>
       <EventStructuredData event={event} />
       <SeoLanding
-        eyebrow="Veranstaltung in Glücksburg"
+        eyebrow="Veranstaltung an der Förde"
         title={event.title}
-        intro={event.description || `Alle verfügbaren Informationen zu ${event.title} in Glücksburg.`}
+        intro={event.description || `Alle verfügbaren Informationen zu ${event.title}.`}
         bullets={[
           `Datum: ${dateLabel}`,
           event.time ? `Uhrzeit: ${String(event.time)}` : "Uhrzeit: siehe Veranstalter",

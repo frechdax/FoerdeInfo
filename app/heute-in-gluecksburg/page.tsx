@@ -60,7 +60,7 @@ export default async function HeuteInGluecksburgPage() {
         "Direkter Link zur jeweiligen Originalquelle",
       ]}
       ctaLabel="Alle Veranstaltungen öffnen"
-      ctaHref="/#events"
+      ctaHref="/gluecksburg#events"
       canonicalPath="/heute-in-gluecksburg"
       compactOverview
     >

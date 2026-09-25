@@ -85,7 +85,7 @@ export default async function WochenendeInGluecksburgPage() {
         "Direkte Links zu den Veranstaltern",
       ]}
       ctaLabel="Vollständigen Kalender öffnen"
-      ctaHref="/#events"
+      ctaHref="/gluecksburg#events"
       canonicalPath="/wochenende-in-gluecksburg"
       compactOverview
     >

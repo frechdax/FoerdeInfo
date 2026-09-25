@@ -65,7 +65,7 @@ export default function SehenswuerdigkeitenGluecksburgPage() {
         "Direkte Links zu offiziellen Informationen",
       ]}
       ctaLabel="Freizeitbereich öffnen"
-      ctaHref="/#urlaub"
+      ctaHref="/gluecksburg#urlaub"
       canonicalPath="/sehenswuerdigkeiten-gluecksburg"
     >
       <section className="seo-card">

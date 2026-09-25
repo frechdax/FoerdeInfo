@@ -98,7 +98,7 @@ export default function FreizeitGluecksburgPage() {
           heute stattfinden, findest du im laufend aktualisierten Veranstaltungskalender.
         </p>
         <div className="seo-live-list">
-          <a className="seo-live-row" href="/familie">
+          <a className="seo-live-row" href="/gluecksburg#urlaub-freizeit">
             <strong>👪 Angebote für Familien</strong>
             <span>Anlaufstellen und Familieninformationen →</span>
           </a>

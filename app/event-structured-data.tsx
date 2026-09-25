@@ -10,7 +10,7 @@ type StructuredEvent = {
   source_url?: string | null;
 };
 
-const siteUrl = "https://www.xn--glcksburg-direkt-kzb.de";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de";
 
 function startDate(event: StructuredEvent) {
   const match = event.time
@@ -42,12 +42,6 @@ export default function EventStructuredData({
       ? {
           "@type": "Place",
           name: event.location,
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: "Glücksburg (Ostsee)",
-            postalCode: "24960",
-            addressCountry: "DE",
-          },
         }
       : undefined,
     organizer: event.organizer

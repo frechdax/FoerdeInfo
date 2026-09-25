@@ -28,14 +28,14 @@ export default function SeoLanding({
       {
         "@type": "ListItem",
         position: 1,
-        name: "GlücksburgDirekt",
-        item: "https://www.xn--glcksburg-direkt-kzb.de/",
+        name: "förde.info",
+        item: process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: title,
-        item: `https://www.xn--glcksburg-direkt-kzb.de${canonicalPath}`,
+        item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.xn--glcksburg-direkt-kzb.de"}${canonicalPath}`,
       },
     ],
   };
@@ -44,9 +44,9 @@ export default function SeoLanding({
     <main className="seo-page">
       <div className="seo-shell">
         <header className="seo-header">
-          <a className="seo-brand" href="/" aria-label="GlücksburgDirekt Startseite">
+          <a className="seo-brand" href="/" aria-label="förde.info Startseite">
             <span aria-hidden="true">⚓</span>
-            <strong>GlücksburgDirekt</strong>
+            <strong>förde.info</strong>
           </a>
           <a className="seo-back" href="/">Zur Übersicht</a>
         </header>
@@ -57,7 +57,7 @@ export default function SeoLanding({
           <p>{intro}</p>
 
           {compactOverview ? (
-            <div className="seo-hero-overview" aria-label="Auf GlücksburgDirekt findest du">
+            <div className="seo-hero-overview" aria-label="Auf dieser Seite findest du">
               {bullets.map((bullet) => (
                 <span key={bullet}>✓ {bullet}</span>
               ))}
@@ -69,7 +69,7 @@ export default function SeoLanding({
 
         {!compactOverview ? (
           <section className="seo-card">
-            <h2>Auf GlücksburgDirekt findest du</h2>
+            <h2>Auf dieser Seite findest du</h2>
             <ul>
               {bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
             </ul>
@@ -79,20 +79,19 @@ export default function SeoLanding({
         {children}
 
         <nav className="seo-links" aria-label="Weitere Bereiche">
-          <a href="/muellabfuhr">Müllabfuhr</a>
+          <a href="/">Alle Orte</a>
+          <a href="/orte/flensburg">Flensburg</a>
+          <a href="/orte/wassersleben">Wassersleben</a>
+          <a href="/orte/gluecksburg">Glücksburg</a>
+          <a href="/orte/langballig">Langballig</a>
+          <a href="/gluecksburg">Glücksburg im Detail</a>
           <a href="/veranstaltungen">Veranstaltungen</a>
-          <a href="/heute-in-gluecksburg">Heute</a>
-          <a href="/wochenende-in-gluecksburg">Wochenende</a>
-          <a href="/freizeit-gluecksburg">Freizeit</a>
+          <a href="/live">Live</a>
           <a href="/urlaub">Urlaub</a>
-          <a href="/sehenswuerdigkeiten-gluecksburg">Sehenswürdigkeiten</a>
-          <a href="/straende-gluecksburg">Strände</a>
-          <a href="/familie">Familie</a>
-          <a href="/rathaus">Rathaus</a>
         </nav>
 
         <p className="seo-disclaimer">
-          GlücksburgDirekt ist ein privates, unabhängiges Informationsangebot und kein offizielles Angebot der Stadt Glücksburg (Ostsee).
+          förde.info ist ein privates, unabhängiges Informationsangebot und kein offizielles Angebot der genannten Städte oder Gemeinden.
         </p>
 
         <script
