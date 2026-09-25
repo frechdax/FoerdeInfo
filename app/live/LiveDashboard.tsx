@@ -720,7 +720,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               )}
             </section>
 
-            <section className={styles.sourceSection} data-home-optional="true">
+            <section className={styles.sourceSection} data-home-section="sources">
               <div>
                 <span className={styles.kicker}>Transparente Datenquellen</span>
                 <h2>Woher kommen die Werte?</h2>
@@ -754,7 +754,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
           </footer>
         ) : (
           <div className={styles.homeEmbedFooter}>
-            <a href="/live">Alle Live-Details & Datenquellen öffnen →</a>
+            <a href="/live">Alle Live-Details öffnen →</a>
           </div>
         )}
       </div>
