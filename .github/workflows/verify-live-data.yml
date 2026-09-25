@@ -2,10 +2,12 @@ name: Verify real live data
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/home-live-recommendations-no-deploy]
     paths:
       - "lib/smarte-grenzregion-live.ts"
       - "app/api/live-daten/route.ts"
+      - "app/page.tsx"
+      - "app/foerde-home.module.css"
       - "package.json"
       - "next.config.mjs"
       - ".github/workflows/verify-live-data.yml"
