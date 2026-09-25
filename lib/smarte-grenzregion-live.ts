@@ -202,21 +202,11 @@ export async function getSmarteGrenzregionSnapshot(): Promise<SgrSnapshot | null
 
   try {
     const text = await renderDashboard();
-    console.info("[sgr-live] dashboard rendered", {
-      length: text.length,
-      hasParking: text.includes("Parkplatz Deutsches Haus"),
-      hasUnavailable: /Keine Live-Daten verfügbar/i.test(text),
-      sample: text.slice(0, 1200),
-    });
     const parsed = parseDashboardText(text);
-    if (!parsed) {
-      console.error("[sgr-live] parse returned null");
-      return null;
-    }
+    if (!parsed) return null;
     cache = { expiresAt: Date.now() + CACHE_MS, value: parsed };
     return parsed;
-  } catch (error) {
-    console.error("[sgr-live] snapshot failed", error);
+  } catch {
     return null;
   }
 }
