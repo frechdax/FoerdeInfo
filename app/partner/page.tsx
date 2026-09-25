@@ -3,15 +3,15 @@ import styles from "./partner.module.css";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Partner werden – lokale Sichtbarkeit in Glücksburg | GlücksburgDirekt",
+    absolute: "Partner werden – lokale Sichtbarkeit in Flensburg & an der Förde | FlensburgDirekt",
   },
   description:
-    "Lokaler Betrieb in Glücksburg? Erfahre, wie du mit GlücksburgDirekt Gäste und Einwohner passend zu Wetter, Freizeit und Veranstaltungen erreichen kannst.",
+    "Lokaler Betrieb in Flensburg, Wassersleben oder Glücksburg? Erfahre, wie du mit FlensburgDirekt Gäste und Einwohner passend zu Wetter, Freizeit und Veranstaltungen erreichen kannst.",
   alternates: { canonical: "/partner" },
 };
 
 const contactHref =
-  "mailto:sebastianschwarz1@icloud.de?subject=Partnerschaft%20mit%20Gl%C3%BCcksburgDirekt";
+  "mailto:sebastianschwarz1@icloud.de?subject=Partnerschaft%20mit%20FlensburgDirekt";
 
 export default function PartnerPage() {
   return (
@@ -20,16 +20,16 @@ export default function PartnerPage() {
         <header className={styles.topbar}>
           <a className={styles.brand} href="/">
             <span className={styles.brandMark} aria-hidden="true">⚓</span>
-            <span>Glücksburg<strong>DIREKT</strong></span>
+            <span>Flensburg<strong>DIREKT</strong></span>
           </a>
           <a className={styles.back} href="/">← Zur Startseite</a>
         </header>
 
         <section className={styles.hero}>
           <span className={styles.eyebrow}>Für lokale Anbieter</span>
-          <h1>Mit GlücksburgDirekt die richtigen Gäste erreichen</h1>
+          <h1>Mit FlensburgDirekt die richtigen Gäste erreichen</h1>
           <p>
-            GlücksburgDirekt verbindet aktuelle Informationen zu Wetter, Strand, Veranstaltungen
+            FlensburgDirekt verbindet aktuelle Informationen zu Wetter, Strand, Veranstaltungen
             und Freizeit mit passenden lokalen Angeboten. Kooperationen sollen Nutzern helfen,
             genau dann ein passendes Angebot zu finden, wenn es für ihren Aufenthalt relevant ist.
           </p>
@@ -51,8 +51,8 @@ export default function PartnerPage() {
             <span aria-hidden="true">📍</span>
             <h2>Lokal statt Streuverlust</h2>
             <p>
-              Die Zielgruppe sucht bereits nach Glücksburg, Holnis, Sandwig, Freizeit,
-              Veranstaltungen, Urlaub oder aktuellen Bedingungen vor Ort.
+              Die Zielgruppe sucht bereits nach Flensburg, Wassersleben, Glücksburg, Förde,
+              Freizeit, Veranstaltungen oder aktuellen Bedingungen vor Ort.
             </p>
           </article>
           <article className={styles.card}>
