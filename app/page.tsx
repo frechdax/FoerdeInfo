@@ -322,7 +322,6 @@ export default function HomePage() {
             <a href="#live">Live</a>
             <a href="/wege">Wegecheck</a>
             <a href="/veranstaltungen">Veranstaltungen</a>
-            <a href="/urlaub">Entdecken</a>
             <a href="/gluecksburg#impressum">Impressum</a>
           </nav>
         </header>
@@ -542,18 +541,6 @@ export default function HomePage() {
             <h2>Veranstaltungen</h2>
             <p>Termine mit Details, Originalquelle und iCal-Aktion.</p>
             <a href="/veranstaltungen">Termine ansehen →</a>
-          </article>
-          <article>
-            <span>🏖️</span>
-            <h2>Strände & Badestellen</h2>
-            <p>Amtliche Einstufungen für die Badestellen entlang der Förde.</p>
-            <a href="#badestellen">Badestellen ansehen →</a>
-          </article>
-          <article>
-            <span>🧭</span>
-            <h2>Freizeit & Urlaub</h2>
-            <p>Ideen und Originalquellen für Flensburg und die Förderegion.</p>
-            <a href="/urlaub">Region entdecken →</a>
           </article>
         </section>
 
