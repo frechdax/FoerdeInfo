@@ -280,10 +280,23 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
                 : "Öffentliche Daten verständlich zusammengefasst: Wetter, beste Zeit für draußen, Strandbedingungen, Fördepegel, amtliche Warnungen und lokale Veränderungen."}
             </p>
           </div>
-          <div className={styles.liveBadge}>
+          <button
+            className={styles.liveBadge}
+            type="button"
+            onClick={load}
+            disabled={loading}
+            aria-label="Live-Daten jetzt aktualisieren"
+            title="Live-Daten jetzt aktualisieren"
+          >
             <span className={styles.liveDot} />
-            {loading ? "Wird geladen" : "Live-Daten"}
-          </div>
+            <span>
+              {loading
+                ? "Aktualisiere …"
+                : data
+                  ? "Aktualisiert " + formatTime(data.generatedAt) + " Uhr · ↻"
+                  : "Live-Daten laden · ↻"}
+            </span>
+          </button>
         </section>
 
         {data && bestScore ? (
@@ -449,7 +462,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.kicker}>Passend für heute</span>
-                  <h2>Von der Information direkt zur passenden Option</h2>
+                  <h2>Was heute besonders gut passt</h2>
                 </div>
                 <span className={styles.updated}>situativ empfohlen</span>
               </div>
@@ -535,7 +548,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               </p>
             </section>
 
-            <section className={styles.featureSection}>
+            <section className={styles.featureSection} data-home-section="best-times">
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.kicker}>Beste Zeit heute</span>
@@ -572,7 +585,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               </div>
             </section>
 
-            <section className={styles.featureSection}>
+            <section className={styles.featureSection} data-home-section="beaches">
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.kicker}>Strand-Ampel</span>
@@ -654,7 +667,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               </p>
             </section>
 
-            <section className={styles.featureSection}>
+            <section className={styles.featureSection} data-home-optional="true">
               <div className={styles.sectionHeading}>
                 <div>
                   <span className={styles.kicker}>Baustellen & Veränderungen</span>
@@ -707,7 +720,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               )}
             </section>
 
-            <section className={styles.seoInfo}>
+            <section className={styles.seoInfo} data-home-optional="true">
               <span className={styles.kicker}>Glücksburg live im Überblick</span>
               <h2>Wetter, Strand-Ampel, Fördepegel und Baustellen für Glücksburg</h2>
               <p>
@@ -729,7 +742,7 @@ export default function LiveDashboard({ embedded = false }: { embedded?: boolean
               </nav>
             </section>
 
-            <section className={styles.sourceSection}>
+            <section className={styles.sourceSection} data-home-optional="true">
               <div>
                 <span className={styles.kicker}>Transparente Datenquellen</span>
                 <h2>Woher kommen die Werte?</h2>
