@@ -742,30 +742,6 @@ export default function HomePage() {
               </span>
             </button>
 
-            {pharmacyDuty ? (
-              <a
-                className="header-pharmacy"
-                href={pharmacyDuty.source_url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Notfallapotheke: ${pharmacyDuty.pharmacy_name}`}
-              >
-                <span className="header-pharmacy-icon" aria-hidden="true">💊</span>
-                <span className="header-pharmacy-copy">
-                  <small>Notfallapotheke · jetzt im Dienst</small>
-                  <strong>{pharmacyDuty.pharmacy_name}</strong>
-                  <em>bis {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr</em>
-                </span>
-              </a>
-            ) : (
-              <div className="header-pharmacy header-pharmacy--loading">
-                <span className="header-pharmacy-icon" aria-hidden="true">💊</span>
-                <span className="header-pharmacy-copy">
-                  <small>Notfallapotheke</small>
-                  <strong>Aktueller Dienst wird geprüft</strong>
-                </span>
-              </div>
-            )}
           </div>
         </header>
 
@@ -782,7 +758,28 @@ export default function HomePage() {
           )}
 
           {view === "home" && (
-            <LiveDashboard embedded />
+            <>
+              <LiveDashboard embedded />
+              <section className="pharmacy-tile" aria-labelledby="pharmacy-title">
+                <span className="pharmacy-tile-icon" aria-hidden="true">💊</span>
+                <div className="pharmacy-tile-content">
+                  <span className="pharmacy-tile-label">Gesundheit & Notdienst</span>
+                  <h2 id="pharmacy-title">Notfallapotheke</h2>
+                  {pharmacyDuty ? (
+                    <>
+                      <strong>{pharmacyDuty.pharmacy_name}</strong>
+                      <p>{[pharmacyDuty.street, [pharmacyDuty.postal_code, pharmacyDuty.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}</p>
+                      <span className="pharmacy-tile-time">Im Dienst bis {formatDutyDateTime(pharmacyDuty.duty_end)} Uhr</span>
+                    </>
+                  ) : (
+                    <p>Aktuell liegt hier kein bestätigter Notdienst vor. Bitte prüfe den offiziellen Notdienstplan.</p>
+                  )}
+                </div>
+                <a href={pharmacyDuty?.source_url || "https://www.aponet.de/apotheke/notdienstsuche"} target="_blank" rel="noreferrer" className="pharmacy-tile-link">
+                  Notdienst prüfen <span aria-hidden="true">↗</span>
+                </a>
+              </section>
+            </>
           )}
 
           {view === "events" && (
