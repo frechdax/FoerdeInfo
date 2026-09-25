@@ -8,17 +8,11 @@ import LiveDashboard from "@/app/live/LiveDashboard";
 
 type View =
   | "home"
-  | "street"
-  | "waste"
   | "events"
   | "urlaub"
   | "urlaub-unterkunft"
   | "urlaub-essen"
   | "urlaub-freizeit"
-  | "family"
-  | "rathaus"
-  | "rathaus-news"
-  | "official-notices"
   | "impressum";
 
 type Street = {
