@@ -22,6 +22,40 @@ type Forecast = {
 };
 
 const bathingBase = "https://efi2.schleswig-holstein.de/bg/opendata/";
+const DWD_WARNINGS_URL = "https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json";
+const FLENSBURG_WARNCELL = "101001000";
+const SCHLESWIG_FLENSBURG_WARNCELL = "101059000";
+
+type DwdWarning = {
+  headline: string;
+  event: string;
+  level: number;
+  start: number;
+  end: number;
+};
+
+function parseDwdJson(raw: string) {
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{")) return JSON.parse(trimmed);
+  const match = trimmed.match(/^[^(]+\((.*)\);?$/s);
+  if (!match) throw new Error("Unbekanntes DWD-Format");
+  return JSON.parse(match[1]);
+}
+
+function normalizeWarnings(payload: unknown, warncell: string): DwdWarning[] {
+  const warningMap =
+    payload && typeof payload === "object" && "warnings" in payload
+      ? (payload as { warnings?: Record<string, Array<Record<string, unknown>>> }).warnings
+      : undefined;
+
+  return (warningMap?.[warncell] ?? []).map((entry) => ({
+    headline: String(entry.headline ?? entry.event ?? "Amtliche Wetterwarnung"),
+    event: String(entry.event ?? "Wetterwarnung"),
+    level: Number(entry.level ?? 1),
+    start: Number(entry.start ?? 0),
+    end: Number(entry.end ?? 0),
+  }));
+}
 
 function maxFinite(values: Array<number | undefined>) {
   const finite = values.filter((value): value is number => Number.isFinite(value));
@@ -134,9 +168,15 @@ async function officialBeaches() {
 }
 
 export async function GET() {
-  const [forecastResults, beachesResult] = await Promise.all([
+  const [forecastResults, beachesResult, warningsResult] = await Promise.all([
     Promise.allSettled(regions.map(weatherFor)),
     officialBeaches().catch(() => null),
+    fetch(DWD_WARNINGS_URL, { next: { revalidate: 120 } })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("DWD-Warnungen nicht erreichbar");
+        return parseDwdJson(await response.text());
+      })
+      .catch(() => null),
   ]);
 
   return NextResponse.json({
@@ -150,11 +190,20 @@ export async function GET() {
       beaches: region.beaches
         .map((id) => beachesResult?.[id])
         .filter(Boolean),
+      warnings: warningsResult
+        ? normalizeWarnings(
+            warningsResult,
+            region.id === "flensburg"
+              ? FLENSBURG_WARNCELL
+              : SCHLESWIG_FLENSBURG_WARNCELL
+          )
+        : [],
     })),
     sources: {
       weather: "https://open-meteo.com/",
       bathing:
         "https://opendata.schleswig-holstein.de/collection/badegewasser-stammdaten/aktuell",
+      warnings: "https://www.dwd.de/",
     },
   });
 }
